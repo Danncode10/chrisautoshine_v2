@@ -42,16 +42,16 @@ const Contact = () => {
           >
             <form className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Name</label>
-                <input type="text" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400" required />
+                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <input type="text" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Email</label>
-                <input type="email" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400" required />
+                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <input type="email" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-2">Message</label>
-                <textarea rows="5" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400" required></textarea>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
+                <textarea rows="5" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required></textarea>
               </div>
               <motion.button 
                 type="submit" 

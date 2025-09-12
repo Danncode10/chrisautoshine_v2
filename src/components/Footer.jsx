@@ -3,12 +3,12 @@ import { FaFacebook } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-black text-gray-400 py-12">
+    <footer className="bg-black text-gray-300 py-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-center gap-8 mb-8">
           <div>
             <h3 className="text-white text-xl font-semibold mb-4">Chris Auto Shine</h3>
-            <p>Professional car wash and detailing services for all vehicles.</p>
+            <p className="text-gray-300">Professional car wash and detailing services for all vehicles.</p>
           </div>
           <div>
             <h4 className="text-white text-lg font-semibold mb-4">Quick Links</h4>
@@ -21,7 +21,7 @@ const Footer = () => {
           </div>
           <div>
             <h4 className="text-white text-lg font-semibold mb-4">Services</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-2 text-gray-300">
               <li>Exterior Wash</li>
               <li>Interior Detailing</li>
               <li>Waxing & Polishing</li>
@@ -32,12 +32,12 @@ const Footer = () => {
             <h4 className="text-white text-lg font-semibold mb-4">Follow Us</h4>
             <div className="flex justify-center">
               <a href="https://www.facebook.com/profile.php?id=61579380248722" target="_blank" rel="noopener noreferrer">
-                <FaFacebook className="text-gray-400 hover:text-red-600 transition-colors duration-300 text-2xl" />
+                <FaFacebook className="text-gray-300 hover:text-red-600 transition-colors duration-300 text-2xl" />
               </a>
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-700 pt-8 text-center text-gray-300">
           <p>&copy; 2025 Chris Auto Shine. All rights reserved.</p>
         </div>
       </div>

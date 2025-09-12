@@ -12,6 +12,8 @@ const Navbar = () => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-white focus:outline-none"
+          aria-label="Toggle navigation menu"
+          aria-expanded={isOpen}
         >
           <div className="space-y-1">
             <span className={`block w-6 h-0.5 bg-white transition-transform ${isOpen ? 'rotate-45 translate-y-0.5' : ''}`}></span>

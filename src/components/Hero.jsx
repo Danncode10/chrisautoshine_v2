@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <section id="home" className="bg-black text-white py-20 min-h-screen flex items-center justify-center">
+    <section id="home" className="bg-black text-white py-16 min-h-screen flex items-center justify-center">
       <motion.div
         className="container mx-auto text-center"
         initial={{ opacity: 0, y: 50 }}
@@ -11,9 +11,9 @@ const Hero = () => {
         transition={{ duration: 0.8 }}
         viewport={{ once: true, amount: 0.3 }}
       >
-        <img className="mx-auto mb-6 h-16 w-auto" src="/vite.svg" alt="Chris Auto Shine Logo" />
+        <img className="mx-auto mb-6 h-12 md:h-16 w-auto" src="/vite.svg" alt="Chris Auto Shine Logo" />
         <motion.h2
-          className="text-5xl font-bold mb-4 text-white relative"
+          className="text-3xl md:text-5xl font-bold mb-4 text-white relative"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -29,7 +29,7 @@ const Hero = () => {
           />
         </motion.h2>
         <motion.p
-          className="text-xl mb-8 max-w-2xl mx-auto text-gray-300"
+          className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-gray-300"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}

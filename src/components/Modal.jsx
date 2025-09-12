@@ -8,7 +8,7 @@ const Modal = ({ isOpen, onClose, imageSrc, altText }) => {
       <div className="relative bg-black text-white border border-red-600 rounded-xl p-6 max-w-lg">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl"
+          className="absolute top-3 right-3 text-gray-300 hover:text-white text-2xl"
         >
           ×
         </button>

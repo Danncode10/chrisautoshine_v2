@@ -29,7 +29,7 @@ const Services = () => {
         viewport={{ once: true, amount: 0.3 }}
       >
         <motion.h2
-          className="text-4xl text-red-600 font-bold text-center mb-12 relative"
+          className="text-3xl md:text-4xl text-red-600 font-bold text-center mb-12 relative"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
