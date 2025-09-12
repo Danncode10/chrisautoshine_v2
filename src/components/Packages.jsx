@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 import PackageCard from './PackageCard';
 import ServiceCard from './ServiceCard';
@@ -60,38 +61,126 @@ const Packages = () => {
 
   return (
     <section id="packages" className="py-16 bg-black">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl text-red-600 font-bold text-center mb-12">Our Packages</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {packagesData.map((pkg) => (
-            <PackageCard
+      <motion.div
+        className="container mx-auto px-4"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        <motion.h2
+          className="text-4xl text-red-600 font-bold text-center mb-12 relative"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          Our Packages
+          <motion.div
+            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true, amount: 0.3 }}
+          />
+        </motion.h2>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          {packagesData.map((pkg, index) => (
+            <motion.div
               key={pkg.id}
-              title={pkg.title}
-              description={pkg.description}
-              price={pkg.price}
-              features={pkg.features}
-            />
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <PackageCard
+                title={pkg.title}
+                description={pkg.description}
+                price={pkg.price}
+                features={pkg.features}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="mt-16">
-          <h2 className="text-4xl text-red-600 font-bold text-center mb-12">Truck Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+          className="mt-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h2
+            className="text-4xl text-red-600 font-bold text-center mb-12 relative"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            Truck Services
+            <motion.div
+              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true, amount: 0.3 }}
+            />
+          </motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
             {truckServices.map((service, index) => (
               <ServiceCard key={index} title={service.title} description={service.description} />
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className="mt-16">
-          <h2 className="text-4xl text-red-600 font-bold text-center mb-12">Additional Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <motion.div
+          className="mt-16"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 2.0 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h2
+            className="text-4xl text-red-600 font-bold text-center mb-12 relative"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
+            Additional Services
+            <motion.div
+              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true, amount: 0.3 }}
+            />
+          </motion.h2>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            viewport={{ once: true, amount: 0.3 }}
+          >
             {additionalServices.map((service, index) => (
               <ServiceCard key={index} title={service.title} description={service.description} />
             ))}
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
