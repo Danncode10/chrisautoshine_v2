@@ -1,10 +1,9 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 import PackageCard from './PackageCard';
 import ServiceCard from './ServiceCard';
 
-const Packages = () => {
+function Packages() {
   const packagesData = [
     {
       id: 'car-wash',
@@ -61,128 +60,49 @@ const Packages = () => {
 
   return (
     <section id="packages" className="py-16 bg-black">
-      <motion.div
-        className="container mx-auto px-4"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, amount: 0.3 }}
-      >
-        <motion.h2
-          className="text-4xl text-red-600 font-bold text-center mb-12 relative"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
+      <div className="container mx-auto px-4">
+        <h2 className="text-4xl text-red-600 font-bold text-center mb-12 relative">
           Our Packages
-          <motion.div
-            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true, amount: 0.3 }}
-          />
-        </motion.h2>
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {packagesData.map((pkg, index) => (
-            <motion.div
+          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600" />
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {packagesData.map((pkg) => (
+            <PackageCard
               key={pkg.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-              viewport={{ once: true, amount: 0.3 }}
-            >
-              <PackageCard
-                title={pkg.title}
-                description={pkg.description}
-                price={pkg.price}
-                features={pkg.features}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className="mt-16"
-          initial={{ opacity: 1, y: 0 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <motion.h2
-            className="text-4xl text-red-600 font-bold text-center mb-12 relative"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            Truck Services
-            <motion.div
-              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true, amount: 0.3 }}
+              title={pkg.title}
+              description={pkg.description}
+              price={pkg.price}
+              features={pkg.features}
             />
-          </motion.h2>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true, amount: 0.3 }}
-          >
+          ))}
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-4xl text-red-600 font-bold text-center mb-12 relative">
+            Truck Services
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600" />
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {truckServices.map((service, index) => (
               <ServiceCard key={index} title={service.title} description={service.description} />
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          className="mt-16"
-          initial={{ opacity: 1, y: 0 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 2.0 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <motion.h2
-            className="text-4xl text-red-600 font-bold text-center mb-12 relative"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true, amount: 0.3 }}
-          >
+        <div className="mt-16">
+          <h2 className="text-4xl text-red-600 font-bold text-center mb-12 relative">
             Additional Services
-            <motion.div
-              className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true, amount: 0.3 }}
-            />
-          </motion.h2>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            viewport={{ once: true, amount: 0.3 }}
-          >
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600" />
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {additionalServices.map((service, index) => (
               <ServiceCard key={index} title={service.title} description={service.description} />
             ))}
-          </motion.div>
-        </motion.div>
-      </motion.div>
+          </div>
+        </div>
+      </div>
     </section>
   );
-};
+}
 
 export default Packages;
