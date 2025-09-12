@@ -85,7 +85,7 @@ const Packages = () => {
           />
         </motion.h2>
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
@@ -111,7 +111,7 @@ const Packages = () => {
 
         <motion.div
           className="mt-16"
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.2 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -133,7 +133,7 @@ const Packages = () => {
             />
           </motion.h2>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
@@ -147,7 +147,7 @@ const Packages = () => {
 
         <motion.div
           className="mt-16"
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 1, y: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 2.0 }}
           viewport={{ once: true, amount: 0.3 }}
@@ -169,7 +169,7 @@ const Packages = () => {
             />
           </motion.h2>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
