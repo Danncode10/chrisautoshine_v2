@@ -4,11 +4,11 @@ const Modal = ({ isOpen, onClose, imageSrc, altText }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="relative bg-gray-900 p-4 rounded-lg max-w-4xl max-h-full overflow-auto border border-red-600">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div className="relative bg-black text-white border border-red-600 rounded-xl p-6 max-w-lg">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white hover:text-red-600 text-2xl"
+          className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl"
         >
           ×
         </button>
