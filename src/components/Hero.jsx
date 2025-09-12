@@ -19,7 +19,7 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          Welcome to Chris Auto Shine (Mobile Test)
+          Welcome to Chris Auto Shine
           <motion.div
             className="absolute -bottom-1 left-0 h-1 bg-red-600 origin-left"
             initial={{ scaleX: 0 }}
