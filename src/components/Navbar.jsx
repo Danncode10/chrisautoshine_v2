@@ -4,8 +4,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-black p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center relative">
+    <nav className="bg-black p-4 shadow-md relative">
+      <div className="container mx-auto flex justify-between items-center">
         <div className="text-white text-2xl font-bold">Chris Auto Shine</div>
         
         {/* Hamburger Button for Mobile */}
@@ -32,12 +32,14 @@ const Navbar = () => {
         </ul>
 
         {/* Mobile Navigation */}
-        <ul className={`md:hidden flex-col absolute top-full left-0 w-full bg-black space-y-4 p-4 shadow-md ${isOpen ? 'block' : 'hidden'}`}>
-          <li><a href="#home" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Home</a></li>
-          <li><a href="#services" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Services</a></li>
-          <li><a href="#packages" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Packages</a></li>
-          <li><a href="#about" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>About</a></li>
-          <li><a href="#contact" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Contact</a></li>
+        <ul className={`md:hidden absolute top-full left-0 w-full bg-black p-4 shadow-md z-50 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+          <div className="flex flex-col space-y-4">
+            <li><a href="#home" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Home</a></li>
+            <li><a href="#services" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Services</a></li>
+            <li><a href="#packages" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Packages</a></li>
+            <li><a href="#about" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>About</a></li>
+            <li><a href="#contact" className="text-white hover:text-red-600 hover:underline block py-2" onClick={() => setIsOpen(false)}>Contact</a></li>
+          </div>
         </ul>
       </div>
     </nav>
