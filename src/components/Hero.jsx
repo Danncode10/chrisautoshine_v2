@@ -27,10 +27,13 @@ const Hero = () => {
 
       <div className="container mx-auto text-center relative z-10">
         <img
-          className="mx-auto mb-6 h-auto max-w-[200px]"
+          className="mx-auto mb-2 h-auto max-w-[200px]"
           src={companyLogo}
           alt="Chris Auto Shine Logo"
         />
+        <div className="text-white text-base font-bold mb-4 text-center">
+          PTY.LTD
+        </div>
 
         <motion.h2
           className="text-3xl md:text-5xl font-bold mb-4 text-white relative inline-block"
