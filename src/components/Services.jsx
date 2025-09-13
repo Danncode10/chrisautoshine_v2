@@ -4,6 +4,7 @@ import exteriorClean from '../assets/images/exterior-clean.jpg';
 import interiorVacuum from '../assets/images/interior-vacuum.jpg';
 import polishing from '../assets/images/polishing.jpg';
 import waxing from '../assets/images/waxing.jpg';
+import truckTireCleaning from '../assets/images/trucktirecleaning.png';
 
 const Services = () => {
   const servicesData = [
@@ -25,7 +26,8 @@ const Services = () => {
     { src: exteriorClean, alt: 'Exterior car cleaning' },
     { src: interiorVacuum, alt: 'Interior vacuuming' },
     { src: polishing, alt: 'Car polishing' },
-    { src: waxing, alt: 'Car waxing' }
+    { src: waxing, alt: 'Car waxing' },
+    { src: truckTireCleaning, alt: 'Truck tire cleaning' }
   ];
 
   return (
