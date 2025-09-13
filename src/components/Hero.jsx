@@ -62,16 +62,3 @@ const Hero = () => {
 };
 
 export default Hero;
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          viewport={{ once: true, amount: 0.3 }}
-          whileHover={{ scale: 1.05 }}
-        >
-          Book Now
-        </motion.button>
-      </motion.div>
-    </section>
-  );
-};
-
-export default Hero;
