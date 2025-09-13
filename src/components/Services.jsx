@@ -1,8 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-import ServiceCard from './ServiceCard';
-
 const Services = () => {
   const servicesData = [
     {
@@ -52,7 +50,14 @@ const Services = () => {
           viewport={{ once: true, amount: 0.3 }}
         >
           {servicesData.map((service, index) => (
-            <ServiceCard key={index} title={service.title} description={service.description} />
+            <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 text-center md:text-left">
+                {service.title}
+              </h3>
+              <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                {service.description}
+              </p>
+            </div>
           ))}
         </motion.div>
       </motion.div>
