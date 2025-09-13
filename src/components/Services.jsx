@@ -1,5 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import exteriorClean from '../assets/images/exterior-clean.jpg';
+import interiorVacuum from '../assets/images/interior-vacuum.jpg';
+import polishing from '../assets/images/polishing.jpg';
+import waxing from '../assets/images/waxing.jpg';
 
 const Services = () => {
   const servicesData = [
@@ -15,6 +19,13 @@ const Services = () => {
       title: 'Waxing & Polishing',
       description: 'Protective wax application and polishing for a showroom shine.'
     }
+  ];
+
+  const galleryImages = [
+    { src: exteriorClean, alt: 'Exterior car cleaning' },
+    { src: interiorVacuum, alt: 'Interior vacuuming' },
+    { src: polishing, alt: 'Car polishing' },
+    { src: waxing, alt: 'Car waxing' }
   ];
 
   return (
@@ -42,6 +53,29 @@ const Services = () => {
             viewport={{ once: true, amount: 0.3 }}
           />
         </motion.h2>
+
+        {/* Scrollable Gallery */}
+        <motion.div
+          className="mb-8 overflow-x-auto whitespace-nowrap py-4 scrollbar-hide"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          {galleryImages.map((image, index) => (
+            <motion.img
+              key={index}
+              src={image.src}
+              alt={image.alt}
+              className="inline-block w-64 h-40 object-cover rounded-lg shadow-md mx-2 hover:scale-105 transition-transform duration-300"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true, amount: 0.3 }}
+            />
+          ))}
+        </motion.div>
+
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           initial={{ opacity: 0, y: 20 }}
@@ -51,19 +85,6 @@ const Services = () => {
         >
           {servicesData.map((service, index) => (
             <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="mb-4 text-center"
-              >
-                <img 
-                  src={`https://source.unsplash.com/60x60/?${service.title.toLowerCase().replace(/&/g, '').replace(/ /g, '-')}`} 
-                  alt={`${service.title} icon`} 
-                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
-                />
-              </motion.div>
               <h3 className="text-xl md:text-2xl font-bold text-white mb-3 text-center md:text-left">
                 {service.title}
               </h3>

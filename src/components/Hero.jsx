@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import companyLogo from '../assets/company-logo.png';
+import heroBg from '../assets/images/hero-bg.jpg';
 
 const Hero = () => {
   return (
@@ -8,10 +9,10 @@ const Hero = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-20" 
         style={{ 
-          backgroundImage: 'url("https://source.unsplash.com/1600x900/?car-detailing,professional")' 
+          backgroundImage: `url(${heroBg})` 
         }}
       ></div>
-      <div className="absolute inset-0 bg-black opacity-70"></div>
+      <div className="absolute inset-0 bg-black opacity-20"></div>
       <motion.div
         className="container mx-auto text-center"
         initial={{ opacity: 0, y: 50 }}
@@ -48,6 +49,19 @@ const Hero = () => {
         <motion.button
           className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          viewport={{ once: true, amount: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+        >
+          Book Now
+        </motion.button>
+      </motion.div>
+    </section>
+  );
+};
+
+export default Hero;
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
           viewport={{ once: true, amount: 0.3 }}

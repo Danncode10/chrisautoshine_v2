@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import aboutTeam from '../assets/images/about-team.jpg';
 
 const About = () => {
   return (
@@ -58,7 +59,7 @@ const About = () => {
             className="mb-8"
           >
             <img 
-              src="https://source.unsplash.com/800x400/?car-detailing,professional" 
+              src={aboutTeam} 
               alt="Professional car detailing service" 
               className="w-full h-64 object-cover rounded-lg shadow-md mx-auto max-w-4xl"
             />
