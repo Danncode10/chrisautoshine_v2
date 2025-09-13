@@ -1,17 +1,71 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 function Packages() {
+  const containerVariants = {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6 }
+    }
+  };
+
+  const titleVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.8 }
+    }
+  };
+
   return (
     <section id="packages" className="py-16 bg-black">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl text-red-600 font-bold text-center mb-12">Packages</h2>
+        <motion.h2 
+          className="text-4xl text-red-600 font-bold text-center mb-12"
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          Packages
+        </motion.h2>
 
         {/* Exterior Packages */}
-        <div className="mb-16">
-          <h3 className="text-3xl text-white font-bold text-center mb-8">Exterior Packages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h3 
+            className="text-3xl text-white font-bold text-center mb-8"
+            variants={itemVariants}
+          >
+            Exterior Packages
+          </motion.h3>
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+          >
             {/* Auto 1 */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Auto 1</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Basic exterior wash</li>
@@ -32,10 +86,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$30</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Deluxe */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Pre-wash foam</li>
@@ -57,10 +114,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$50</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Super */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full exterior detail</li>
@@ -82,16 +142,33 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$70</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Interior Packages */}
-        <div className="mb-16">
-          <h3 className="text-3xl text-white font-bold text-center mb-8">Interior Packages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h3 
+            className="text-3xl text-white font-bold text-center mb-8"
+            variants={itemVariants}
+          >
+            Interior Packages
+          </motion.h3>
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+          >
             {/* Plus */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Plus</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Vacuum seats & carpets</li>
@@ -112,10 +189,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$40</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Deluxe */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep vacuum & shampoo</li>
@@ -137,10 +217,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$60</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Super */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
+              variants={itemVariants}
+            >
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full interior steam clean</li>
@@ -162,16 +245,33 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$80</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Exclusive Packages */}
-        <div className="mb-16">
-          <h3 className="text-3xl text-white font-bold text-center mb-8">Exclusive Packages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h3 
+            className="text-3xl text-white font-bold text-center mb-8"
+            variants={itemVariants}
+          >
+            Exclusive Packages
+          </motion.h3>
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+          >
             {/* Auto Elite */}
-            <div className="bg-gradient-to-br from-red-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-red-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Elite</h4>
               <ul className="mb-6 space-y-2">
@@ -193,10 +293,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$100</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Auto Super Elite */}
-            <div className="bg-gradient-to-br from-amber-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-amber-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Super Elite</h4>
               <ul className="mb-6 space-y-2">
@@ -219,10 +322,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$130</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Exclusive Auto Elite */}
-            <div className="bg-gradient-to-br from-purple-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Exclusive Auto Elite</h4>
               <ul className="mb-6 space-y-2">
@@ -246,16 +352,33 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$180</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Truck Services & Pricing */}
-        <div className="mb-16">
-          <h3 className="text-3xl text-white font-bold text-center mb-8">Truck Services & Pricing</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h3 
+            className="text-3xl text-white font-bold text-center mb-8"
+            variants={itemVariants}
+          >
+            Truck Services & Pricing
+          </motion.h3>
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={containerVariants}
+          >
             {/* Bullbars Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Bullbars (Sand & Polish)</h4>
               <ul className="mb-6 space-y-3">
@@ -268,10 +391,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">Starting at $1250</p>
                 </li>
               </ul>
-            </div>
+            </motion.div>
 
             {/* Tanks Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Tanks (Sand & Polish)</h4>
               <ul className="mb-6 space-y-3">
@@ -288,10 +414,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$200</p>
                 </li>
               </ul>
-            </div>
+            </motion.div>
 
             {/* Other Parts Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Other Parts</h4>
               <ul className="mb-6 space-y-3">
@@ -308,10 +437,13 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$50</p>
                 </li>
               </ul>
-            </div>
+            </motion.div>
 
             {/* Wheel Rims Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Wheel Rims</h4>
               <ul className="mb-6 space-y-3">
@@ -324,74 +456,148 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$80 each</p>
                 </li>
               </ul>
-            </div>
+            </motion.div>
 
             {/* Interior Detailing Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Interior Detailing (Trucks)</h4>
               <p className="text-2xl font-bold text-white text-center">Starting at $250</p>
-            </div>
+            </motion.div>
 
             {/* Full Vehicle Polish Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative md:col-span-2 lg:col-span-1">
+            <motion.div 
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative md:col-span-2 lg:col-span-1"
+              variants={itemVariants}
+            >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Full Vehicle Polish</h4>
               <p className="text-4xl font-bold text-white text-center">$1250</p>
-            </div>
-          </div>
-          <div className="mt-8 text-center">
+            </motion.div>
+          </motion.div>
+          <motion.div 
+            className="mt-8 text-center"
+            variants={itemVariants}
+          >
             <p className="text-green-400 text-xl font-semibold">💡 Prices depend on item quality. 🎉 First-time customers get 10% OFF!</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Additional Services */}
-        <div className="mb-16">
-          <h3 className="text-3xl text-white font-bold text-center mb-8">Additional Services</h3>
+        <motion.div 
+          className="mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.h3 
+            className="text-3xl text-white font-bold text-center mb-8"
+            variants={itemVariants}
+          >
+            Additional Services
+          </motion.h3>
 
           {/* Body Cleaning & Protection */}
-          <div className="mb-8">
-            <h4 className="text-2xl text-white font-bold text-center mb-6">Body Cleaning & Protection</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+          <motion.div 
+            className="mb-8"
+            variants={containerVariants}
+          >
+            <motion.h4 
+              className="text-2xl text-white font-bold text-center mb-6"
+              variants={itemVariants}
+            >
+              Body Cleaning & Protection
+            </motion.h4>
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              variants={containerVariants}
+            >
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Hatchback</h5>
                 <p className="text-3xl font-bold text-white">$1400</p>
-              </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+              </motion.div>
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Sedan</h5>
                 <p className="text-3xl font-bold text-white">$1600</p>
-              </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2">
+              </motion.div>
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">UTE/7 Seater</h5>
                 <p className="text-3xl font-bold text-white">$1750</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
           {/* Paint Correction */}
-          <div className="mb-8">
-            <h4 className="text-2xl text-white font-bold text-center mb-6">Paint Correction</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+          <motion.div 
+            className="mb-8"
+            variants={containerVariants}
+          >
+            <motion.h4 
+              className="text-2xl text-white font-bold text-center mb-6"
+              variants={itemVariants}
+            >
+              Paint Correction
+            </motion.h4>
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              variants={containerVariants}
+            >
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Single Stage Polish</h5>
                 <p className="text-3xl font-bold text-white">$395</p>
-              </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+              </motion.div>
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Two Stage Polish</h5>
                 <p className="text-3xl font-bold text-white">$595</p>
-              </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2">
+              </motion.div>
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2"
+                variants={itemVariants}
+              >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Three Stage Polish</h5>
                 <p className="text-3xl font-bold text-white">$750</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
           {/* Add-ons */}
-          <div className="mb-8">
-            <h4 className="text-2xl text-white font-bold text-center mb-6">Add-ons</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+          <motion.div 
+            className="mb-8"
+            variants={containerVariants}
+          >
+            <motion.h4 
+              className="text-2xl text-white font-bold text-center mb-6"
+              variants={itemVariants}
+            >
+              Add-ons
+            </motion.h4>
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              variants={containerVariants}
+            >
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <ul className="space-y-3">
                   <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
                     <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Tar Removal</span>
@@ -406,8 +612,11 @@ function Packages() {
                     <span className="text-right"><span className="text-2xl font-bold text-white">$50</span></span>
                   </li>
                 </ul>
-              </div>
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+              </motion.div>
+              <motion.div 
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                variants={itemVariants}
+              >
                 <ul className="space-y-3">
                   <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
                     <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Per Panel Polish</span>
@@ -426,10 +635,10 @@ function Packages() {
                     <span className="text-right"><span className="text-2xl font-bold text-white">From $850</span></span>
                   </li>
                 </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
