@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
+  const form = useRef();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    emailjs.sendForm(
+      process.env.REACT_APP_EMAILJS_SERVICE_ID,
+      process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+      form.current,
+      process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+    )
+      .then((result) => {
+        alert('Message sent successfully!');
+        form.current.reset();
+      })
+      .catch((error) => {
+        alert('Failed to send the message. Please try again.');
+      });
+  };
+
   return (
     <section id="contact" className="py-16 bg-black">
       <motion.div
@@ -40,18 +61,18 @@ const Contact = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             viewport={{ once: true, amount: 0.3 }}
           >
-            <form className="space-y-4">
+            <form ref={form} onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
-                <input type="text" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
+                <input type="text" name="user_name" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                <input type="email" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
+                <input type="email" name="user_email" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                <textarea rows="5" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required></textarea>
+                <textarea name="message" rows="5" className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-300" required></textarea>
               </div>
               <motion.button 
                 type="submit" 
