@@ -30,6 +30,8 @@ const Services = () => {
     { src: truckTireCleaning, alt: 'Truck tire cleaning' }
   ];
 
+  const extendedImages = [...galleryImages, ...galleryImages];
+
   return (
     <section id="services" className="py-16 bg-black">
       <motion.div
@@ -56,26 +58,38 @@ const Services = () => {
           />
         </motion.h2>
 
-        {/* Scrollable Gallery */}
+        {/* Auto-sliding Gallery */}
         <motion.div
-          className="mb-8 overflow-x-auto whitespace-nowrap py-4 scrollbar-hide"
+          className="mb-8 overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          {galleryImages.map((image, index) => (
-            <motion.img
-              key={index}
-              src={image.src}
-              alt={image.alt}
-              className="inline-block w-64 h-40 object-cover rounded-lg shadow-md mx-2 hover:scale-105 transition-transform duration-300"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true, amount: 0.3 }}
-            />
-          ))}
+          <motion.div
+            className="flex py-4"
+            animate={{
+              x: [0, -(galleryImages.length * 272)]
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          >
+            {extendedImages.map((image, index) => (
+              <motion.img
+                key={index}
+                src={image.src}
+                alt={image.alt}
+                className="flex-none w-64 h-40 object-cover rounded-lg shadow-md mx-2"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: (index % galleryImages.length) * 0.1 }}
+                viewport={{ once: true, amount: 0.3 }}
+              />
+            ))}
+          </motion.div>
         </motion.div>
 
         <motion.div
