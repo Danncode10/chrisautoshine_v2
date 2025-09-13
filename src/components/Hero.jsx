@@ -4,7 +4,14 @@ import companyLogo from '../assets/company-logo.png';
 
 const Hero = () => {
   return (
-    <section id="home" className="bg-black text-white py-16 min-h-screen flex items-center justify-center">
+    <section id="home" className="bg-black text-white py-16 min-h-screen flex items-center justify-center relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20" 
+        style={{ 
+          backgroundImage: 'url("https://source.unsplash.com/1600x900/?car-detailing,professional")' 
+        }}
+      ></div>
+      <div className="absolute inset-0 bg-black opacity-70"></div>
       <motion.div
         className="container mx-auto text-center"
         initial={{ opacity: 0, y: 50 }}

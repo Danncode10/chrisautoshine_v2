@@ -66,6 +66,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-wash,basic" 
+                  alt="Basic wash icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto 1</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Basic exterior wash</li>
@@ -93,6 +106,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-detailing,deluxe" 
+                  alt="Deluxe detailing icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Pre-wash foam</li>
@@ -121,6 +147,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-polish,super" 
+                  alt="Super polish icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full exterior detail</li>
@@ -169,6 +208,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-interior,vacuum" 
+                  alt="Interior plus icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Plus</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Vacuum seats & carpets</li>
@@ -196,6 +248,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-interior,shampoo" 
+                  alt="Deluxe interior icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep vacuum & shampoo</li>
@@ -224,6 +289,19 @@ function Packages() {
               className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-interior,steam-clean" 
+                  alt="Super interior icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full interior steam clean</li>
@@ -272,6 +350,19 @@ function Packages() {
               className="bg-gradient-to-br from-red-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-elite,premium" 
+                  alt="Elite package icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Elite</h4>
               <ul className="mb-6 space-y-2">
@@ -300,6 +391,19 @@ function Packages() {
               className="bg-gradient-to-br from-amber-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-super-elite,protection" 
+                  alt="Super elite icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Super Elite</h4>
               <ul className="mb-6 space-y-2">
@@ -329,6 +433,19 @@ function Packages() {
               className="bg-gradient-to-br from-purple-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
               variants={itemVariants}
             >
+              <motion.div
+                className="mb-4 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                <img 
+                  src="https://source.unsplash.com/64x64/?car-exclusive,ceramic" 
+                  alt="Exclusive elite icon" 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <div className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Exclusive Auto Elite</h4>
               <ul className="mb-6 space-y-2">

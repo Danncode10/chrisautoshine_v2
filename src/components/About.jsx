@@ -53,6 +53,19 @@ const About = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
+            viewport={{ once: true, amount: 0.3 }}
+            className="mb-8"
+          >
+            <img 
+              src="https://source.unsplash.com/800x400/?car-detailing,professional" 
+              alt="Professional car detailing service" 
+              className="w-full h-64 object-cover rounded-lg shadow-md mx-auto max-w-4xl"
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.0 }}
             viewport={{ once: true, amount: 0.3 }}
             className="grid md:grid-cols-3 gap-8 mt-12"

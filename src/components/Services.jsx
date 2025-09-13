@@ -51,6 +51,19 @@ const Services = () => {
         >
           {servicesData.map((service, index) => (
             <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="mb-4 text-center"
+              >
+                <img 
+                  src={`https://source.unsplash.com/60x60/?${service.title.toLowerCase().replace(/&/g, '').replace(/ /g, '-')}`} 
+                  alt={`${service.title} icon`} 
+                  className="w-16 h-16 object-cover rounded-lg shadow-md mx-auto"
+                />
+              </motion.div>
               <h3 className="text-xl md:text-2xl font-bold text-white mb-3 text-center md:text-left">
                 {service.title}
               </h3>

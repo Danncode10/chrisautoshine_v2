@@ -40,6 +40,19 @@ const Contact = () => {
             transition={{ duration: 0.6, delay: 0.8 }}
             viewport={{ once: true, amount: 0.3 }}
           >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="mb-6 text-center"
+            >
+              <img 
+                src="https://source.unsplash.com/100x100/?contact,car" 
+                alt="Contact icon" 
+                className="w-16 h-16 object-cover rounded-full shadow-md mx-auto"
+              />
+            </motion.div>
             <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
