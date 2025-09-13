@@ -323,6 +323,13 @@ function Packages() {
               </ul>
             </div>
 
+            {/* Interior Detailing Card */}
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+              <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
+              <h4 className="text-xl font-bold mb-4 text-center">Interior Detailing (Trucks)</h4>
+              <p className="text-2xl font-bold text-white text-center">Starting at $250</p>
+            </div>
+
             {/* Full Vehicle Polish Card */}
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative md:col-span-2 lg:col-span-1">
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
@@ -331,7 +338,72 @@ function Packages() {
             </div>
           </div>
           <div className="mt-8 text-center">
-            <p className="text-gray-300 text-lg">💡 Prices depend on item quality. 🎉 First-time customers get 10% OFF!</p>
+            <p className="text-green-400 text-xl font-semibold">💡 Prices depend on item quality. 🎉 First-time customers get 10% OFF!</p>
+          </div>
+        </div>
+
+        {/* Additional Services */}
+        <div className="mb-16">
+          <h3 className="text-3xl text-white font-bold text-center mb-8">Additional Services</h3>
+
+          {/* Body Cleaning & Protection */}
+          <div className="mb-8">
+            <h4 className="text-2xl text-white font-bold text-center mb-6">Body Cleaning & Protection</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">Hatchback</h5>
+                <p className="text-3xl font-bold text-white">$1400</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">Sedan</h5>
+                <p className="text-3xl font-bold text-white">$1600</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">UTE/7 Seater</h5>
+                <p className="text-3xl font-bold text-white">$1750</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Paint Correction */}
+          <div className="mb-8">
+            <h4 className="text-2xl text-white font-bold text-center mb-6">Paint Correction</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">Single Stage Polish</h5>
+                <p className="text-3xl font-bold text-white">$395</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">Two Stage Polish</h5>
+                <p className="text-3xl font-bold text-white">$595</p>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2">
+                <h5 className="text-lg font-semibold text-gray-300 mb-2">Three Stage Polish</h5>
+                <p className="text-3xl font-bold text-white">$750</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Add-ons */}
+          <div className="mb-8">
+            <h4 className="text-2xl text-white font-bold text-center mb-6">Add-ons</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <ul className="space-y-3">
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Tar Removal — <span className="text-2xl font-bold text-white ml-2">$50–100</span></li>
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Pet Hair Removal — <span className="text-2xl font-bold text-white ml-2">$50–100</span></li>
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Odour Treatment — <span className="text-2xl font-bold text-white ml-2">$50</span></li>
+                </ul>
+              </div>
+              <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
+                <ul className="space-y-3">
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Per Panel Polish — <span className="text-2xl font-bold text-white ml-2">$100</span></li>
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Headlight Restoration — <span className="text-2xl font-bold text-white ml-2">$45</span></li>
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Red Dirt Removal — <span className="text-2xl font-bold text-white ml-2">$100–150</span></li>
+                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ceramic Coating — <span className="text-2xl font-bold text-white ml-2">From $850</span></li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
