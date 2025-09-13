@@ -8,19 +8,32 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Send email to business (main template)
     emailjs.sendForm(
-      process.env.REACT_APP_EMAILJS_SERVICE_ID,
-      process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
       form.current,
-      process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
     )
-      .then((result) => {
-        alert('Message sent successfully!');
+    .then(() => {
+      // Send auto-reply to customer (second template)
+      emailjs.sendForm(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_AUTO_REPLY_TEMPLATE_ID, // 👈 create this in EmailJS
+        form.current,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      )
+      .then(() => {
+        alert("Message sent! You'll also receive a confirmation email.");
         form.current.reset();
       })
-      .catch((error) => {
-        alert('Failed to send the message. Please try again.');
+      .catch(() => {
+        alert("Message sent, but auto-reply failed.");
       });
+    })
+    .catch(() => {
+      alert('Failed to send the message. Please try again.');
+    });
   };
 
   return (
