@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import companyLogo from '../assets/company-logo.png';
 
 const Hero = () => {
   return (
@@ -11,7 +12,7 @@ const Hero = () => {
         transition={{ duration: 0.8 }}
         viewport={{ once: true, amount: 0.3 }}
       >
-        <img className="mx-auto mb-6 h-12 md:h-16 w-auto" src="/vite.svg" alt="Chris Auto Shine Logo" />
+        <img className="mx-auto mb-6 h-auto max-w-[200px]" src={companyLogo} alt="Chris Auto Shine Logo" />
         <motion.h2
           className="text-3xl md:text-5xl font-bold mb-4 text-white relative"
           initial={{ opacity: 0, y: 20 }}
