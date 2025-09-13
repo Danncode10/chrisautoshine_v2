@@ -171,7 +171,8 @@ function Packages() {
           <h3 className="text-3xl text-white font-bold text-center mb-8">Exclusive Packages</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Auto Elite */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <div className="bg-gradient-to-br from-red-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+              <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Elite</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deluxe Exterior + Interior</li>
@@ -195,7 +196,8 @@ function Packages() {
             </div>
 
             {/* Auto Super Elite */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <div className="bg-gradient-to-br from-amber-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+              <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Super Elite</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Super Exterior + Interior</li>
@@ -220,7 +222,8 @@ function Packages() {
             </div>
 
             {/* Exclusive Auto Elite */}
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl">
+            <div className="bg-gradient-to-br from-purple-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative">
+              <div className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Exclusive Auto Elite</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ultimate full detail</li>
@@ -390,17 +393,38 @@ function Packages() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
                 <ul className="space-y-3">
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Tar Removal — <span className="text-2xl font-bold text-white ml-2">$50–100</span></li>
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Pet Hair Removal — <span className="text-2xl font-bold text-white ml-2">$50–100</span></li>
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Odour Treatment — <span className="text-2xl font-bold text-white ml-2">$50</span></li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Tar Removal</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$50–100</span></span>
+                  </li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Pet Hair Removal</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$50–100</span></span>
+                  </li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Odour Treatment</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$50</span></span>
+                  </li>
                 </ul>
               </div>
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg">
                 <ul className="space-y-3">
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Per Panel Polish — <span className="text-2xl font-bold text-white ml-2">$100</span></li>
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Headlight Restoration — <span className="text-2xl font-bold text-white ml-2">$45</span></li>
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Red Dirt Removal — <span className="text-2xl font-bold text-white ml-2">$100–150</span></li>
-                  <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ceramic Coating — <span className="text-2xl font-bold text-white ml-2">From $850</span></li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Per Panel Polish</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$100</span></span>
+                  </li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Headlight Restoration</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$45</span></span>
+                  </li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Red Dirt Removal</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">$100–150</span></span>
+                  </li>
+                  <li className="grid grid-cols-2 items-center gap-4 text-gray-300">
+                    <span className="flex items-center"><span className="text-red-500 mr-2 font-bold">✓</span>Ceramic Coating</span>
+                    <span className="text-right"><span className="text-2xl font-bold text-white">From $850</span></span>
+                  </li>
                 </ul>
               </div>
             </div>
