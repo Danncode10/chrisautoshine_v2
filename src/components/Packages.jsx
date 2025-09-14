@@ -494,6 +494,20 @@ function Packages() {
             Additional Services
           </motion.h3>
 
+          {/* Under Body Cleaning Promo */}
+          <motion.div 
+            className="mb-8 flex justify-center"
+            variants={containerVariants}
+          >
+            <motion.div 
+              className="bg-gray-800 text-white p-8 rounded-xl shadow-md max-w-md w-full text-center border border-gray-700"
+              variants={itemVariants}
+            >
+              <h4 className="text-2xl font-bold mb-4">Under Body Cleaning</h4>
+              <p className="text-xl font-semibold text-red-400">prices starting at $250</p>
+            </motion.div>
+          </motion.div>
+
           {/* Body Cleaning & Protection */}
           <motion.div 
             className="mb-8"
