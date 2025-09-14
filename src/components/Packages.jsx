@@ -503,7 +503,7 @@ function Packages() {
               className="text-2xl text-white font-bold text-center mb-6"
               variants={itemVariants}
             >
-              Body Cleaning & Protection
+              Under Body Cleaning & Protection
             </motion.h4>
             <motion.div 
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
