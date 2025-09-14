@@ -68,22 +68,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Auto 1</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Basic exterior wash</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Wheel cleaning</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Tire shine</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Snow Foam Wash + Exterior Windows</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Door Frames + Tire & Rim Shine</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Regular Exterior Cleaning</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$20</p>
+                  <p className="text-2xl font-bold text-white">$55</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$25</p>
+                  <p className="text-2xl font-bold text-white">$65</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$30</p>
+                  <p className="text-2xl font-bold text-white">$75</p>
                 </div>
               </div>
             </motion.div>
@@ -95,23 +95,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Pre-wash foam</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Hand wash</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Clay bar treatment</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Wax application</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Foam Wash + Hand Wax</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Interior Quick Vacuum & Dust Wipe</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Tire & Rim Shine</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$35</p>
+                  <p className="text-2xl font-bold text-white">$160</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$40</p>
+                  <p className="text-2xl font-bold text-white">$180</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$50</p>
+                  <p className="text-2xl font-bold text-white">$200</p>
                 </div>
               </div>
             </motion.div>
@@ -123,21 +122,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full exterior detail</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Wheel & tire detail</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Foam Wash + Single Stage Polish</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Spray Wax + Tire & Rim Shine</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Quick Interior Clean</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$50</p>
+                  <p className="text-2xl font-bold text-white">$245</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$60</p>
+                  <p className="text-2xl font-bold text-white">$295</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$70</p>
+                  <p className="text-2xl font-bold text-white">$345</p>
                 </div>
               </div>
             </motion.div>
@@ -169,22 +169,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Plus</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Vacuum seats & carpets</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Wipe down surfaces</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Air freshener</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Interior Vacuum + Dust Wipe</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Snow Foam Wash + Exterior Wipe</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Spray Wax + Rim Shine</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$25</p>
+                  <p className="text-2xl font-bold text-white">$105</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$30</p>
+                  <p className="text-2xl font-bold text-white">$125</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$40</p>
+                  <p className="text-2xl font-bold text-white">$145</p>
                 </div>
               </div>
             </motion.div>
@@ -196,23 +196,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Deluxe</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep vacuum & shampoo</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Seat & upholstery clean</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Leather conditioning</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Dashboard protection</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Vacuum + Interior Panels Wipe</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Foam Wash + Spray Wax</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Tire & Rim Shine + 4 Doors Shampoo</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$40</p>
+                  <p className="text-2xl font-bold text-white">$160</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$45</p>
+                  <p className="text-2xl font-bold text-white">$180</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$60</p>
+                  <p className="text-2xl font-bold text-white">$200</p>
                 </div>
               </div>
             </motion.div>
@@ -224,23 +223,22 @@ function Packages() {
             >
               <h4 className="text-xl font-bold mb-4 text-center">Super</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full interior steam clean</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Stain & odor removal</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep carpet extraction</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Headliner cleaning</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Interior Shampoo + Steam Clean</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Leather Conditioner</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Foam Wash + Spray Wax</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$55</p>
+                  <p className="text-2xl font-bold text-white">$245</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$65</p>
+                  <p className="text-2xl font-bold text-white">$295</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$80</p>
+                  <p className="text-2xl font-bold text-white">$345</p>
                 </div>
               </div>
             </motion.div>
@@ -273,22 +271,22 @@ function Packages() {
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Elite</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deluxe Exterior + Interior</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Engine bay clean</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Premium wax</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full Interior Care – Shampoo, Steam Clean, Air Blowing, Vacuum, Leather Conditioner</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Exterior Wash – Tires & Rims Cleaning + Spray Wax + Foam Wash</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Single Stage Polish – Removes light swirls for extra shine</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$70</p>
+                  <p className="text-2xl font-bold text-white">$395</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$80</p>
+                  <p className="text-2xl font-bold text-white">$475</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$100</p>
+                  <p className="text-2xl font-bold text-white">$545</p>
                 </div>
               </div>
             </motion.div>
@@ -301,23 +299,22 @@ function Packages() {
               <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Auto Super Elite</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Super Exterior + Interior</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ceramic coating prep</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full vehicle protection</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>UV protection</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Complete Interior – Shampoo, Steam Clean, Vacuum, Leather Conditioner</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep Exterior – Tar Removal, Clay Bar, Engine & Underchassis Cleaning</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>2-3 Stage Polish + Spray Wax – Professional finish & protection</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$100</p>
+                  <p className="text-2xl font-bold text-white">$999</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$110</p>
+                  <p className="text-2xl font-bold text-white">$1250</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$130</p>
+                  <p className="text-2xl font-bold text-white">$1500</p>
                 </div>
               </div>
             </motion.div>
@@ -330,24 +327,22 @@ function Packages() {
               <div className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Exclusive Auto Elite</h4>
               <ul className="mb-6 space-y-2">
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ultimate full detail</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Ceramic coating</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Paint correction</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Luxury interior restore</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Complimentary pickup</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Full Interior Care – Shampoo Wash, Steam Clean, Leather Conditioning</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Exterior Perfection – Snow Foam Hand Wash, Tires & Rims Deep Clean, 3-Stage Polish + Spray Wax</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Advanced Protection – Engine Bay Cleaning, Underbody Cleaning + Rust Protection</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Hatchback</h5>
-                  <p className="text-2xl font-bold text-white">$150</p>
+                  <p className="text-2xl font-bold text-white">$2500</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">Sedan/UTE</h5>
-                  <p className="text-2xl font-bold text-white">$160</p>
+                  <p className="text-2xl font-bold text-white">$2800</p>
                 </div>
                 <div>
                   <h5 className="text-sm font-semibold text-gray-300">7 Seater</h5>
-                  <p className="text-2xl font-bold text-white">$180</p>
+                  <p className="text-2xl font-bold text-white">$3250</p>
                 </div>
               </div>
             </motion.div>
