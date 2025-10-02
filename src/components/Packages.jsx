@@ -373,17 +373,41 @@ function Packages() {
               variants={itemVariants}
             >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
-              <h4 className="text-xl font-bold mb-4 text-center">Bullbars (Sand & Polish)</h4>
-              <ul className="mb-6 space-y-3">
-                <li className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-300">4 Poster Bullbar</span>
-                  <p className="text-2xl font-bold text-white">Starting at $990</p>
-                </li>
-                <li className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-300">5 Poster Bullbar</span>
-                  <p className="text-2xl font-bold text-white">Starting at $1250</p>
-                </li>
-              </ul>
+              <h4 className="text-xl font-bold mb-4 text-center">Bullbars</h4>
+              <div className="mb-4">
+                <p className="text-sm font-bold text-gray-300 mb-2 text-center">Sand & Polish</p>
+                <ul className="space-y-3">
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">4 Poster Bullbar</span>
+                    <p className="text-2xl font-bold text-white">Starting at $990</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">5 Poster Bullbar</span>
+                    <p className="text-2xl font-bold text-white">Starting at $1250</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Bumper</span>
+                    <p className="text-2xl font-bold text-white">Starting at $550</p>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-300 mb-2 text-center">Cut & Polish</p>
+                <ul className="space-y-3">
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">4 Poster Bullbar</span>
+                    <p className="text-2xl font-bold text-white">Starting at $495</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">5 Poster Bullbar</span>
+                    <p className="text-2xl font-bold text-white">Starting at $625</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Bumper</span>
+                    <p className="text-2xl font-bold text-white">Starting at $275</p>
+                  </li>
+                </ul>
+              </div>
             </motion.div>
 
             {/* Tanks Card */}
@@ -392,21 +416,41 @@ function Packages() {
               variants={itemVariants}
             >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
-              <h4 className="text-xl font-bold mb-4 text-center">Tanks (Sand & Polish)</h4>
-              <ul className="mb-6 space-y-3">
-                <li className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-300">Large Tank</span>
-                  <p className="text-2xl font-bold text-white">$290</p>
-                </li>
-                <li className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-300">Medium Tank</span>
-                  <p className="text-2xl font-bold text-white">$250</p>
-                </li>
-                <li className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-300">Small Tank</span>
-                  <p className="text-2xl font-bold text-white">$200</p>
-                </li>
-              </ul>
+              <h4 className="text-xl font-bold mb-4 text-center">Tanks</h4>
+              <div className="mb-4">
+                <p className="text-sm font-bold text-gray-300 mb-2 text-center">Sand & Polish</p>
+                <ul className="space-y-3">
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Large Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $290</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Medium Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $250</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Small Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $200</p>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-300 mb-2 text-center">Cut & Polish</p>
+                <ul className="space-y-3">
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Large Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $145</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Medium Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $125</p>
+                  </li>
+                  <li className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-300">Small Tank</span>
+                    <p className="text-2xl font-bold text-white">Starting at $100</p>
+                  </li>
+                </ul>
+              </div>
             </motion.div>
 
             {/* Other Parts Card */}
@@ -415,19 +459,19 @@ function Packages() {
               variants={itemVariants}
             >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
-              <h4 className="text-xl font-bold mb-4 text-center">Other Parts</h4>
+              <h4 className="text-xl font-bold mb-4 text-center">Other Parts (Cut & Polish)</h4>
               <ul className="mb-6 space-y-3">
                 <li className="flex flex-col">
                   <span className="text-sm font-semibold text-gray-300">Exhaust</span>
-                  <p className="text-2xl font-bold text-white">$150</p>
+                  <p className="text-2xl font-bold text-white">Starting at $150</p>
                 </li>
                 <li className="flex flex-col">
                   <span className="text-sm font-semibold text-gray-300">Snorkel</span>
-                  <p className="text-2xl font-bold text-white">$100</p>
+                  <p className="text-2xl font-bold text-white">Starting at $100</p>
                 </li>
                 <li className="flex flex-col">
                   <span className="text-sm font-semibold text-gray-300">Mirror</span>
-                  <p className="text-2xl font-bold text-white">$50</p>
+                  <p className="text-2xl font-bold text-white">Starting at $50</p>
                 </li>
               </ul>
             </motion.div>
@@ -442,11 +486,11 @@ function Packages() {
               <ul className="mb-6 space-y-3">
                 <li className="flex flex-col">
                   <span className="text-sm font-semibold text-gray-300">Sand & Polish</span>
-                  <p className="text-2xl font-bold text-white">$200 each</p>
+                  <p className="text-2xl font-bold text-white">Starting at $200 each</p>
                 </li>
                 <li className="flex flex-col">
                   <span className="text-sm font-semibold text-gray-300">Cut & Polish</span>
-                  <p className="text-2xl font-bold text-white">$80 each</p>
+                  <p className="text-2xl font-bold text-white">Starting at $80 each</p>
                 </li>
               </ul>
             </motion.div>
@@ -458,7 +502,7 @@ function Packages() {
             >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Interior Detailing (Trucks)</h4>
-              <p className="text-2xl font-bold text-white text-center">Starting at $250</p>
+              <p className="text-2xl font-bold text-white text-center">Starting at $250-500</p>
             </motion.div>
 
             {/* Full Vehicle Polish Card */}
@@ -468,7 +512,20 @@ function Packages() {
             >
               <div className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-t-lg mb-4"></div>
               <h4 className="text-xl font-bold mb-4 text-center">Full Vehicle Polish</h4>
-              <p className="text-4xl font-bold text-white text-center">$1250</p>
+              <ul className="mb-6 space-y-3">
+                <li className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-300">1 Stage Polish</span>
+                  <p className="text-2xl font-bold text-white">Starting at $600</p>
+                </li>
+                <li className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-300">2 Stage Polish</span>
+                  <p className="text-2xl font-bold text-white">$900</p>
+                </li>
+                <li className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-300">3 Stage Polish</span>
+                  <p className="text-2xl font-bold text-white">Starting at $1250</p>
+                </li>
+              </ul>
             </motion.div>
           </motion.div>
           <motion.div 
