@@ -373,7 +373,7 @@ function Packages() {
             variants={containerVariants}
           >
             <motion.div 
-              className="bg-gray-800 text-white p-8 rounded-xl shadow-md max-w-md w-full text-center border border-gray-700"
+              className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border border-gray-700 hover:scale-105 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
               <h4 className="text-2xl font-bold mb-4">Under Body Cleaning</h4>
@@ -397,21 +397,21 @@ function Packages() {
               variants={containerVariants}
             >
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Hatchback</h5>
                 <p className="text-3xl font-bold text-white">$1400</p>
               </motion.div>
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Sedan</h5>
                 <p className="text-3xl font-bold text-white">$1600</p>
               </motion.div>
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl md:col-span-2"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">UTE/7 Seater</h5>
@@ -436,21 +436,21 @@ function Packages() {
               variants={containerVariants}
             >
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Single Stage Polish</h5>
                 <p className="text-3xl font-bold text-white">$395</p>
               </motion.div>
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Two Stage Polish</h5>
                 <p className="text-3xl font-bold text-white">$595</p>
               </motion.div>
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg md:col-span-2"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl md:col-span-2"
                 variants={itemVariants}
               >
                 <h5 className="text-lg font-semibold text-gray-300 mb-2">Three Stage Polish</h5>
@@ -475,7 +475,7 @@ function Packages() {
               variants={containerVariants}
             >
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <ul className="space-y-3">
@@ -494,7 +494,7 @@ function Packages() {
                 </ul>
               </motion.div>
               <motion.div 
-                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg"
+                className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl"
                 variants={itemVariants}
               >
                 <ul className="space-y-3">
