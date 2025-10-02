@@ -1,9 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 function TruckServices() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
+
   const containerVariants = {
-    hidden: { opacity: 1 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
@@ -23,11 +26,11 @@ function TruckServices() {
 
   return (
     <motion.div 
+      ref={ref}
       className="mb-16"
       variants={containerVariants}
       initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      animate={isInView ? "visible" : "hidden"}
     >
       <motion.h3 
         className="text-3xl text-white font-bold text-center mb-8"
