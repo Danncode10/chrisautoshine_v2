@@ -34,6 +34,9 @@ function Packages() {
   return (
     <section id="packages" className="py-16 bg-black">
       <div className="container mx-auto px-4">
+
+        <TruckServices />
+
         <motion.h2 
           className="text-4xl text-red-600 font-bold text-center mb-12"
           variants={titleVariants}
@@ -350,9 +353,7 @@ function Packages() {
           </motion.div>
         </motion.div>
 
-        <TruckServices />
-
-        {/* Additional Services */}
+        {/* -------------------- Additional Services -------------------- */}
         <motion.div 
           className="mb-16"
           variants={containerVariants}
@@ -419,6 +420,7 @@ function Packages() {
               </motion.div>
             </motion.div>
           </motion.div> */}
+
 
           {/* Paint Correction */}
           <motion.div 
