@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFacebook } from "react-icons/fa";
+import { FaEnvelope, FaFacebook, FaInstagram, FaTiktok} from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -31,9 +31,18 @@ const Footer = () => {
           <div>
             <h4 className="text-white text-lg font-semibold mb-4">Follow Us</h4>
             <div className="flex justify-center">
+
               <a href="https://www.facebook.com/profile.php?id=61579380248722" target="_blank" rel="noopener noreferrer">
-                <FaFacebook className="text-gray-300 hover:text-red-600 transition-colors duration-300 text-2xl" />
+                <FaFacebook className="text-gray-300 hover:text-red-600 transition-colors duration-300 text-2xl m-2" />
               </a>
+              <a href="#" target="_blank" rel="noopener noreferrer">
+                <FaInstagram className="text-gray-300 hover:text-red-600 transition-colors duration-300 text-2xl m-2" />
+              </a>
+              <a href="https://www.tiktok.com/@malaykosayuwolf" target="_blank" rel="noopener noreferrer">
+                <FaTiktok className="text-gray-300 hover:text-red-600 transition-colors duration-300 text-2xl m-2" />
+              </a>
+
+
             </div>
           </div>
         </div>
