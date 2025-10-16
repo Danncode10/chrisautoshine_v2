@@ -62,8 +62,8 @@ function Packages() {
           >
             Exterior Packages
           </motion.h3>
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+<motion.div 
+  className="flex flex-wrap justify-center gap-6" // Updated to use flex layout
             variants={containerVariants}
           >
             {/* Auto 1 */}
@@ -305,7 +305,7 @@ function Packages() {
               <h4 className="text-xl font-bold mb-4 text-center">Auto Super Elite</h4>
               <ul className="mb-6 space-y-2">
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Complete Interior – Shampoo, Steam Clean, Vacuum, Leather Conditioner</li>
-                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep Exterior – Tar Removal, Clay Bar, Engine & Underchassis Cleaning</li>
+                <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>Deep Exterior – Tar Removal, Clay Bar, & Engine Cleaning</li>
                 <li className="flex items-center text-gray-300"><span className="text-red-500 mr-2 font-bold">✓</span>2-3 Stage Polish + Spray Wax – Professional finish & protection</li>
               </ul>
               <div className="grid grid-cols-3 gap-4 text-center">
@@ -325,7 +325,7 @@ function Packages() {
             </motion.div>
 
             {/* Exclusive Auto Elite */}
-            <motion.div 
+            {/* <motion.div 
               className="bg-gradient-to-br from-purple-900 to-gray-900 text-white p-6 rounded-lg shadow-lg hover:scale-105 transition-all duration-300 hover:shadow-xl relative"
               variants={itemVariants}
             >
@@ -350,7 +350,9 @@ function Packages() {
                   <p className="text-2xl font-bold text-white">$3250</p>
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
+
+            
           </motion.div>
         </motion.div>
 
