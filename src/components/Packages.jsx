@@ -35,7 +35,8 @@ function Packages() {
     <section id="packages" className="py-16 bg-black">
       <div className="container mx-auto px-4">
 
-        <TruckServices />
+        {/* <TruckServices /> */}
+        {/* Hide the Truck Service based on Clients request */}
 
         <motion.h2 
           className="text-4xl text-red-600 font-bold text-center mb-12"
