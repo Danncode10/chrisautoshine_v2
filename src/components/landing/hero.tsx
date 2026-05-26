@@ -137,10 +137,10 @@ export function Hero() {
           alt=""
           fill
           priority
-          className="object-cover"
+          className="object-cover transition-all duration-1000 ease-out"
           style={{
             objectPosition: "65% 50%",
-            filter: "contrast(1.15) saturate(1.2) brightness(0.82)",
+            filter: `contrast(1.15) saturate(1.2) brightness(0.82) blur(${introComplete ? "0px" : "8px"})`,
           }}
         />
       </div>
