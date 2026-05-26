@@ -1,106 +1,123 @@
 "use client";
 
+import { useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { Droplets, Car, Sparkles, Wrench } from "lucide-react";
+import { Typewriter } from "@/components/landing/typewriter";
 
-const servicesData = [
+const services = [
   {
+    icon: Droplets,
     title: "Exterior Wash",
-    description: "Thorough cleaning of the exterior to remove dirt, grime, and contaminants.",
+    description:
+      "Full hand wash, wheel clean, tire dressing, and streak-free windows. Your car leaves spotless every time.",
   },
   {
+    icon: Car,
     title: "Interior Detailing",
-    description: "Deep clean of seats, carpets, dashboard, and all interior surfaces.",
+    description:
+      "Deep vacuum, dashboard wipe, leather conditioning, and odor elimination for a fresh cabin experience.",
   },
   {
+    icon: Sparkles,
     title: "Waxing & Polishing",
-    description: "Protective wax application and polishing for a showroom shine.",
+    description:
+      "Machine polish and premium carnauba wax protect your paint and deliver a mirror-like, showroom shine.",
+  },
+  {
+    icon: Wrench,
+    title: "Paint Correction",
+    description:
+      "Multi-stage machine compound removes swirl marks, scratches, and oxidation — restoring factory clarity.",
   },
 ];
 
-const galleryImages = [
-  { src: "/images/exterior-clean.jpg", alt: "Exterior car cleaning" },
-  { src: "/images/interior-vacuum.jpg", alt: "Interior vacuuming" },
-  { src: "/images/polishing.jpg", alt: "Car polishing" },
-  { src: "/images/waxing.jpg", alt: "Car waxing" },
-  { src: "/images/trucktirecleaning.png", alt: "Truck tire cleaning" },
-];
+type ServiceItem = (typeof services)[0];
 
-const extendedImages = [...galleryImages, ...galleryImages];
+function ServiceCard({ service, index }: { service: ServiceItem; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+
+  const onMove = useCallback((e: MouseEvent) => {
+    const el = cardRef.current;
+    const glow = glowRef.current;
+    if (!el || !glow) return;
+    const rect = el.getBoundingClientRect();
+    glow.style.background = `radial-gradient(300px at ${e.clientX - rect.left}px ${
+      e.clientY - rect.top
+    }px, rgba(220,38,38,0.12), transparent 70%)`;
+  }, []);
+
+  const onLeave = useCallback(() => {
+    if (glowRef.current) glowRef.current.style.background = "none";
+  }, []);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.addEventListener("mousemove", onMove as EventListener);
+    el.addEventListener("mouseleave", onLeave);
+    return () => {
+      el.removeEventListener("mousemove", onMove as EventListener);
+      el.removeEventListener("mouseleave", onLeave);
+    };
+  }, [onMove, onLeave]);
+
+  const Icon = service.icon;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="relative rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight overflow-hidden cursor-default"
+    >
+      {/* Mouse-follow glow */}
+      <div
+        ref={glowRef}
+        className="absolute inset-0 rounded-3xl pointer-events-none z-0 transition-all duration-75"
+      />
+
+      <div className="relative z-10 bg-card rounded-3xl p-6 h-full flex flex-col gap-5">
+        <div className="w-11 h-11 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-white font-semibold text-lg mb-2">{service.title}</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">{service.description}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export function Services() {
   return (
-    <section id="services" className="py-16 bg-black">
-      <motion.div
-        className="container mx-auto px-4"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, amount: 0.3 }}
-      >
-        <motion.h2
-          className="text-3xl md:text-4xl text-red-600 font-bold text-center mb-12 relative"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          Our Services
-          <motion.div
-            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true, amount: 0.3 }}
-          />
-        </motion.h2>
+    <section id="services" className="py-28 bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-sm opacity-40" aria-hidden />
 
-        {/* Auto-sliding Gallery */}
-        <motion.div
-          className="mb-8 overflow-hidden"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <motion.div
-            className="flex py-4"
-            animate={{ x: [0, -(galleryImages.length * 272)] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          >
-            {extendedImages.map((image, index) => (
-              <motion.img
-                key={index}
-                src={image.src}
-                alt={image.alt}
-                className="flex-none w-64 h-40 object-cover rounded-lg shadow-md mx-2"
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: (index % galleryImages.length) * 0.1 }}
-                viewport={{ once: true, amount: 0.3 }}
-              />
-            ))}
-          </motion.div>
-        </motion.div>
+      <div className="relative max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16 space-y-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+            What We Offer
+          </span>
+          <h2 className="text-4xl sm:text-5xl font-bold text-white">
+            <Typewriter text="Services Built for Shine" speed={35} />
+          </h2>
+          <p className="text-muted-foreground max-w-lg mx-auto text-base">
+            From a quick wash to a full paint correction, every service is delivered with
+            professional-grade products and meticulous care.
+          </p>
+        </div>
 
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {servicesData.map((service, index) => (
-            <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h3 className="text-xl md:text-2xl font-bold text-white mb-3 text-center md:text-left">
-                {service.title}
-              </h3>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-                {service.description}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {services.map((service, i) => (
+            <ServiceCard key={service.title} service={service} index={i} />
           ))}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

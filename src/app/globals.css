@@ -10,19 +10,19 @@
   --color-foreground: #FFFFFF;
 
   /* Cards / panels */
-  --color-card: #111111;
+  --color-card: #0C0C0C;
   --color-card-foreground: #FFFFFF;
 
   /* Muted */
-  --color-muted: #1a1a1a;
-  --color-muted-foreground: #9ca3af;
+  --color-muted: #141414;
+  --color-muted-foreground: #8a8a8a;
 
   /* Accent */
-  --color-accent: #1f0000;
+  --color-accent: #1a0000;
   --color-accent-foreground: #FFFFFF;
 
   /* Secondary */
-  --color-secondary: #1a1a1a;
+  --color-secondary: #141414;
   --color-secondary-foreground: #FFFFFF;
 
   /* Destructive */
@@ -30,21 +30,25 @@
   --color-destructive-foreground: #ffffff;
 
   /* Popover */
-  --color-popover: #111111;
+  --color-popover: #0C0C0C;
   --color-popover-foreground: #FFFFFF;
 
   /* Form elements */
   --color-input: #1f1f1f;
   --color-ring: #DC2626;
-  --color-border: #2a2a2a;
+  --color-border: #1f1f1f;
 
   /* Radius */
   --radius-5xl: 3rem;
 
-  /* Easing */
+  /* Premium easing curves */
   --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fonts wired to Geist loaded via next/font in layout.tsx */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {
@@ -53,34 +57,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
   }
   h1, h2, h3, h4 {
     text-wrap: balance;
-  }
-  a {
-    font-weight: 500;
-    color: #FFFFFF;
-    text-decoration: inherit;
-  }
-  a:hover {
-    color: #DC2626;
-  }
-  button {
-    border-radius: 8px;
-    border: 1px solid #DC2626;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    background-color: #000000;
-    color: #FFFFFF;
-    cursor: pointer;
-    transition: all 0.25s;
-  }
-  button:hover {
-    background-color: #DC2626;
-    color: #ffffff;
-    border-color: #DC2626;
   }
 }
 
@@ -92,6 +72,100 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Static dot grid background */
+  .bg-grid {
+    background-image:
+      radial-gradient(circle at center, rgba(220, 38, 38, 0.18) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: 0 0;
+  }
+  .bg-grid-sm {
+    background-image:
+      radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Red gradient text */
+  .gradient-text-primary {
+    background: linear-gradient(135deg, #FCA5A5 0%, #DC2626 60%, #FCA5A5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Inner highlight — double-bezel cards */
+  .inner-highlight {
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.06),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
+  /* Radial fade mask */
+  .mask-radial-fade {
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  .mask-vertical-fade {
+    mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  }
+
+  /* Paint-only radial fade overlay */
+  .grid-fade-overlay {
+    background: radial-gradient(
+      ellipse at center,
+      transparent 30%,
+      var(--color-background) 80%
+    );
+  }
+  .grid-fade-overlay-v {
+    background: linear-gradient(
+      to bottom,
+      var(--color-background) 0%,
+      transparent 20%,
+      transparent 80%,
+      var(--color-background) 100%
+    );
+  }
+}
+
+/* Typewriter cursor */
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+.typewriter-cursor,
+.typewriter-cursor-done {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.85em;
+  background: var(--color-primary);
+  vertical-align: baseline;
+  margin-left: 0.04em;
+  transform: translateY(0.08em);
+}
+.typewriter-cursor {
+  animation: blink-cursor 0.8s steps(1) infinite;
+}
+
+/* Intro phase — lock scroll + blur non-hero during typewriter reveal */
+body.intro-active {
+  overflow: hidden;
+}
+body section:not(#home),
+body footer,
+body header {
+  transition: filter 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+body.intro-active section:not(#home),
+body.intro-active footer,
+body.intro-active header {
+  filter: blur(8px);
+  opacity: 0.25;
+  pointer-events: none;
 }
 
 /* Respect user motion preferences */
@@ -105,9 +179,33 @@
   }
 }
 
-/* WebKit font rendering */
+/* WebKit rendering */
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+body {
+  -webkit-transform: translate3d(0, 0, 0);
+}
+svg {
+  -webkit-filter: blur(0);
+  filter: blur(0);
+}
+img {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+h2, h3, h4, h5, h6 {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Suppress browser password icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear { display: none; }
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

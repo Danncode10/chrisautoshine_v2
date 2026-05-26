@@ -1,194 +1,212 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { FaFacebook, FaTiktok } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
-import { FaEnvelope, FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
-import { siteConfig } from "@/lib/config";
+import { toast } from "sonner";
+import { businessConfig } from "@/lib/business-config";
+
+const MAPS_EMBED =
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15600.000000000000!2d153.0724!3d-27.2486!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1m1!1s26%20Cameron%20St%2C%20Clontarf%204019%2C%20Australia!5e0!3m2!1sen!2sus!4v1726200000000";
 
 export function ContactBlock() {
   const form = useRef<HTMLFormElement>(null);
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.current) return;
-
-    emailjs
-      .sendForm(
+    setSending(true);
+    try {
+      await emailjs.sendForm(
         process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
         process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
         form.current,
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      )
-      .then(() => {
-        emailjs
-          .sendForm(
-            process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-            process.env.NEXT_PUBLIC_EMAILJS_AUTO_REPLY_TEMPLATE_ID!,
-            form.current!,
-            process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-          )
-          .then(() => {
-            alert("Message sent! You'll also receive a confirmation email.");
-            form.current?.reset();
-          })
-          .catch(() => alert("Message sent, but auto-reply failed."));
-      })
-      .catch(() => alert("Failed to send the message. Please try again."));
+      );
+      try {
+        await emailjs.sendForm(
+          process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+          process.env.NEXT_PUBLIC_EMAILJS_AUTO_REPLY_TEMPLATE_ID!,
+          form.current,
+          process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        );
+      } catch {
+        // auto-reply failure is non-critical
+      }
+      toast.success("Message sent! We'll get back to you soon.");
+      form.current.reset();
+    } catch {
+      toast.error("Failed to send. Please try again or contact us directly.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
-    <section id="contact" className="py-16 bg-black">
-      <motion.div
-        className="container mx-auto px-4"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, amount: 0.3 }}
-      >
-        <motion.h2
-          className="text-4xl font-bold text-center mb-12 text-white relative"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          Contact Us
-          <motion.div
-            className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true, amount: 0.3 }}
-          />
-        </motion.h2>
+    <section id="contact" className="py-28 bg-background">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16 space-y-4">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Get in Touch
+          </span>
+          <h2 className="text-4xl sm:text-5xl font-bold text-white">Book a Detail</h2>
+          <p className="text-muted-foreground max-w-md mx-auto text-base">
+            Ready for a showroom-fresh vehicle? Drop us a message and we&apos;ll lock in your booking.
+          </p>
+        </div>
 
-        {/* Social Icons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <div className="flex justify-center space-x-6 mb-12 flex-wrap">
-            <a
-              href={`mailto:${siteConfig.contact.email}`}
-              className="text-gray-300 hover:text-red-600 transition-colors"
-            >
-              <FaEnvelope size={32} />
-            </a>
-            {siteConfig.socials.facebook && (
-              <a
-                href={siteConfig.socials.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-red-600 transition-colors"
-              >
-                <FaFacebook size={32} />
-              </a>
-            )}
-            {siteConfig.socials.instagram ? (
-              <a
-                href={siteConfig.socials.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-red-600 transition-colors"
-              >
-                <FaInstagram size={32} />
-              </a>
-            ) : (
-              <span className="text-gray-500 opacity-40 cursor-not-allowed">
-                <FaInstagram size={32} />
-              </span>
-            )}
-            {siteConfig.socials.tiktok && (
-              <a
-                href={siteConfig.socials.tiktok}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-red-600 transition-colors"
-              >
-                <FaTiktok size={32} />
-              </a>
-            )}
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="grid md:grid-cols-2 gap-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {/* Form */}
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* ── Left: info + socials + map ── */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-8"
           >
-            <form ref={form} onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
-                <input
-                  type="text"
-                  name="user_name"
-                  placeholder="Enter your name"
-                  className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                <input
-                  type="email"
-                  name="user_email"
-                  placeholder="Enter your email address"
-                  className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                <textarea
-                  name="message"
-                  rows={5}
-                  placeholder="Have a question, want an appointment, or tell us the service you need..."
-                  className="bg-gray-900 border border-red-600 rounded-lg text-white p-3 w-full focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400"
-                  required
-                />
-              </div>
-              <motion.button
-                type="submit"
-                className="bg-red-600 hover:bg-red-700 text-white rounded-lg w-full py-3 font-semibold border-red-600"
-                whileHover={{ scale: 1.02 }}
-              >
-                Send Message
-              </motion.button>
-            </form>
+            {/* Contact info */}
+            <div className="space-y-4">
+              {businessConfig.contact.email && (
+                <a
+                  href={`mailto:${businessConfig.contact.email}`}
+                  className="flex items-center gap-4 group"
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
+                    <Mail className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">
+                    {businessConfig.contact.email}
+                  </span>
+                </a>
+              )}
+
+              {businessConfig.contact.phone && (
+                <a
+                  href={`tel:${businessConfig.contact.phone}`}
+                  className="flex items-center gap-4 group"
+                >
+                  <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
+                    <Phone className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm text-muted-foreground group-hover:text-white transition-colors">
+                    {businessConfig.contact.phone}
+                  </span>
+                </a>
+              )}
+
+              {businessConfig.contact.address && (
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {businessConfig.contact.address}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Socials */}
+            <div className="flex gap-3">
+              {businessConfig.socials.facebook && (
+                <a
+                  href={businessConfig.socials.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-primary/20 text-white/60 hover:text-primary transition-colors"
+                >
+                  <FaFacebook size={18} />
+                </a>
+              )}
+              {businessConfig.socials.tiktok && (
+                <a
+                  href={businessConfig.socials.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-primary/20 text-white/60 hover:text-primary transition-colors"
+                >
+                  <FaTiktok size={18} />
+                </a>
+              )}
+            </div>
+
+            {/* Map */}
+            <div className="rounded-2xl overflow-hidden border border-border">
+              <iframe
+                src={MAPS_EMBED}
+                width="100%"
+                height="260"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Chris Auto Shine location"
+              />
+            </div>
           </motion.div>
 
-          {/* Map */}
+          {/* ── Right: form ── */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <iframe
-              src={siteConfig.contact.googleMapsEmbedUrl}
-              width="100%"
-              height="400"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-xl border-2 border-red-600 w-full"
-            />
+            <div className="rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight">
+              <div className="bg-card rounded-3xl p-8">
+                <form ref={form} onSubmit={handleSubmit} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-white/80">Name</label>
+                    <input
+                      type="text"
+                      name="user_name"
+                      placeholder="Your name"
+                      required
+                      className="w-full px-4 py-3 rounded-xl bg-input border border-border text-white placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-white/80">Email</label>
+                    <input
+                      type="email"
+                      name="user_email"
+                      placeholder="your@email.com"
+                      required
+                      className="w-full px-4 py-3 rounded-xl bg-input border border-border text-white placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-white/80">Message</label>
+                    <textarea
+                      name="message"
+                      rows={5}
+                      placeholder="Tell us about your vehicle and the service you need..."
+                      required
+                      className="w-full px-4 py-3 rounded-xl bg-input border border-border text-white placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-colors resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-primary hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+                  >
+                    <Send className="w-4 h-4" />
+                    {sending ? "Sending…" : "Send Message"}
+                  </button>
+                </form>
+              </div>
+            </div>
           </motion.div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }
