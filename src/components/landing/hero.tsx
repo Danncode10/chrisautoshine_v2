@@ -183,46 +183,16 @@ export function Hero() {
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="flex items-center gap-3.5"
         >
-          {/* Logo ring — replaces CAS text */}
-          <div
-            className="w-14 h-14 rounded-full border-2 border-primary overflow-hidden flex-shrink-0"
+          <p
+            className="font-bold text-white text-sm uppercase tracking-[0.13em]"
             style={{
-              background: "rgba(0,0,0,0.55)",
-              boxShadow: "0 0 28px rgba(220,18,18,0.55)",
+              fontFamily: "var(--font-display)",
+              textShadow: "0 2px 12px rgba(0,0,0,0.9)",
             }}
           >
-            <div className="relative w-full h-full">
-              <Image
-                src="/company-logo.png"
-                alt="Chris Auto Shine"
-                fill
-                className="object-cover"
-                style={{
-                  objectPosition: "50% 72%",
-                  filter: "invert(1)",
-                  transform: "scale(1.8)",
-                  transformOrigin: "50% 72%",
-                }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <p
-              className="font-bold text-white text-base uppercase tracking-[0.13em]"
-              style={{
-                fontFamily: "var(--font-display)",
-                textShadow: "0 2px 12px rgba(0,0,0,0.9)",
-              }}
-            >
-              Chris Auto Shine
-            </p>
-            <p className="text-[10px] text-white/50 tracking-[0.22em] uppercase mt-1">
-              Professional Detailing
-            </p>
-          </div>
+            Chris Auto Shine
+          </p>
         </motion.div>
 
         {/* Main content */}
