@@ -88,7 +88,7 @@ function CompanyNameReveal() {
           className="font-bold select-none"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(26px, 3.8vw, 46px)",
+            fontSize: "clamp(44px, 6.5vw, 84px)",
             color: red ? "var(--color-primary)" : "rgba(255,255,255,0.9)",
             textShadow: red
               ? "0 0 40px rgba(220,20,20,0.7), 2px 2px 0 rgba(60,0,0,0.55)"
@@ -200,10 +200,10 @@ export function Hero() {
                 fill
                 className="object-cover"
                 style={{
-                  objectPosition: "50% 78%",
+                  objectPosition: "50% 72%",
                   filter: "invert(1)",
-                  transform: "scale(2.6)",
-                  transformOrigin: "50% 78%",
+                  transform: "scale(1.8)",
+                  transformOrigin: "50% 72%",
                 }}
               />
             </div>
@@ -251,7 +251,7 @@ export function Hero() {
               className="font-bold text-white leading-[1.06]"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(40px, 7vw, 78px)",
+                fontSize: "clamp(26px, 4vw, 48px)",
                 textShadow: "2px 3px 0 rgba(0,0,0,0.75), 0 4px 18px rgba(0,0,0,0.9)",
               }}
             >
@@ -273,7 +273,7 @@ export function Hero() {
               className="font-bold text-white leading-[1.06]"
               style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "clamp(40px, 7vw, 78px)",
+                fontSize: "clamp(26px, 4vw, 48px)",
                 textShadow: "2px 3px 0 rgba(0,0,0,0.75), 0 4px 18px rgba(0,0,0,0.9)",
               }}
             >

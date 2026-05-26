@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { businessConfig } from "@/lib/business-config";
 
 const navLinks = [
@@ -34,8 +35,37 @@ export function Navbar() {
             : "bg-black/40 backdrop-blur-md border-white/5"
         }`}
       >
-        <a href="/" className="text-white font-bold text-lg tracking-tight select-none">
-          {businessConfig.name}
+        <a href="/" className="flex items-center gap-3 select-none">
+          <div
+            className="w-11 h-11 rounded-full border-2 border-primary overflow-hidden flex-shrink-0"
+            style={{
+              background: "rgba(0,0,0,0.55)",
+              boxShadow: "0 0 20px rgba(220,18,18,0.45)",
+            }}
+          >
+            <div className="relative w-full h-full">
+              <Image
+                src="/company-logo.png"
+                alt="Chris Auto Shine"
+                fill
+                className="object-cover"
+                style={{
+                  objectPosition: "50% 75%",
+                  filter: "invert(1)",
+                  transform: "scale(2.2)",
+                  transformOrigin: "50% 75%",
+                }}
+              />
+            </div>
+          </div>
+          <div>
+            <p className="font-bold text-white text-sm uppercase tracking-[0.13em]" style={{ fontFamily: "var(--font-display)" }}>
+              {businessConfig.name}
+            </p>
+            <p className="text-[9px] text-white/50 tracking-[0.22em] uppercase">
+              Professional Detailing
+            </p>
+          </div>
         </a>
 
         <div className="hidden md:flex items-center gap-1">
