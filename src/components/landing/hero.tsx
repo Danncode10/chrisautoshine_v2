@@ -71,6 +71,7 @@ function CompanyNameReveal() {
     { text: "CHRIS", red: false },
     { text: "AUTO", red: true },
     { text: "SHINE", red: false },
+    { text: "DETAILING", red: false },
   ] as const;
 
   return (

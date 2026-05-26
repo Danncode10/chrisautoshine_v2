@@ -7,7 +7,7 @@
 import businessData from "../../business.json" assert { type: "json" };
 
 export const businessConfig = {
-  name: businessData.business.name || "Chris Auto Shine",
+  name: businessData.business.name || "Chris Auto Shine Detailing",
   tagline: businessData.business.tagline || "Your vehicle deserves to shine.",
   description:
     businessData.business.description ||

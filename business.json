@@ -1,8 +1,8 @@
 {
-  "_readme": "Chris Auto Shine business configuration. Edit this file to update all client-facing content.",
+  "_readme": "Chris Auto Shine Detailing business configuration. Edit this file to update all client-facing content.",
 
   "business": {
-    "name": "Chris Auto Shine",
+    "name": "Chris Auto Shine Detailing",
     "tagline": "Your vehicle deserves to shine.",
     "description": "Professional car wash and detailing services to make your vehicle shine like new.",
     "industry": "Auto Detailing",

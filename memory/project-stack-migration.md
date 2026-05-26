@@ -1,6 +1,6 @@
 ---
 name: project-stack-migration
-description: Chris Auto Shine migrated from Vite+JSX to Next.js 16 + TypeScript on the Dannflow branch, following the business-template structure
+description: Chris Auto Shine Detailing migrated from Vite+JSX to Next.js 16 + TypeScript on the Dannflow branch, following the business-template structure
 metadata:
   type: project
 ---

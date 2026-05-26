@@ -46,7 +46,7 @@ export function Navbar() {
             <div className="relative w-full h-full">
               <Image
                 src="/company-logo.png"
-                alt="Chris Auto Shine"
+                alt="Chris Auto Shine Detailing"
                 fill
                 className="object-cover"
                 style={{

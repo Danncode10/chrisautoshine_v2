@@ -1,10 +1,10 @@
-# CLAUDE.md — Chris Auto Shine
+# CLAUDE.md — Chris Auto Shine Detailing
 
 > Project-specific instructions for Claude Code. These override global defaults.
 
 ## Project Overview
 
-Chris Auto Shine is a **Next.js 16 + TypeScript + Tailwind v4** landing page for a professional mobile car detailing business in Brisbane, QLD. It follows the **Dannflow** architecture — a shared business-template structure used across multiple client sites.
+Chris Auto Shine Detailing is a **Next.js 16 + TypeScript + Tailwind v4** landing page for a professional mobile car detailing business in Brisbane, QLD. It follows the **Dannflow** architecture — a shared business-template structure used across multiple client sites.
 
 - **Live URL:** https://chrisautoshine.vercel.app
 - **GitHub:** https://github.com/Danncode10/chrisautoshine_v2

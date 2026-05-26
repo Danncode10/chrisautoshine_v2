@@ -11,7 +11,7 @@ interface WaterParticlesProps {
  * Ambient particle field — cursor movement pushes particles along its
  * direction of travel (water-like flow trail). Pauses when off-screen
  * via IntersectionObserver. Honors prefers-reduced-motion.
- * Particles use red hues to match Chris Auto Shine branding.
+ * Particles use red hues to match Chris Auto Shine Detailing branding.
  */
 export function WaterParticles({ active, count = 120 }: WaterParticlesProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

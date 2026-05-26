@@ -145,7 +145,7 @@ export function ContactBlock() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Chris Auto Shine location"
+                title="Chris Auto Shine Detailing location"
               />
             </div>
           </motion.div>

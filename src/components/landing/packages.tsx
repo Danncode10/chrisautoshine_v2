@@ -135,13 +135,13 @@ const exclusivePackages: Package[] = [
 ];
 
 const addOns = [
-  { label: "Tar Removal", price: "$50–100" },
-  { label: "Pet Hair Removal", price: "$50–100" },
-  { label: "Odour Treatment", price: "$50" },
-  { label: "Per Panel Polish", price: "$100" },
-  { label: "Headlight Restoration", price: "$45" },
-  { label: "Red Dirt Removal", price: "$100–150" },
-  { label: "Ceramic Coating", price: "From $850" },
+  { label: "Premium Tar & Contamination Removal", price: "$50–100" },
+  { label: "Pet Hair & Odor Elimination", price: "$50–100" },
+  { label: "Advanced Odour Neutralization", price: "$50" },
+  { label: "Precision Panel Restoration", price: "$100" },
+  { label: "Headlight Clarity Enhancement", price: "$45" },
+  { label: "Australian Red Dirt Deep Clean", price: "$100–150" },
+  { label: "Professional Ceramic Coating", price: "From $850" },
 ];
 
 const paintCorrection = [

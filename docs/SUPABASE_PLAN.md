@@ -1,8 +1,8 @@
-# Supabase Plan — Chris Auto Shine
+# Supabase Plan — Chris Auto Shine Detailing
 
 ## Overview
 
-Chris Auto Shine will use the **shared Dannflow Supabase project** rather than spinning up a separate project. This is the same model as other client sites in the Dannflow ecosystem — all client apps share one Supabase organization with RLS (Row Level Security) providing data isolation per `app_id`.
+Chris Auto Shine Detailing will use the **shared Dannflow Supabase project** rather than spinning up a separate project. This is the same model as other client sites in the Dannflow ecosystem — all client apps share one Supabase organization with RLS (Row Level Security) providing data isolation per `app_id`.
 
 ## Setup (When Ready)
 

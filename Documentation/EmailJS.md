@@ -1,6 +1,6 @@
 # EmailJS Integration Guide
 
-This document explains the integration of EmailJS in the Chris Auto Shine v2 project, a client-side email sending solution used in the contact form. It covers how EmailJS works, the use of VITE_ prefixed environment variables, locating API keys in the EmailJS dashboard, and deploying to Vercel with environment variables.
+This document explains the integration of EmailJS in the Chris Auto Shine Detailing v2 project, a client-side email sending solution used in the contact form. It covers how EmailJS works, the use of VITE_ prefixed environment variables, locating API keys in the EmailJS dashboard, and deploying to Vercel with environment variables.
 
 ## How EmailJS Works
 

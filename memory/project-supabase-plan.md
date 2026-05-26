@@ -1,11 +1,11 @@
 ---
 name: project-supabase-plan
-description: Chris Auto Shine will use the shared Dannflow Supabase project with RLS isolation; setup is deferred
+description: Chris Auto Shine Detailing will use the shared Dannflow Supabase project with RLS isolation; setup is deferred
 metadata:
   type: project
 ---
 
-Chris Auto Shine will NOT have its own Supabase project. It will use the **shared Dannflow Supabase project** with RLS `app_id` isolation.
+Chris Auto Shine Detailing will NOT have its own Supabase project. It will use the **shared Dannflow Supabase project** with RLS `app_id` isolation.
 
 **Why:** User (Dann) manages multiple client sites under the Dannflow ecosystem. All share one Supabase org to reduce cost and overhead. Each app is isolated via `app_id = 'chris-auto-shine'` in RLS policies.
 

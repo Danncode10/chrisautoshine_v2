@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || "Chris Auto Shine",
+  name: process.env.NEXT_PUBLIC_SITE_NAME || "Chris Auto Shine Detailing",
   description:
     "Professional car wash and detailing services to make your vehicle shine like new.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://chrisautoshine.vercel.app",

@@ -20,7 +20,7 @@ export function About() {
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          About Chris Auto Shine
+          About Chris Auto Shine Detailing
           <motion.div
             className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-1 bg-red-600 origin-center"
             initial={{ scaleX: 0 }}
@@ -38,7 +38,7 @@ export function About() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-lg text-gray-300 mb-8 leading-relaxed"
           >
-            With over 10 years of experience in the auto detailing industry, Chris Auto Shine is
+            With over 10 years of experience in the auto detailing industry, Chris Auto Shine Detailing is
             dedicated to providing top-quality car wash and detailing services. Our team of certified
             professionals uses eco-friendly products and state-of-the-art equipment to ensure your
             vehicle receives the best care possible.

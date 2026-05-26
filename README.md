@@ -1,8 +1,8 @@
-# Chris Auto Shine
+# Chris Auto Shine Detailing
 
 ## Overview
 
-Chris Auto Shine is a modern, responsive website built for a professional car detailing and maintenance service. It showcases services, packages, about information, and contact details with a clean, user-friendly interface.
+Chris Auto Shine Detailing is a modern, responsive website built for a professional car detailing and maintenance service. It showcases services, packages, about information, and contact details with a clean, user-friendly interface.
 
 This project is developed using React with Vite for fast builds and Tailwind CSS for styling. It includes interactive components like modals, navigation, and service cards.
 

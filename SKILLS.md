@@ -1,4 +1,4 @@
-# SKILLS.md — Chris Auto Shine
+# SKILLS.md — Chris Auto Shine Detailing
 
 Available Claude skills and commands for this project.
 
