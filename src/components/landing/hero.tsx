@@ -178,23 +178,6 @@ export function Hero() {
       {/* ── Content ── */}
       <div className="relative z-10 min-h-screen flex flex-col px-6 sm:px-10 md:px-11 pt-28 md:pt-32 pb-10">
 
-        {/* Brand mark */}
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <p
-            className="font-bold text-white text-sm uppercase tracking-[0.13em]"
-            style={{
-              fontFamily: "var(--font-display)",
-              textShadow: "0 2px 12px rgba(0,0,0,0.9)",
-            }}
-          >
-            Chris Auto Shine
-          </p>
-        </motion.div>
-
         {/* Main content */}
         <div className="flex-1 flex flex-col justify-center mt-8 max-w-3xl space-y-5">
 
