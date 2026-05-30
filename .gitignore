@@ -33,3 +33,6 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+#ignore SS folder for screenshots
+SS

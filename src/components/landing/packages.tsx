@@ -5,154 +5,52 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { Typewriter } from "@/components/landing/typewriter";
 import { cn } from "@/lib/utils";
+import type { Tables } from "@/types/supabase";
 
-// ─── Data ──────────────────────────────────────────────────────────────────────
-
-const VEHICLE_SIZES = ["Hatchback", "Sedan/UTE", "7 Seater"] as const;
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 type PriceTier = { label: string; price: string };
-type Package = {
+type Service = Tables<"services">;
+
+type PackageView = {
+  id: string;
   name: string;
   features: string[];
   prices: PriceTier[];
-  featured?: boolean;
-  badge?: string;
+  featured: boolean;
+  badge: string | null;
 };
 
-const exteriorPackages: Package[] = [
-  {
-    name: "Auto 1",
-    features: [
-      "Snow Foam Wash + Exterior Windows",
-      "Door Frames + Tire & Rim Shine",
-      "Regular Exterior Cleaning",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$55" },
-      { label: "Sedan/UTE", price: "$65" },
-      { label: "7 Seater", price: "$75" },
-    ],
-  },
-  {
-    name: "Deluxe",
-    features: [
-      "Foam Wash + Hand Wax",
-      "Interior Quick Vacuum & Dust Wipe",
-      "Tire & Rim Shine",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$160" },
-      { label: "Sedan/UTE", price: "$180" },
-      { label: "7 Seater", price: "$200" },
-    ],
-  },
-  {
-    name: "Super",
-    features: [
-      "Foam Wash + Single Stage Polish",
-      "Spray Wax + Tire & Rim Shine",
-      "Quick Interior Clean",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$245" },
-      { label: "Sedan/UTE", price: "$295" },
-      { label: "7 Seater", price: "$345" },
-    ],
-  },
-];
+type SimpleRow = { id: string; label: string; price: string };
 
-const interiorPackages: Package[] = [
-  {
-    name: "Plus",
-    features: [
-      "Interior Vacuum + Dust Wipe",
-      "Snow Foam Wash + Exterior Wipe",
-      "Spray Wax + Rim Shine",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$105" },
-      { label: "Sedan/UTE", price: "$125" },
-      { label: "7 Seater", price: "$145" },
-    ],
-  },
-  {
-    name: "Deluxe",
-    features: [
-      "Vacuum + Interior Panels Wipe",
-      "Foam Wash + Spray Wax",
-      "Tire & Rim Shine + 4 Door Shampoo",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$160" },
-      { label: "Sedan/UTE", price: "$180" },
-      { label: "7 Seater", price: "$200" },
-    ],
-  },
-  {
-    name: "Super",
-    features: [
-      "Interior Shampoo + Steam Clean",
-      "Leather Conditioner",
-      "Foam Wash + Spray Wax",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$245" },
-      { label: "Sedan/UTE", price: "$295" },
-      { label: "7 Seater", price: "$345" },
-    ],
-  },
-];
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-const exclusivePackages: Package[] = [
-  {
-    name: "Auto Elite",
-    badge: "Popular",
-    featured: true,
-    features: [
-      "Full Interior — Shampoo, Steam Clean, Air Blow, Vacuum, Leather Conditioner",
-      "Exterior Wash — Tires & Rims + Spray Wax + Foam Wash",
-      "Single Stage Polish — Removes light swirls for extra shine",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$395" },
-      { label: "Sedan/UTE", price: "$475" },
-      { label: "7 Seater", price: "$545" },
-    ],
-  },
-  {
-    name: "Auto Super Elite",
-    features: [
-      "Complete Interior — Shampoo, Steam Clean, Vacuum, Leather Conditioner",
-      "Deep Exterior — Tar Removal, Clay Bar & Engine Clean",
-      "2–3 Stage Polish + Spray Wax — Professional finish & protection",
-    ],
-    prices: [
-      { label: "Hatchback", price: "$999" },
-      { label: "Sedan/UTE", price: "$1,250" },
-      { label: "7 Seater", price: "$1,500" },
-    ],
-  },
-];
+function asStringArray(raw: unknown): string[] {
+  return Array.isArray(raw) ? (raw as string[]) : [];
+}
+function asTiers(raw: unknown): PriceTier[] {
+  return Array.isArray(raw) ? (raw as PriceTier[]) : [];
+}
 
-const addOns = [
-  { label: "Premium Tar & Contamination Removal", price: "$50–100" },
-  { label: "Pet Hair & Odor Elimination", price: "$50–100" },
-  { label: "Advanced Odour Neutralization", price: "$50" },
-  { label: "Precision Panel Restoration", price: "$100" },
-  { label: "Headlight Clarity Enhancement", price: "$45" },
-  { label: "Australian Red Dirt Deep Clean", price: "$100–150" },
-  { label: "Professional Ceramic Coating", price: "From $850" },
-];
+function toPackage(s: Service): PackageView {
+  return {
+    id: s.id,
+    name: s.name,
+    features: asStringArray(s.features),
+    prices: asTiers(s.pricing_tiers),
+    featured: !!s.is_featured,
+    badge: s.badge,
+  };
+}
 
-const paintCorrection = [
-  { label: "Single Stage Polish", price: "$395" },
-  { label: "Two Stage Polish", price: "$595" },
-  { label: "Three Stage Polish", price: "$750" },
-];
+function toSimpleRow(s: Service): SimpleRow {
+  const tiers = asTiers(s.pricing_tiers);
+  return { id: s.id, label: s.name, price: tiers[0]?.price ?? "" };
+}
 
-// ─── Components ───────────────────────────────────────────────────────────────
+// ─── Card ───────────────────────────────────────────────────────────────────
 
-function PackageCard({ pkg, index }: { pkg: Package; index: number }) {
+function PackageCard({ pkg, index }: { pkg: PackageView; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -179,42 +77,61 @@ function PackageCard({ pkg, index }: { pkg: Package; index: number }) {
         <h3 className="text-white font-bold text-xl">{pkg.name}</h3>
 
         <ul className="space-y-2 flex-1">
-          {pkg.features.map((f) => (
-            <li key={f} className="flex items-start gap-2.5">
+          {pkg.features.map((f, i) => (
+            <li key={i} className="flex items-start gap-2.5">
               <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <span className="text-sm text-muted-foreground leading-relaxed">{f}</span>
             </li>
           ))}
         </ul>
 
-        <div className="pt-4 border-t border-border">
-          <div className="grid grid-cols-3 gap-2">
-            {pkg.prices.map((p) => (
-              <div key={p.label} className="text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">{p.label}</p>
-                <p className={cn("font-bold", pkg.featured ? "text-primary text-lg" : "text-white text-base")}>
-                  {p.price}
-                </p>
-              </div>
-            ))}
+        {pkg.prices.length > 0 && (
+          <div className="pt-4 border-t border-border">
+            <div
+              className={cn(
+                "grid gap-2",
+                pkg.prices.length === 3 ? "grid-cols-3" : pkg.prices.length === 2 ? "grid-cols-2" : "grid-cols-1"
+              )}
+            >
+              {pkg.prices.map((p, i) => (
+                <div key={i} className="text-center">
+                  {p.label && <p className="text-[10px] text-muted-foreground mb-1">{p.label}</p>}
+                  <p className={cn("font-bold", pkg.featured ? "text-primary text-lg" : "text-white text-base")}>
+                    {p.price}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-const TABS = [
-  { key: "exterior", label: "Exterior", packages: exteriorPackages },
-  { key: "interior", label: "Interior", packages: interiorPackages },
-  { key: "exclusive", label: "Exclusive", packages: exclusivePackages },
+// ─── Tab config ─────────────────────────────────────────────────────────────
+
+const TAB_CONFIG = [
+  { key: "exterior",  label: "Exterior"  },
+  { key: "interior",  label: "Interior"  },
+  { key: "exclusive", label: "Exclusive" },
 ] as const;
 
-// ─── Export ───────────────────────────────────────────────────────────────────
+type TabKey = (typeof TAB_CONFIG)[number]["key"];
 
-export function Packages() {
-  const [tab, setTab] = useState<"exterior" | "interior" | "exclusive">("exterior");
-  const activeTab = TABS.find((t) => t.key === tab)!;
+// ─── Main component ─────────────────────────────────────────────────────────
+
+export function Packages({ services }: { services: Service[] }) {
+  const [tab, setTab] = useState<TabKey>("exterior");
+
+  const byCategory = (cat: string) =>
+    services
+      .filter((s) => s.category === cat)
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+
+  const activePackages = byCategory(tab).map(toPackage);
+  const paintCorrection = byCategory("paint-correction").map(toSimpleRow);
+  const addOns = byCategory("addons").map(toSimpleRow);
 
   return (
     <section id="packages" className="py-28 bg-background">
@@ -234,7 +151,7 @@ export function Packages() {
         {/* Tabs */}
         <div className="flex justify-center mb-10">
           <div className="flex gap-1 p-1 rounded-2xl bg-card border border-border">
-            {TABS.map((t) => (
+            {TAB_CONFIG.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
@@ -261,57 +178,64 @@ export function Packages() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
               "grid gap-5",
-              activeTab.packages.length === 2
+              activePackages.length === 2
                 ? "grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto"
                 : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             )}
           >
-            {activeTab.packages.map((pkg, i) => (
-              <PackageCard key={pkg.name} pkg={pkg} index={i} />
-            ))}
+            {activePackages.length === 0 ? (
+              <p className="col-span-full text-center text-muted-foreground py-12">
+                No packages available in this category yet.
+              </p>
+            ) : (
+              activePackages.map((pkg, i) => <PackageCard key={pkg.id} pkg={pkg} index={i} />)
+            )}
           </motion.div>
         </AnimatePresence>
 
         {/* Extras */}
-        <div className="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Paint Correction */}
-          <div>
-            <h3 className="text-white font-bold text-xl mb-6">Paint Correction</h3>
-            <div className="rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight">
-              <div className="bg-card rounded-3xl p-6 space-y-3">
-                {paintCorrection.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
-                  >
-                    <span className="text-sm text-white">{item.label}</span>
-                    <span className="text-sm font-bold text-primary">{item.price}</span>
+        {(paintCorrection.length > 0 || addOns.length > 0) && (
+          <div className="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {paintCorrection.length > 0 && (
+              <div>
+                <h3 className="text-white font-bold text-xl mb-6">Paint Correction</h3>
+                <div className="rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight">
+                  <div className="bg-card rounded-3xl p-6 space-y-3">
+                    {paintCorrection.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                      >
+                        <span className="text-sm text-white">{item.label}</span>
+                        <span className="text-sm font-bold text-primary">{item.price}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* Add-ons */}
-          <div>
-            <h3 className="text-white font-bold text-xl mb-6">Add-ons</h3>
-            <div className="rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight">
-              <div className="bg-card rounded-3xl p-6 space-y-3">
-                {addOns.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
-                  >
-                    <span className="text-sm text-white">{item.label}</span>
-                    <span className="text-sm font-bold text-primary">{item.price}</span>
+            {addOns.length > 0 && (
+              <div>
+                <h3 className="text-white font-bold text-xl mb-6">Add-ons</h3>
+                <div className="rounded-3xl p-px bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent inner-highlight">
+                  <div className="bg-card rounded-3xl p-6 space-y-3">
+                    {addOns.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                      >
+                        <span className="text-sm text-white">{item.label}</span>
+                        <span className="text-sm font-bold text-primary">{item.price}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* CTA */}
         <p className="text-center text-sm text-muted-foreground mt-12">
           Not sure which package is right for you?{" "}
           <a href="#contact" className="text-primary hover:underline font-medium">
