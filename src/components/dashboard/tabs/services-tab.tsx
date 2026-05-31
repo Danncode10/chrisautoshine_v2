@@ -97,11 +97,14 @@ function EditPackageModal({ service, onSave, onClose }: {
   const [newPrice, setNewPrice]   = useState("");
 
   const handleSave = () => {
+    // Auto-commit any in-progress inputs so the user doesn't have to click ✓ first
+    const finalFeatures = newFeature.trim() ? [...features, newFeature.trim()] : features;
+    const finalTiers    = newPrice.trim()   ? [...tiers, { label: newLabel.trim(), price: newPrice.trim() }] : tiers;
     onSave({
       name: name.trim() || service.name,
       badge: badge.trim() || null,
-      features: features as unknown as Service["features"],
-      pricing_tiers: tiers as unknown as Service["pricing_tiers"],
+      features: finalFeatures as unknown as Service["features"],
+      pricing_tiers: finalTiers as unknown as Service["pricing_tiers"],
       is_published: isPublished,
       is_featured: isPopular,
     });
@@ -526,6 +529,7 @@ export function ServicesTab() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["services"] });
       qc.invalidateQueries({ queryKey: ["recent-activity"] });
+      toast.success("Saved");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Save failed"),
   });
@@ -565,7 +569,6 @@ export function ServicesTab() {
 
   const save = (id: string, updates: Record<string, unknown>) => {
     updateMut.mutate({ id, updates });
-    toast.success("Saved");
   };
 
   const byGroup = (cat: string) =>
