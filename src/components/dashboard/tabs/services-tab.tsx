@@ -532,17 +532,15 @@ export function ServicesTab() {
 
   const createMut = useMutation({
     mutationFn: async (input: { name: string; category: string; features?: string[]; pricing_tiers?: PriceTier[]; display_order?: number }) => {
-      const client = (await import("@/utils/supabase/client")).createClient();
-      const { data: org } = await client.from("organizations").select("id")
-        .eq("app_id", process.env.NEXT_PUBLIC_APP_ID ?? "chris-auto-shine").single();
-      if (!org) throw new Error("Org not found");
+      const orgId = ((allServices ?? []) as Service[])[0]?.organization_id;
+      if (!orgId) throw new Error("No existing services to derive organization — add at least one service first.");
       return createService({
         name: input.name,
         slug: `${input.category}-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
         category: input.category,
         features: (input.features ?? []) as unknown as never,
         pricing_tiers: (input.pricing_tiers ?? []) as unknown as never,
-        organization_id: org.id,
+        organization_id: orgId,
         is_published: true,
         is_featured: false,
         display_order: input.display_order ?? 99,
