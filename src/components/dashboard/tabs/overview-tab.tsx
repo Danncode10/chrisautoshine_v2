@@ -6,11 +6,11 @@ import {
   TrendingUp, TrendingDown, Minus,
   Calendar, DollarSign, BarChart2,
   AlertCircle, CheckCircle2, ChevronRight,
-  Clock, Car, Wrench, Users,
+  Clock, Car, Wrench, Users, Plus,
 } from "lucide-react";
 import {
   getKpis, getAttentionItems, getTodayJobs,
-  getFunnelData, getTrendData,
+  getTrendData,
   type TrendMetric,
 } from "@/services/overview";
 import { getRecentActivity } from "@/services/dashboard-stats";
@@ -225,65 +225,6 @@ function TodayJobsList({
   );
 }
 
-// ─── Funnel ───────────────────────────────────────────────────────────────────
-
-function FunnelPanel({ data }: { data: Awaited<ReturnType<typeof getFunnelData>> }) {
-  const stages = [
-    { label: "Leads in",    value: data.leadsTotal,     color: "bg-amber-500" },
-    { label: "Contacted",   value: data.leadsContacted,  color: "bg-orange-500" },
-    { label: "Booked",      value: data.booked,          color: "bg-blue-500" },
-    { label: "Completed",   value: data.completed,       color: "bg-emerald-500" },
-  ];
-  const max = Math.max(data.leadsTotal, 1);
-
-  return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      <div className="px-5 py-4 border-b border-border">
-        <h3 className="text-[13px] font-semibold text-foreground">30-Day Pipeline</h3>
-        <p className="text-[11px] text-muted-foreground mt-0.5">Lead → Job conversion funnel</p>
-      </div>
-      <div className="px-5 py-5 space-y-4">
-        {stages.map((stage, i) => {
-          const pct = Math.round((stage.value / max) * 100);
-          const convPct = i > 0 && stages[i - 1].value > 0
-            ? Math.round((stage.value / stages[i - 1].value) * 100)
-            : null;
-          return (
-            <div key={stage.label}>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-2">
-                  <span className={cn("w-2 h-2 rounded-full shrink-0", stage.color)} />
-                  <span className="text-[12px] text-muted-foreground">{stage.label}</span>
-                  {convPct !== null && (
-                    <span className="text-[10px] text-muted-foreground/50">({convPct}% of prev)</span>
-                  )}
-                </div>
-                <span className="text-[13px] font-bold text-foreground tabular-nums">{stage.value}</span>
-              </div>
-              <div className="h-2 bg-muted/40 rounded-full overflow-hidden">
-                <div
-                  className={cn("h-full rounded-full transition-all", stage.color, "opacity-70")}
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-
-        <div className="pt-2 border-t border-border">
-          <p className="text-[11px] text-muted-foreground">
-            Overall conversion:{" "}
-            <span className="font-bold text-foreground">
-              {data.leadsTotal > 0 ? Math.round((data.completed / data.leadsTotal) * 100) : 0}%
-            </span>{" "}
-            lead → completed job
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Trend chart (CSS bars) ───────────────────────────────────────────────────
 
 const METRIC_CONFIG: Record<TrendMetric, { label: string; color: string; prefix: string }> = {
@@ -481,7 +422,6 @@ export function OverviewTab({ displayName, setTab }: OverviewTabProps) {
   const kpisQ      = useQuery({ queryKey: ["overview-kpis"],      queryFn: getKpis,            staleTime: 60_000 });
   const attentionQ = useQuery({ queryKey: ["overview-attention"],  queryFn: getAttentionItems,  staleTime: 30_000 });
   const todayQ     = useQuery({ queryKey: ["overview-today"],      queryFn: getTodayJobs,       staleTime: 30_000 });
-  const funnelQ    = useQuery({ queryKey: ["overview-funnel"],     queryFn: getFunnelData,      staleTime: 60_000 });
   const trendQ     = useQuery({ queryKey: ["overview-trend"],      queryFn: () => getTrendData(30), staleTime: 60_000 });
   const activityQ  = useQuery({ queryKey: ["recent-activity"],     queryFn: () => getRecentActivity(6), staleTime: 30_000 });
 
@@ -491,9 +431,17 @@ export function OverviewTab({ displayName, setTab }: OverviewTabProps) {
     <div className="space-y-7">
 
       {/* ── Header ── */}
-      <div>
-        <h2 className="text-2xl font-semibold text-foreground tracking-tight">Good day, {displayName}.</h2>
-        <p className="text-[13px] text-muted-foreground mt-1">{today}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-foreground tracking-tight">Good day, {displayName}.</h2>
+          <p className="text-[13px] text-muted-foreground mt-1">{today}</p>
+        </div>
+        <button
+          onClick={() => setTab("sales")}
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors shrink-0">
+          <Plus className="w-4 h-4" />
+          Record Sale
+        </button>
       </div>
 
       {/* ── Zone 1: KPI Cards ── */}
@@ -527,15 +475,10 @@ export function OverviewTab({ displayName, setTab }: OverviewTabProps) {
         <AttentionStrip items={attentionQ.data} setTab={setTab} />
       )}
 
-      {/* ── Zone 3: Today's Jobs + Funnel ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {todayQ.isLoading
-          ? <Skeleton className="h-64 rounded-2xl" />
-          : <TodayJobsList jobs={todayQ.data ?? []} setTab={setTab} />}
-        {funnelQ.isLoading
-          ? <Skeleton className="h-64 rounded-2xl" />
-          : funnelQ.data && <FunnelPanel data={funnelQ.data} />}
-      </div>
+      {/* ── Zone 3: Today's Jobs ── */}
+      {todayQ.isLoading
+        ? <Skeleton className="h-64 rounded-2xl" />
+        : <TodayJobsList jobs={todayQ.data ?? []} setTab={setTab} />}
 
       {/* ── Zone 4: Trend chart ── */}
       {trendQ.isLoading
