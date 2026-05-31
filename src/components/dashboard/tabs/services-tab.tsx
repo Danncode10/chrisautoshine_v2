@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Trash2, Loader2, Eye, EyeOff, Sparkles, X, Pencil } from "lucide-react";
+import { Check, Plus, Trash2, Loader2, Sparkles, X, Pencil, Star } from "lucide-react";
 import { listServices, updateService, createService, deleteService } from "@/services/services";
 import type { Tables } from "@/types/supabase";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ const MAIN_GROUPS = [
 
 type MainGroup = (typeof MAIN_GROUPS)[number]["key"];
 
-// ─── Inline text editor ───────────────────────────────────────────────────────
+// ─── Inline text editor (used only in SimpleRow) ──────────────────────────────
 
 function InlineText({
   value, onSave, className, placeholder, multiline,
@@ -79,7 +79,236 @@ function InlineText({
   );
 }
 
-// ─── Package card (matches landing page style) ────────────────────────────────
+// ─── Edit Package Modal ───────────────────────────────────────────────────────
+
+function EditPackageModal({ service, onSave, onClose }: {
+  service: Service;
+  onSave: (updates: Partial<Service & { features: string[]; pricing_tiers: PriceTier[] }>) => void;
+  onClose: () => void;
+}) {
+  const [name, setName]           = useState(service.name);
+  const [badge, setBadge]         = useState(service.badge ?? "");
+  const [features, setFeatures]   = useState(asFeatures(service.features));
+  const [tiers, setTiers]         = useState(asTiers(service.pricing_tiers));
+  const [isPublished, setIsPublished] = useState(service.is_published ?? true);
+  const [isPopular, setIsPopular] = useState(service.is_featured ?? false);
+  const [newFeature, setNewFeature] = useState("");
+  const [newLabel, setNewLabel]   = useState("");
+  const [newPrice, setNewPrice]   = useState("");
+
+  const handleSave = () => {
+    onSave({
+      name: name.trim() || service.name,
+      badge: badge.trim() || null,
+      features: features as unknown as Service["features"],
+      pricing_tiers: tiers as unknown as Service["pricing_tiers"],
+      is_published: isPublished,
+      is_featured: isPopular,
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <h3 className="text-base font-semibold text-foreground">Edit Package</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-5">
+
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">Package Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
+              placeholder="Package name"
+            />
+          </div>
+
+          {/* Badge */}
+          <div className="space-y-1.5">
+            <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">Badge Text</label>
+            <input
+              value={badge}
+              onChange={(e) => setBadge(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50"
+              placeholder="e.g. Popular, New, Best Value"
+            />
+          </div>
+
+          {/* Toggles: Popular + Published */}
+          <div className="space-y-3">
+            <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">Settings</label>
+
+            {/* Popular */}
+            <button
+              type="button"
+              onClick={() => setIsPopular(!isPopular)}
+              className={cn(
+                "w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors",
+                isPopular
+                  ? "border-primary/40 bg-primary/10 text-foreground"
+                  : "border-border bg-background text-muted-foreground"
+              )}>
+              <div className="flex items-center gap-2.5">
+                <Star className={cn("w-4 h-4", isPopular ? "text-primary fill-primary" : "text-muted-foreground")} />
+                <div className="text-left">
+                  <p className="text-sm font-medium">Popular</p>
+                  <p className="text-[11px] opacity-60">Highlights this card with a featured border</p>
+                </div>
+              </div>
+              <div className={cn(
+                "w-10 h-5 rounded-full relative transition-colors shrink-0",
+                isPopular ? "bg-primary" : "bg-muted"
+              )}>
+                <div className={cn(
+                  "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all",
+                  isPopular ? "left-5" : "left-0.5"
+                )} />
+              </div>
+            </button>
+
+            {/* Published */}
+            <button
+              type="button"
+              onClick={() => setIsPublished(!isPublished)}
+              className={cn(
+                "w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors",
+                isPublished
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-foreground"
+                  : "border-border bg-background text-muted-foreground"
+              )}>
+              <div className="flex items-center gap-2.5">
+                <div className={cn("w-2 h-2 rounded-full shrink-0", isPublished ? "bg-emerald-400" : "bg-muted-foreground/50")} />
+                <div className="text-left">
+                  <p className="text-sm font-medium">Published</p>
+                  <p className="text-[11px] opacity-60">Visible on the public website</p>
+                </div>
+              </div>
+              <div className={cn(
+                "w-10 h-5 rounded-full relative transition-colors shrink-0",
+                isPublished ? "bg-emerald-500" : "bg-muted"
+              )}>
+                <div className={cn(
+                  "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all",
+                  isPublished ? "left-5" : "left-0.5"
+                )} />
+              </div>
+            </button>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-2">
+            <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">Features</label>
+            <div className="space-y-1.5">
+              {features.map((f, i) => (
+                <div key={i} className="flex items-center gap-2 group">
+                  <Check className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <input
+                    value={f}
+                    onChange={(e) => setFeatures(features.map((x, j) => j === i ? e.target.value : x))}
+                    className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                  />
+                  <button onClick={() => setFeatures(features.filter((_, j) => j !== i))}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <Plus className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <input
+                  value={newFeature}
+                  onChange={(e) => setNewFeature(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newFeature.trim()) { setFeatures([...features, newFeature.trim()]); setNewFeature(""); }
+                  }}
+                  placeholder="Add feature…"
+                  className="flex-1 bg-background border border-dashed border-border rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground focus:outline-none focus:border-primary/50 focus:text-foreground"
+                />
+                {newFeature.trim() && (
+                  <button onClick={() => { setFeatures([...features, newFeature.trim()]); setNewFeature(""); }}
+                    className="p-1 text-emerald-400 shrink-0"><Check className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Tiers */}
+          <div className="space-y-2">
+            <label className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">Pricing Tiers</label>
+            <div className="space-y-1.5">
+              {tiers.map((t, i) => (
+                <div key={i} className="flex items-center gap-2 group">
+                  <input
+                    value={t.label}
+                    onChange={(e) => setTiers(tiers.map((x, j) => j === i ? { ...x, label: e.target.value } : x))}
+                    placeholder="Label (e.g. SUV)"
+                    className="flex-1 bg-background border border-border rounded-lg px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                  />
+                  <input
+                    value={t.price}
+                    onChange={(e) => setTiers(tiers.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
+                    placeholder="$0"
+                    className="w-24 bg-background border border-border rounded-lg px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary/50"
+                  />
+                  <button onClick={() => setTiers(tiers.filter((_, j) => j !== i))}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Label (e.g. Sedan)"
+                  className="flex-1 bg-background border border-dashed border-border rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground focus:outline-none focus:border-primary/50 focus:text-foreground"
+                />
+                <input
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newPrice.trim()) { setTiers([...tiers, { label: newLabel, price: newPrice }]); setNewLabel(""); setNewPrice(""); }
+                  }}
+                  placeholder="$0"
+                  className="w-24 bg-background border border-dashed border-border rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground focus:outline-none focus:border-primary/50 focus:text-foreground"
+                />
+                {newPrice.trim() && (
+                  <button onClick={() => { setTiers([...tiers, { label: newLabel, price: newPrice }]); setNewLabel(""); setNewPrice(""); }}
+                    className="p-1 text-emerald-400 shrink-0"><Check className="w-3.5 h-3.5" /></button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 p-5 border-t border-border">
+          <button onClick={onClose}
+            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Cancel
+          </button>
+          <button onClick={handleSave}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Package card ─────────────────────────────────────────────────────────────
 
 function PackageCard({ service, onUpdate, onDelete }: {
   service: Service;
@@ -88,154 +317,105 @@ function PackageCard({ service, onUpdate, onDelete }: {
 }) {
   const features = asFeatures(service.features);
   const tiers    = asTiers(service.pricing_tiers);
-
-  const [addingFeature, setAddingFeature] = useState(false);
-  const [newFeature, setNewFeature]       = useState("");
-  const [addingTier, setAddingTier]       = useState(false);
-  const [newLabel, setNewLabel]           = useState("");
-  const [newPrice, setNewPrice]           = useState("");
-
-  const setFeatures = (f: string[]) => onUpdate({ features: f });
-  const setTiers    = (t: PriceTier[]) => onUpdate({ pricing_tiers: t });
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
-    <div className={cn(
-      "relative rounded-3xl p-px overflow-hidden flex flex-col",
-      service.is_featured
-        ? "bg-gradient-to-br from-primary/60 via-primary/20 to-transparent"
-        : "bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent",
-    )}>
-      {/* Badge */}
-      {service.badge && (
-        <div className="absolute top-4 right-14 z-10">
-          <span className="px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold flex items-center gap-1">
-            <Sparkles className="w-3 h-3" />
-            <InlineText value={service.badge} onSave={(v) => onUpdate({ badge: v || null })}
-              className="text-white text-xs font-semibold" />
-          </span>
-        </div>
-      )}
+    <>
+      <div className={cn(
+        "rounded-3xl p-px flex flex-col",
+        service.is_featured
+          ? "bg-gradient-to-br from-primary via-primary/40 to-primary/10"
+          : "bg-gradient-to-br from-white/10 via-white/[0.04] to-transparent",
+      )}>
+        {/* Card body */}
+        <div className={cn(
+          "rounded-3xl p-6 flex flex-col gap-5 h-full",
+          service.is_featured ? "bg-card/95" : "bg-card",
+        )}>
 
-      {/* Controls top-right */}
-      <div className="absolute top-3 right-3 z-10 flex gap-1">
-        <button title={service.is_published ? "Published" : "Hidden"}
-          onClick={() => onUpdate({ is_published: !service.is_published })}
-          className={cn("p-1.5 rounded-lg transition-colors",
-            service.is_published ? "text-emerald-400 bg-emerald-500/10" : "text-muted-foreground bg-muted"
-          )}>
-          {service.is_published ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-        </button>
-        <button title={service.is_featured ? "Featured" : "Set featured"}
-          onClick={() => onUpdate({ is_featured: !service.is_featured })}
-          className={cn("p-1.5 rounded-lg transition-colors",
-            service.is_featured ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted"
-          )}>
-          <Sparkles className="w-3.5 h-3.5" />
-        </button>
-        <button title="Delete"
-          onClick={() => confirm(`Delete "${service.name}"?`) && onDelete()}
-          className="p-1.5 rounded-lg text-muted-foreground bg-muted hover:text-destructive hover:bg-destructive/10 transition-colors">
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
+          {/* Top bar: badge + controls */}
+          <div className="flex items-center justify-between gap-2">
+            {/* Badge / Popular / Hidden */}
+            <div className="flex items-center gap-2 min-w-0">
+              {service.is_featured ? (
+                <span className="px-2.5 py-1 rounded-full bg-primary text-white text-[11px] font-semibold flex items-center gap-1 shrink-0">
+                  <Star className="w-3 h-3 fill-white" />
+                  Popular
+                </span>
+              ) : service.badge ? (
+                <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-semibold flex items-center gap-1 shrink-0">
+                  <Sparkles className="w-3 h-3" />
+                  {service.badge}
+                </span>
+              ) : null}
+              {!service.is_published && (
+                <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-medium shrink-0">
+                  Hidden
+                </span>
+              )}
+            </div>
 
-      {/* Card body */}
-      <div className="bg-card rounded-3xl p-6 flex flex-col gap-5 h-full">
-
-        {/* Name */}
-        <InlineText value={service.name} onSave={(v) => onUpdate({ name: v })}
-          className="text-white font-bold text-xl" placeholder="Package name" />
-
-        {/* Badge toggle (if no badge yet) */}
-        {!service.badge && (
-          <button onClick={() => onUpdate({ badge: "Popular" })}
-            className="self-start text-[10px] text-muted-foreground border border-dashed border-border rounded-full px-2 py-0.5 hover:border-primary/40 hover:text-primary transition-colors">
-            + badge
-          </button>
-        )}
-
-        {/* Features list */}
-        <ul className="space-y-2 flex-1">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2 group">
-              <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <InlineText value={f} onSave={(v) => setFeatures(features.map((x, j) => j === i ? v : x))}
-                className="text-sm text-muted-foreground leading-relaxed flex-1" />
-              <button onClick={() => setFeatures(features.filter((_, j) => j !== i))}
-                className="opacity-0 group-hover:opacity-100 shrink-0 text-muted-foreground hover:text-destructive transition-all">
-                <X className="w-3 h-3" />
+            {/* Controls */}
+            <div className="flex gap-1 shrink-0">
+              <button
+                title="Edit package"
+                onClick={() => setEditOpen(true)}
+                className="p-1.5 rounded-lg text-muted-foreground bg-muted hover:text-foreground hover:bg-muted/80 transition-colors">
+                <Pencil className="w-3.5 h-3.5" />
               </button>
-            </li>
-          ))}
-
-          {addingFeature ? (
-            <li className="flex items-center gap-1.5 pl-6">
-              <input autoFocus value={newFeature} onChange={(e) => setNewFeature(e.target.value)}
-                placeholder="Feature text…"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newFeature.trim()) { setFeatures([...features, newFeature.trim()]); setNewFeature(""); setAddingFeature(false); }
-                  if (e.key === "Escape") setAddingFeature(false);
-                }}
-                className="flex-1 bg-background border border-primary/40 rounded px-2 py-1 text-sm focus:outline-none" />
-              <button onClick={() => { if (newFeature.trim()) { setFeatures([...features, newFeature.trim()]); setNewFeature(""); } setAddingFeature(false); }}
-                className="text-emerald-400"><Check className="w-3.5 h-3.5" /></button>
-              <button onClick={() => setAddingFeature(false)} className="text-muted-foreground"><X className="w-3.5 h-3.5" /></button>
-            </li>
-          ) : (
-            <li>
-              <button onClick={() => setAddingFeature(true)}
-                className="flex items-center gap-1.5 pl-6 text-[12px] text-muted-foreground hover:text-primary transition-colors">
-                <Plus className="w-3 h-3" /> Add feature
+              <button
+                title="Delete"
+                onClick={() => confirm(`Delete "${service.name}"?`) && onDelete()}
+                className="p-1.5 rounded-lg text-muted-foreground bg-muted hover:text-destructive hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
-            </li>
-          )}
-        </ul>
-
-        {/* Pricing tiers */}
-        <div className="pt-4 border-t border-border">
-          <div className={cn("grid gap-2", tiers.length === 3 ? "grid-cols-3" : tiers.length === 2 ? "grid-cols-2" : "grid-cols-1")}>
-            {tiers.map((t, i) => (
-              <div key={i} className="text-center relative group/tier">
-                <button onClick={() => setTiers(tiers.filter((_, j) => j !== i))}
-                  className="absolute -top-1 -right-1 opacity-0 group-hover/tier:opacity-100 w-4 h-4 bg-destructive rounded-full flex items-center justify-center transition-opacity z-10">
-                  <X className="w-2.5 h-2.5 text-white" />
-                </button>
-                <InlineText value={t.label}
-                  onSave={(v) => setTiers(tiers.map((x, j) => j === i ? { ...x, label: v } : x))}
-                  className="text-[10px] text-muted-foreground block w-full justify-center mb-1"
-                  placeholder="Label" />
-                <InlineText value={t.price}
-                  onSave={(v) => setTiers(tiers.map((x, j) => j === i ? { ...x, price: v } : x))}
-                  className={cn("font-bold block w-full justify-center",
-                    service.is_featured ? "text-primary text-lg" : "text-white text-base")}
-                  placeholder="$0" />
-              </div>
-            ))}
+            </div>
           </div>
 
-          {addingTier ? (
-            <div className="mt-3 flex gap-2 items-center">
-              <input autoFocus value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Label (e.g. SUV)" className="flex-1 bg-background border border-primary/40 rounded px-2 py-1 text-[11px] focus:outline-none" />
-              <input value={newPrice} onChange={(e) => setNewPrice(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && newPrice.trim()) { setTiers([...tiers, { label: newLabel, price: newPrice }]); setNewLabel(""); setNewPrice(""); setAddingTier(false); }
-                  if (e.key === "Escape") setAddingTier(false);
-                }}
-                placeholder="$0" className="w-20 bg-background border border-primary/40 rounded px-2 py-1 text-[11px] focus:outline-none" />
-              <button onClick={() => { if (newPrice.trim()) { setTiers([...tiers, { label: newLabel, price: newPrice }]); setNewLabel(""); setNewPrice(""); } setAddingTier(false); }}
-                className="text-emerald-400"><Check className="w-3.5 h-3.5" /></button>
-              <button onClick={() => setAddingTier(false)} className="text-muted-foreground"><X className="w-3.5 h-3.5" /></button>
+          {/* Name */}
+          <p className={cn("font-bold text-xl leading-tight", service.is_featured ? "text-primary" : "text-white")}>
+            {service.name}
+          </p>
+
+          {/* Features list */}
+          <ul className="space-y-2 flex-1">
+            {features.map((f, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <span className="text-sm text-muted-foreground leading-relaxed">{f}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Pricing tiers */}
+          {tiers.length > 0 && (
+            <div className="pt-4 border-t border-border">
+              <div className={cn(
+                "grid gap-2",
+                tiers.length === 3 ? "grid-cols-3" : tiers.length === 2 ? "grid-cols-2" : "grid-cols-1"
+              )}>
+                {tiers.map((t, i) => (
+                  <div key={i} className="text-center">
+                    <p className="text-[10px] text-muted-foreground mb-1">{t.label}</p>
+                    <p className={cn("font-bold", service.is_featured ? "text-primary text-lg" : "text-white text-base")}>
+                      {t.price}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          ) : (
-            <button onClick={() => setAddingTier(true)}
-              className="mt-3 w-full text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1">
-              <Plus className="w-3 h-3" /> Add price tier
-            </button>
           )}
         </div>
       </div>
-    </div>
+
+      {editOpen && (
+        <EditPackageModal
+          service={service}
+          onSave={(u) => onUpdate(u)}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -270,13 +450,13 @@ function SimpleRow({ service, onUpdate, onDelete }: {
 
 // ─── Add package / Add row forms ──────────────────────────────────────────────
 
-function AddPackageCard({ groupKey, onAdd }: { groupKey: string; onAdd: (name: string) => void }) {
+function AddPackageCard({ onAdd }: { onAdd: (name: string) => void }) {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
       <button onClick={() => setOpen(true)}
-        className="rounded-3xl border-2 border-dashed border-border hover:border-primary/30 min-h-[200px] flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+        className="rounded-3xl border-2 border-dashed border-border hover:border-primary/30 min-h-[200px] flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors w-full">
         <Plus className="w-6 h-6" />
         <span className="text-[13px]">Add package</span>
       </button>
@@ -316,16 +496,16 @@ function AddRowButton({ onAdd, placeholder }: { onAdd: (name: string, price: str
   return (
     <div className="flex items-center gap-2 mt-3">
       <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={placeholder}
-        className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary/50" />
+        className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary/50 min-w-0" />
       <input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="$0"
         onKeyDown={(e) => {
           if (e.key === "Enter" && name.trim()) { onAdd(name.trim(), price.trim()); setName(""); setPrice(""); setOpen(false); }
           if (e.key === "Escape") setOpen(false);
         }}
-        className="w-24 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary/50" />
+        className="w-20 bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-primary/50 shrink-0" />
       <button onClick={() => { if (name.trim()) { onAdd(name.trim(), price.trim()); setName(""); setPrice(""); } setOpen(false); }}
-        className="text-emerald-400"><Check className="w-4 h-4" /></button>
-      <button onClick={() => setOpen(false)} className="text-muted-foreground"><X className="w-4 h-4" /></button>
+        className="text-emerald-400 shrink-0"><Check className="w-4 h-4" /></button>
+      <button onClick={() => setOpen(false)} className="text-muted-foreground shrink-0"><X className="w-4 h-4" /></button>
     </div>
   );
 }
@@ -364,6 +544,7 @@ export function ServicesTab() {
         pricing_tiers: (input.pricing_tiers ?? []) as unknown as never,
         organization_id: org.id,
         is_published: true,
+        is_featured: false,
         display_order: input.display_order ?? 99,
       });
     },
@@ -384,16 +565,19 @@ export function ServicesTab() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Delete failed"),
   });
 
-  const save = (id: string, updates: Record<string, unknown>) => updateMut.mutate({ id, updates });
+  const save = (id: string, updates: Record<string, unknown>) => {
+    updateMut.mutate({ id, updates });
+    toast.success("Saved");
+  };
 
   const byGroup = (cat: string) =>
     ((allServices ?? []) as Service[])
       .filter(s => s.category === cat)
       .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
-  const mainServices = byGroup(activeGroup);
-  const paintServices = byGroup("paint-correction");
-  const addonServices = byGroup("addons");
+  const mainServices   = byGroup(activeGroup);
+  const paintServices  = byGroup("paint-correction");
+  const addonServices  = byGroup("addons");
 
   return (
     <div className="space-y-8">
@@ -402,32 +586,34 @@ export function ServicesTab() {
       <div>
         <h2 className="text-2xl font-semibold text-foreground tracking-tight">Services & Packages</h2>
         <p className="mt-1 text-[14px] text-muted-foreground">
-          Click any name, feature, or price to edit inline. Changes save instantly.
+          Click the <Pencil className="inline w-3 h-3 mb-0.5" /> icon on any card to edit it.
         </p>
       </div>
 
       {/* ── Main packages (Exterior / Interior / Exclusive) ── */}
       <div className="space-y-5">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-muted/60 rounded-2xl p-1 w-fit border border-border">
-          {MAIN_GROUPS.map(({ key, label }) => {
-            const count = byGroup(key).length;
-            return (
-              <button key={key} onClick={() => setActiveGroup(key)}
-                className={cn(
-                  "px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200",
-                  activeGroup === key
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-muted-foreground hover:text-white"
-                )}>
-                {label}
-                <span className={cn(
-                  "ml-1.5 text-[10px] font-bold",
-                  activeGroup === key ? "opacity-80" : "opacity-50"
-                )}>({count})</span>
-              </button>
-            );
-          })}
+        {/* Tabs — scrollable on small screens */}
+        <div className="flex overflow-x-auto pb-1 -mb-1">
+          <div className="flex gap-1 bg-muted/60 rounded-2xl p-1 border border-border shrink-0">
+            {MAIN_GROUPS.map(({ key, label }) => {
+              const count = byGroup(key).length;
+              return (
+                <button key={key} onClick={() => setActiveGroup(key)}
+                  className={cn(
+                    "px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap",
+                    activeGroup === key
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-muted-foreground hover:text-white"
+                  )}>
+                  {label}
+                  <span className={cn(
+                    "ml-1.5 text-[10px] font-bold",
+                    activeGroup === key ? "opacity-80" : "opacity-50"
+                  )}>({count})</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Cards grid */}
@@ -437,7 +623,7 @@ export function ServicesTab() {
           <div className={cn(
             "grid gap-5",
             mainServices.length <= 2
-              ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
+              ? "grid-cols-1 sm:grid-cols-2"
               : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           )}>
             {mainServices.map(s => (
@@ -445,8 +631,7 @@ export function ServicesTab() {
                 onUpdate={(u) => save(s.id, u as Record<string, unknown>)}
                 onDelete={() => deleteMut.mutate(s.id)} />
             ))}
-            <AddPackageCard groupKey={activeGroup}
-              onAdd={(name) => createMut.mutate({ name, category: activeGroup })} />
+            <AddPackageCard onAdd={(name) => createMut.mutate({ name, category: activeGroup })} />
           </div>
         )}
       </div>
