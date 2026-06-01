@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import {
   Plus, Search, X, Check, Loader2, Trash2,
   DollarSign, ShoppingBag, TrendingUp, Star,
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  Car,
+  ChevronDown, Pencil,
 } from "lucide-react";
 import {
   getSalesStats, getServicePopularity, listSales, createSale, deleteSale,
@@ -125,18 +125,255 @@ function PopularServices({ data }: { data: Awaited<ReturnType<typeof getServiceP
   );
 }
 
+// ─── Service Picker ───────────────────────────────────────────────────────────
+
+type SelectedItem = {
+  key: string;
+  service_id: string;
+  service_name: string;
+  vehicle_type: string;
+  price: number;
+};
+
+const PICKER_GROUPS = [
+  { key: "exterior",         label: "Exterior"  },
+  { key: "interior",         label: "Interior"  },
+  { key: "exclusive",        label: "Exclusive" },
+  { key: "paint-correction", label: "Paint"     },
+  { key: "addons",           label: "Add-ons"   },
+] as const;
+
+function ServicePickerContent({
+  initialSelected,
+  onDone,
+}: {
+  initialSelected: SelectedItem[];
+  onDone: (items: SelectedItem[]) => void;
+}) {
+  const { data: services, isLoading } = useQuery({ queryKey: ["services"], queryFn: listServices });
+  const [activeGroup, setActiveGroup] = useState<string>("exterior");
+  const [expandedId, setExpandedId]   = useState<string | null>(null);
+  const [selected, setSelected]       = useState<SelectedItem[]>(initialSelected);
+
+  const byGroup = (cat: string) =>
+    (services ?? [])
+      .filter(s => s.category === cat)
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+
+  const makeKey  = (svcId: string, vt: string) => `${svcId}::${vt}`;
+  const isSel    = (svcId: string, vt: string) => selected.some(s => s.key === makeKey(svcId, vt));
+
+  const toggle = (item: Omit<SelectedItem, "key">) => {
+    const key = makeKey(item.service_id, item.vehicle_type);
+    setSelected(prev =>
+      prev.some(s => s.key === key)
+        ? prev.filter(s => s.key !== key)
+        : [...prev, { ...item, key }]
+    );
+  };
+
+  const total = selected.reduce((s, i) => s + i.price, 0);
+
+  return (
+    <>
+      {/* Category tabs — horizontally scrollable */}
+      <div className="shrink-0 border-b border-border overflow-x-auto">
+        <div className="flex gap-1.5 px-4 py-2.5" style={{ minWidth: "max-content" }}>
+          {PICKER_GROUPS.map(g => {
+            const count = byGroup(g.key).length;
+            if (!count) return null;
+            const selCount = selected.filter(s =>
+              (services ?? []).some(svc => svc.id === s.service_id && svc.category === g.key)
+            ).length;
+            return (
+              <button key={g.key} type="button"
+                onClick={() => { setActiveGroup(g.key); setExpandedId(null); }}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[12px] font-semibold whitespace-nowrap transition-colors",
+                  activeGroup === g.key ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                )}>
+                {g.label}
+                {selCount > 0 ? (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] font-bold leading-none">
+                    {selCount}
+                  </span>
+                ) : (
+                  <span className="text-[10px] opacity-50">({count})</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Service cards */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-14">
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : byGroup(activeGroup).length === 0 ? (
+          <p className="text-[13px] text-muted-foreground text-center py-10">No services here.</p>
+        ) : (
+          byGroup(activeGroup).map(svc => {
+            const tiers      = Array.isArray(svc.pricing_tiers) ? (svc.pricing_tiers as PriceTier[]) : [];
+            const features   = Array.isArray(svc.features)      ? (svc.features as string[])         : [];
+            const isExpanded = expandedId === svc.id;
+            const multiTier  = tiers.length > 1;
+            const oneTier    = tiers.length === 1 ? tiers[0] : null;
+            const anyTierSel = multiTier
+              ? tiers.some(t => isSel(svc.id, t.label))
+              : oneTier ? isSel(svc.id, oneTier.label) : false;
+
+            return (
+              <div key={svc.id} className={cn(
+                "rounded-2xl border overflow-hidden transition-all",
+                anyTierSel
+                  ? "border-emerald-500/50 bg-emerald-500/5"
+                  : svc.is_featured
+                  ? "border-primary/30 bg-primary/5"
+                  : "border-border bg-card"
+              )}>
+                {/* Card row */}
+                <button type="button"
+                  onClick={() => {
+                    if (multiTier) {
+                      setExpandedId(isExpanded ? null : svc.id);
+                    } else {
+                      toggle({
+                        service_id:   svc.id,
+                        service_name: svc.name,
+                        vehicle_type: oneTier?.label ?? "",
+                        price:        oneTier ? parseTierPrice(oneTier.price) : 0,
+                      });
+                    }
+                  }}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left">
+                  <div className="flex-1 min-w-0">
+                    <p className={cn(
+                      "text-[14px] font-semibold leading-snug",
+                      anyTierSel ? "text-emerald-400" : svc.is_featured ? "text-primary" : "text-foreground"
+                    )}>
+                      {svc.name}
+                      {svc.is_featured && !anyTierSel && (
+                        <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/20 text-primary align-middle">
+                          Popular
+                        </span>
+                      )}
+                    </p>
+                    {features.length > 0 && (
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                        {features.slice(0, 3).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0 flex items-center gap-2">
+                    <span className={cn(
+                      "text-[13px] font-bold tabular-nums",
+                      anyTierSel ? "text-emerald-400" : "text-muted-foreground"
+                    )}>
+                      {oneTier ? oneTier.price : multiTier ? `${tiers[0].price}+` : ""}
+                    </span>
+                    {multiTier ? (
+                      <ChevronDown className={cn(
+                        "w-4 h-4 text-muted-foreground",
+                        isExpanded && "rotate-180"
+                      )} style={{ transition: "transform 0.2s" }} />
+                    ) : anyTierSel ? (
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500">
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </span>
+                    ) : (
+                      <span className="w-6 h-6 rounded-full border-2 border-border block" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Tier grid */}
+                {multiTier && isExpanded && (
+                  <div className="px-4 pb-4 grid gap-2" style={{
+                    gridTemplateColumns: `repeat(${Math.min(tiers.length, 3)}, 1fr)`
+                  }}>
+                    {tiers.map(t => {
+                      const sel = isSel(svc.id, t.label);
+                      return (
+                        <button key={t.label} type="button"
+                          onClick={() => toggle({
+                            service_id:   svc.id,
+                            service_name: svc.name,
+                            vehicle_type: t.label,
+                            price:        parseTierPrice(t.price),
+                          })}
+                          className={cn(
+                            "flex flex-col items-center py-3 px-2 rounded-xl border transition-all",
+                            sel
+                              ? "border-emerald-500/60 bg-emerald-500/15"
+                              : "border-border bg-background"
+                          )}>
+                          <span className={cn(
+                            "text-[12px] font-semibold",
+                            sel ? "text-emerald-400" : "text-foreground"
+                          )}>{t.label}</span>
+                          <span className={cn(
+                            "text-[13px] font-bold mt-0.5 tabular-nums",
+                            sel ? "text-emerald-400" : "text-muted-foreground"
+                          )}>{t.price}</span>
+                          {sel && (
+                            <span className="mt-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500">
+                              <Check className="w-3 h-3 text-white" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+        <div style={{ height: 8 }} />
+      </div>
+
+      {/* Sticky cart bar */}
+      <div className="shrink-0 border-t border-border bg-card px-4 py-3">
+        {selected.length === 0 ? (
+          <p className="text-[12px] text-muted-foreground text-center py-0.5">
+            Select at least one service to continue
+          </p>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[13px] font-semibold text-foreground">
+                {selected.length} service{selected.length !== 1 ? "s" : ""} selected
+              </p>
+              <p className="text-[13px] font-bold text-emerald-400 tabular-nums">
+                ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <button type="button" onClick={() => onDone(selected)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shrink-0">
+              <Check className="w-4 h-4" />
+              Done
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ─── Add Sale Modal ───────────────────────────────────────────────────────────
 
 function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
-  const { data: services } = useQuery({ queryKey: ["services"], queryFn: listServices });
+  const [step, setStep]               = useState<"form" | "picker">("form");
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
 
   const now = new Date();
   const [form, setForm] = useState<{
     customer_name: string;
     customer_phone: string;
     customer_email: string;
-    service_id: string;
-    vehicle_type: string;
     price_override: string;
     date: string;
     time: string;
@@ -146,8 +383,6 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
     customer_name: "",
     customer_phone: "",
     customer_email: "",
-    service_id: "",
-    vehicle_type: "",
     price_override: "",
     date: now.toISOString().split("T")[0],
     time: now.toTimeString().slice(0, 5),
@@ -157,28 +392,12 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
 
   const set = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const selectedService = services?.find(s => s.id === form.service_id);
-  const tiers = selectedService
-    ? (Array.isArray(selectedService.pricing_tiers) ? selectedService.pricing_tiers as PriceTier[] : [])
-    : [];
-
-  // Auto-fill price when service + vehicle type selected
-  useEffect(() => {
-    if (!form.service_id) { set("price_override", ""); return; }
-    if (!tiers.length) { set("price_override", ""); return; }
-    if (tiers.length === 1) { set("price_override", String(parseTierPrice(tiers[0].price))); return; }
-    const match = tiers.find(t => t.label.toLowerCase().includes(form.vehicle_type.toLowerCase()) && form.vehicle_type);
-    if (match) set("price_override", String(parseTierPrice(match.price)));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.service_id, form.vehicle_type]);
-
-  // Group services by category
-  const grouped = (services ?? []).reduce<Record<string, typeof services>>((acc, s) => {
-    const cat = s.category ?? "other";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat]!.push(s);
-    return acc;
-  }, {});
+  const handlePickerDone = (items: SelectedItem[]) => {
+    setSelectedItems(items);
+    const total = items.reduce((s, i) => s + i.price, 0);
+    set("price_override", total > 0 ? String(total) : "");
+    setStep("form");
+  };
 
   const qc = useQueryClient();
   const mut = useMutation({
@@ -195,17 +414,21 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to save"),
   });
 
-  const canSubmit = form.customer_name.trim() && form.service_id && form.price_override && form.date;
+  const canSubmit = form.customer_name.trim() && selectedItems.length > 0 && form.price_override && form.date;
 
   const handleSubmit = () => {
-    if (!canSubmit || !selectedService) return;
+    if (!canSubmit || selectedItems.length === 0) return;
+    const first = selectedItems[0];
+    const serviceName = selectedItems
+      .map(s => s.vehicle_type ? `${s.service_name} (${s.vehicle_type})` : s.service_name)
+      .join(" + ");
     mut.mutate({
       customer_name:  form.customer_name.trim(),
       customer_email: form.customer_email.trim() || "",
       customer_phone: form.customer_phone.trim() || undefined,
-      service_id:     selectedService.id,
-      service_name:   selectedService.name,
-      vehicle_type:   form.vehicle_type || undefined,
+      service_id:     first.service_id,
+      service_name:   serviceName,
+      vehicle_type:   first.vehicle_type || undefined,
       price_quoted:   parseFloat(form.price_override) || 0,
       payment_status: form.payment_status,
       confirmed_date: form.date,
@@ -215,150 +438,196 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="bg-card border border-border rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      onClick={e => { if (e.target === e.currentTarget && step === "form") onClose(); }}>
+      <div className="bg-card border border-border rounded-2xl w-full max-w-lg shadow-2xl flex flex-col"
+        style={{ maxHeight: "92vh" }}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-border">
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Record Sale</h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Log a completed job instantly</p>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="p-5 space-y-4">
-
-          {/* Customer */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Customer</label>
-            <input value={form.customer_name} onChange={e => set("customer_name", e.target.value)}
-              placeholder="Full name *"
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
-            <div className="grid grid-cols-2 gap-2">
-              <input value={form.customer_phone} onChange={e => set("customer_phone", e.target.value)}
-                placeholder="Phone"
-                className="bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
-              <input value={form.customer_email} onChange={e => set("customer_email", e.target.value)}
-                placeholder="Email"
-                className="bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
-            </div>
-          </div>
-
-          {/* Service */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Service *</label>
-            <select value={form.service_id} onChange={e => { set("service_id", e.target.value); set("vehicle_type", ""); }}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50">
-              <option value="">Select a service…</option>
-              {Object.entries(grouped).map(([cat, svcs]) => (
-                <optgroup key={cat} label={cat.charAt(0).toUpperCase() + cat.replace(/-/g, " ").slice(1)}>
-                  {(svcs ?? []).map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </div>
-
-          {/* Vehicle type — shown only when service has multiple tiers */}
-          {tiers.length > 1 && (
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Vehicle Type *</label>
-              <div className="grid grid-cols-3 gap-2">
-                {tiers.map(t => (
-                  <button key={t.label} type="button"
-                    onClick={() => set("vehicle_type", t.label)}
-                    className={cn(
-                      "flex flex-col items-center py-2.5 px-2 rounded-xl border text-sm transition-colors",
-                      form.vehicle_type === t.label
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-background text-muted-foreground hover:border-primary/30"
-                    )}>
-                    <Car className="w-4 h-4 mb-1" strokeWidth={1.5} />
-                    <span className="text-[11px] font-medium">{t.label}</span>
-                    <span className="text-[10px] opacity-70 mt-0.5">{t.price}</span>
-                  </button>
-                ))}
+        {/* ── PICKER STEP ─────────────────────────────────────────── */}
+        {step === "picker" && (
+          <>
+            <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-border shrink-0">
+              <button type="button" onClick={() => setStep("form")}
+                className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <div className="min-w-0">
+                <h3 className="text-[15px] font-semibold text-foreground leading-tight">Choose Services</h3>
+                <p className="text-[11px] text-muted-foreground">Tap to add · tap again to remove</p>
               </div>
             </div>
-          )}
+            <ServicePickerContent
+              initialSelected={selectedItems}
+              onDone={handlePickerDone}
+            />
+          </>
+        )}
 
-          {/* Price */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Price *</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">$</span>
-              <input
-                type="number" min="0" step="0.01"
-                value={form.price_override}
-                onChange={e => set("price_override", e.target.value)}
-                placeholder="0.00"
-                className="w-full bg-background border border-border rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:border-primary/50"
-              />
+        {/* ── FORM STEP ───────────────────────────────────────────── */}
+        {step === "form" && (
+          <>
+            <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">Record Sale</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Log a completed job instantly</p>
+              </div>
+              <button onClick={onClose} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
-          </div>
 
-          {/* Date + Time */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Date *</label>
-              <input type="date" value={form.date} onChange={e => set("date", e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 cursor-pointer" />
+            <div className="overflow-y-auto flex-1">
+              <div className="p-5 space-y-4">
+
+                {/* Customer */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Customer <span className="text-primary normal-case">*</span>
+                  </label>
+                  <input value={form.customer_name} onChange={e => set("customer_name", e.target.value)}
+                    placeholder="Full name"
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input value={form.customer_phone} onChange={e => set("customer_phone", e.target.value)}
+                      placeholder="Phone (optional)"
+                      className="bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
+                    <input value={form.customer_email} onChange={e => set("customer_email", e.target.value)}
+                      placeholder="Email (optional)"
+                      className="bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
+                  </div>
+                </div>
+
+                {/* Service button */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Services <span className="text-primary">*</span>
+                  </label>
+                  <button type="button" onClick={() => setStep("picker")}
+                    className={cn(
+                      "w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-sm transition-all",
+                      selectedItems.length > 0
+                        ? "border-emerald-500/40 bg-emerald-500/5 text-foreground"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/30"
+                    )}>
+                    <span className={cn("truncate", selectedItems.length === 0 && "opacity-60")}>
+                      {selectedItems.length === 0
+                        ? "Choose services…"
+                        : selectedItems.length === 1
+                        ? selectedItems[0].service_name + (selectedItems[0].vehicle_type ? ` · ${selectedItems[0].vehicle_type}` : "")
+                        : `${selectedItems.length} services selected`}
+                    </span>
+                    <Pencil className="w-3.5 h-3.5 shrink-0 ml-2 opacity-50" />
+                  </button>
+                </div>
+
+                {/* POS receipt — multi-line */}
+                {selectedItems.length > 0 && (
+                  <div className="rounded-2xl border border-border bg-muted/20 overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Order Summary</span>
+                      <button type="button" onClick={() => setStep("picker")}
+                        className="text-[10px] text-primary hover:text-primary/80 font-medium transition-colors">
+                        Edit
+                      </button>
+                    </div>
+                    {selectedItems.map((item, idx) => (
+                      <div key={item.key} className={cn(
+                        "px-4 py-3 flex items-center justify-between gap-3",
+                        idx < selectedItems.length - 1 && "border-b border-border/40"
+                      )}>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-foreground truncate">{item.service_name}</p>
+                          {item.vehicle_type && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{item.vehicle_type}</p>
+                          )}
+                        </div>
+                        <span className="text-[13px] font-bold text-emerald-400 tabular-nums shrink-0">
+                          ${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="px-4 py-3 border-t border-border flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total</span>
+                      <span className="text-[16px] font-bold text-foreground tabular-nums">
+                        ${parseFloat(form.price_override || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Price <span className="text-primary">*</span>
+                    <span className="ml-1 normal-case font-normal opacity-60">(auto-filled · editable)</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">$</span>
+                    <input type="number" min="0" step="0.01"
+                      value={form.price_override}
+                      onChange={e => set("price_override", e.target.value)}
+                      placeholder="0.00"
+                      className="w-full bg-background border border-border rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:border-primary/50" />
+                  </div>
+                </div>
+
+                {/* Date + Time */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Date <span className="text-primary">*</span></label>
+                    <input type="date" value={form.date} onChange={e => set("date", e.target.value)}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 cursor-pointer" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Time</label>
+                    <input type="time" value={form.time} onChange={e => set("time", e.target.value)}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 cursor-pointer" />
+                  </div>
+                </div>
+
+                {/* Payment */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["paid", "unpaid"] as const).map(s => (
+                      <button key={s} type="button" onClick={() => set("payment_status", s)}
+                        className={cn(
+                          "py-2 rounded-xl border text-sm font-medium transition-colors capitalize",
+                          form.payment_status === s
+                            ? s === "paid"
+                              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+                              : "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/30"
+                        )}>
+                        {s === "paid" ? "✓ Paid" : "⏳ Unpaid"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Notes</label>
+                  <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
+                    placeholder="Any additional details…" rows={2}
+                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 resize-none" />
+                </div>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Time</label>
-              <input type="time" value={form.time} onChange={e => set("time", e.target.value)}
-                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 cursor-pointer" />
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border shrink-0">
+              <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleSubmit} disabled={!canSubmit || mut.isPending}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                {mut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                Record Sale
+              </button>
             </div>
-          </div>
-
-          {/* Payment status */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["paid", "unpaid"] as const).map(s => (
-                <button key={s} type="button" onClick={() => set("payment_status", s)}
-                  className={cn(
-                    "py-2 rounded-xl border text-sm font-medium transition-colors capitalize",
-                    form.payment_status === s
-                      ? s === "paid"
-                        ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                        : "border-amber-500/40 bg-amber-500/10 text-amber-400"
-                      : "border-border bg-background text-muted-foreground hover:border-primary/30"
-                  )}>
-                  {s === "paid" ? "✓ Paid" : "⏳ Unpaid"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Notes</label>
-            <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
-              placeholder="Any additional details…"
-              rows={2}
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 resize-none" />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!canSubmit || mut.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
-            {mut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-            Record Sale
-          </button>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
