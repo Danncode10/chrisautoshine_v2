@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
 const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "chris-auto-shine";
@@ -24,7 +24,7 @@ export interface SalesStats {
 }
 
 export async function getSalesStats(period: "today" | "week" | "month"): Promise<SalesStats> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const since = periodStart(period);
 
   const { data } = await supabase
@@ -71,7 +71,7 @@ export interface ServicePopularity {
 }
 
 export async function getServicePopularity(period: "today" | "week" | "month"): Promise<ServicePopularity[]> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const since = periodStart(period);
 
   const { data } = await supabase
@@ -124,7 +124,7 @@ export interface SaleFilters {
 }
 
 export async function listSales(filters: SaleFilters): Promise<{ data: Sale[]; total: number }> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { page, pageSize, search, from, to } = filters;
   const offset = (page - 1) * pageSize;
 
@@ -163,7 +163,7 @@ export interface CreateSaleInput {
 }
 
 export async function createSale(input: CreateSaleInput): Promise<void> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
 
   // Derive org_id from existing services
   const { data: svc } = await supabase
@@ -201,7 +201,7 @@ export async function createSale(input: CreateSaleInput): Promise<void> {
 }
 
 export async function deleteSale(id: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.from("bookings").delete().eq("id", id).eq("app_id", APP_ID).eq("source", "direct");
   if (error) throw error;
   revalidatePath("/dashboard");

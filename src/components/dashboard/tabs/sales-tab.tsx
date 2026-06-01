@@ -26,7 +26,12 @@ const PERIOD_LABELS: Record<Period, string> = { today: "Today", week: "This Week
 const PAGE_SIZE = 12;
 
 function parseTierPrice(raw: string): number {
-  return parseFloat(raw.replace(/[^0-9.]/g, "")) || 0;
+  const match = raw.match(/[\d]+(?:\.[\d]+)?/);
+  return match ? parseFloat(match[0]) : 0;
+}
+
+function isRangePrice(raw: string): boolean {
+  return /[-–—]/.test(raw.replace(/^\$/, "")) || /^from\s/i.test(raw.trim());
 }
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
@@ -133,6 +138,7 @@ type SelectedItem = {
   service_name: string;
   vehicle_type: string;
   price: number;
+  isRange: boolean;
 };
 
 const PICKER_GROUPS = [
@@ -172,7 +178,8 @@ function ServicePickerContent({
     );
   };
 
-  const total = selected.reduce((s, i) => s + i.price, 0);
+  const total    = selected.reduce((s, i) => s + i.price, 0);
+  const hasRange = selected.some(i => i.isRange);
 
   return (
     <>
@@ -245,6 +252,7 @@ function ServicePickerContent({
                         service_name: svc.name,
                         vehicle_type: oneTier?.label ?? "",
                         price:        oneTier ? parseTierPrice(oneTier.price) : 0,
+                        isRange:      oneTier ? isRangePrice(oneTier.price) : false,
                       });
                     }
                   }}
@@ -272,7 +280,11 @@ function ServicePickerContent({
                       "text-[13px] font-bold tabular-nums",
                       anyTierSel ? "text-emerald-400" : "text-muted-foreground"
                     )}>
-                      {oneTier ? oneTier.price : multiTier ? `${tiers[0].price}+` : ""}
+                      {oneTier
+                        ? oneTier.price
+                        : multiTier
+                        ? (isRangePrice(tiers[0].price) ? `~${tiers[0].price}` : `${tiers[0].price}+`)
+                        : ""}
                     </span>
                     {multiTier ? (
                       <ChevronDown className={cn(
@@ -303,6 +315,7 @@ function ServicePickerContent({
                             service_name: svc.name,
                             vehicle_type: t.label,
                             price:        parseTierPrice(t.price),
+                            isRange:      isRangePrice(t.price),
                           })}
                           className={cn(
                             "flex flex-col items-center py-3 px-2 rounded-xl border transition-all",
@@ -317,7 +330,9 @@ function ServicePickerContent({
                           <span className={cn(
                             "text-[13px] font-bold mt-0.5 tabular-nums",
                             sel ? "text-emerald-400" : "text-muted-foreground"
-                          )}>{t.price}</span>
+                          )}>
+                            {isRangePrice(t.price) ? `~${t.price}` : t.price}
+                          </span>
                           {sel && (
                             <span className="mt-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500">
                               <Check className="w-3 h-3 text-white" />
@@ -348,7 +363,10 @@ function ServicePickerContent({
                 {selected.length} service{selected.length !== 1 ? "s" : ""} selected
               </p>
               <p className="text-[13px] font-bold text-emerald-400 tabular-nums">
-                ${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {hasRange ? "~" : ""}${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {hasRange && (
+                  <span className="ml-1.5 text-[10px] font-normal text-amber-400">· adjust price after</span>
+                )}
               </p>
             </div>
             <button type="button" onClick={() => onDone(selected)}
@@ -541,11 +559,19 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
                             <p className="text-[11px] text-muted-foreground mt-0.5">{item.vehicle_type}</p>
                           )}
                         </div>
-                        <span className="text-[13px] font-bold text-emerald-400 tabular-nums shrink-0">
-                          ${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <span className={cn(
+                          "text-[13px] font-bold tabular-nums shrink-0",
+                          item.isRange ? "text-amber-400" : "text-emerald-400"
+                        )}>
+                          {item.isRange ? "~" : ""}${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     ))}
+                    {selectedItems.some(i => i.isRange) && (
+                      <div className="px-4 py-2 bg-amber-500/10 border-t border-amber-500/20">
+                        <p className="text-[11px] text-amber-400">~ Range price — update the amount below before saving</p>
+                      </div>
+                    )}
                     <div className="px-4 py-3 border-t border-border flex items-center justify-between">
                       <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total</span>
                       <span className="text-[16px] font-bold text-foreground tabular-nums">
