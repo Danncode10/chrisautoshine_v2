@@ -138,6 +138,7 @@ type SelectedItem = {
   service_name: string;
   vehicle_type: string;
   price: number;
+  catalogPrice: number; // original price from the service picker
   isRange: boolean;
 };
 
@@ -169,13 +170,14 @@ function ServicePickerContent({
   const makeKey  = (svcId: string, vt: string) => `${svcId}::${vt}`;
   const isSel    = (svcId: string, vt: string) => selected.some(s => s.key === makeKey(svcId, vt));
 
-  const toggle = (item: Omit<SelectedItem, "key">) => {
+  const toggle = (item: Omit<SelectedItem, "key" | "catalogPrice">) => {
     const key = makeKey(item.service_id, item.vehicle_type);
-    setSelected(prev =>
-      prev.some(s => s.key === key)
-        ? prev.filter(s => s.key !== key)
-        : [...prev, { ...item, key }]
-    );
+    setSelected(prev => {
+      if (prev.some(s => s.key === key)) return prev.filter(s => s.key !== key);
+      // Preserve any price edit if item was previously selected (e.g. re-opening picker)
+      const existing = initialSelected.find(s => s.key === key);
+      return [...prev, { ...item, key, catalogPrice: item.price, price: existing?.price ?? item.price }];
+    });
   };
 
   const total    = selected.reduce((s, i) => s + i.price, 0);
@@ -381,6 +383,82 @@ function ServicePickerContent({
   );
 }
 
+// ─── Editable line item row ───────────────────────────────────────────────────
+
+function LineItemRow({
+  item,
+  onPriceChange,
+  hasBorder,
+}: {
+  item: SelectedItem;
+  onPriceChange: (price: number) => void;
+  hasBorder: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft]     = useState("");
+  const isEdited = item.price !== item.catalogPrice;
+
+  const commit = () => {
+    const val = parseFloat(draft);
+    if (!isNaN(val) && val >= 0) onPriceChange(val);
+    else setDraft(String(item.price)); // revert on invalid
+    setEditing(false);
+  };
+
+  return (
+    <div className={cn(
+      "px-4 py-3 flex items-center justify-between gap-3",
+      hasBorder && "border-b border-border/40"
+    )}>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-medium text-foreground truncate">{item.service_name}</p>
+        {item.vehicle_type && (
+          <p className="text-[11px] text-muted-foreground mt-0.5">{item.vehicle_type}</p>
+        )}
+      </div>
+
+      {/* Tappable price — becomes input on click */}
+      <div className="shrink-0 text-right">
+        {editing ? (
+          <div className="flex items-center gap-1 justify-end">
+            <span className="text-[13px] text-muted-foreground font-medium">$</span>
+            <input
+              type="number" min="0" step="0.01"
+              value={draft}
+              autoFocus
+              onChange={e => setDraft(e.target.value)}
+              onBlur={commit}
+              onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(String(item.price)); setEditing(false); } }}
+              className="w-20 text-right bg-background border border-primary/50 rounded-lg px-2 py-0.5 text-[13px] font-bold text-foreground focus:outline-none"
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => { setDraft(String(item.price)); setEditing(true); }}
+            className="group text-right"
+            title="Tap to edit price">
+            {/* Strikethrough original when price was changed */}
+            {isEdited && (
+              <p className="text-[10px] text-muted-foreground line-through tabular-nums">
+                ${item.catalogPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            )}
+            <p className={cn(
+              "text-[13px] font-bold tabular-nums flex items-center gap-1 justify-end",
+              isEdited ? "text-emerald-400" : item.isRange ? "text-amber-400" : "text-emerald-400"
+            )}>
+              {item.isRange && !isEdited && <span className="text-[10px] font-normal">~</span>}
+              ${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Pencil className="w-2.5 h-2.5 opacity-0 group-hover:opacity-40 transition-opacity" />
+            </p>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Add Sale Modal ───────────────────────────────────────────────────────────
 
 function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
@@ -411,10 +489,24 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
   const set = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }));
 
   const handlePickerDone = (items: SelectedItem[]) => {
-    setSelectedItems(items);
-    const total = items.reduce((s, i) => s + i.price, 0);
+    // Preserve any manual price edits the admin made before re-opening picker
+    const merged = items.map(item => {
+      const prev = selectedItems.find(s => s.key === item.key);
+      return prev ? { ...item, price: prev.price } : item;
+    });
+    setSelectedItems(merged);
+    const total = merged.reduce((s, i) => s + i.price, 0);
     set("price_override", total > 0 ? String(total) : "");
     setStep("form");
+  };
+
+  const updateItemPrice = (key: string, newPrice: number) => {
+    setSelectedItems(prev => {
+      const updated = prev.map(item => item.key === key ? { ...item, price: newPrice } : item);
+      const total = updated.reduce((s, i) => s + i.price, 0);
+      setForm(f => ({ ...f, price_override: String(total) }));
+      return updated;
+    });
   };
 
   const qc = useQueryClient();
@@ -549,27 +641,16 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
                       </button>
                     </div>
                     {selectedItems.map((item, idx) => (
-                      <div key={item.key} className={cn(
-                        "px-4 py-3 flex items-center justify-between gap-3",
-                        idx < selectedItems.length - 1 && "border-b border-border/40"
-                      )}>
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-medium text-foreground truncate">{item.service_name}</p>
-                          {item.vehicle_type && (
-                            <p className="text-[11px] text-muted-foreground mt-0.5">{item.vehicle_type}</p>
-                          )}
-                        </div>
-                        <span className={cn(
-                          "text-[13px] font-bold tabular-nums shrink-0",
-                          item.isRange ? "text-amber-400" : "text-emerald-400"
-                        )}>
-                          {item.isRange ? "~" : ""}${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
+                      <LineItemRow
+                        key={item.key}
+                        item={item}
+                        onPriceChange={p => updateItemPrice(item.key, p)}
+                        hasBorder={idx < selectedItems.length - 1}
+                      />
                     ))}
-                    {selectedItems.some(i => i.isRange) && (
+                    {selectedItems.some(i => i.isRange && i.price === i.catalogPrice) && (
                       <div className="px-4 py-2 bg-amber-500/10 border-t border-amber-500/20">
-                        <p className="text-[11px] text-amber-400">~ Range price — update the amount below before saving</p>
+                        <p className="text-[11px] text-amber-400">Tap a price to adjust it for this customer</p>
                       </div>
                     )}
                     <div className="px-4 py-3 border-t border-border flex items-center justify-between">
