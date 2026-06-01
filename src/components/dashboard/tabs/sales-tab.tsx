@@ -512,12 +512,15 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
   const qc = useQueryClient();
   const mut = useMutation({
     mutationFn: (input: CreateSaleInput) => createSale(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["sales-stats"] });
-      qc.invalidateQueries({ queryKey: ["sales-list"] });
-      qc.invalidateQueries({ queryKey: ["sales-popular"] });
-      qc.invalidateQueries({ queryKey: ["overview-kpis"] });
-      qc.invalidateQueries({ queryKey: ["overview-trend"] });
+    onSuccess: async () => {
+      // refetchQueries forces an immediate re-fetch rather than just marking stale
+      await Promise.all([
+        qc.refetchQueries({ queryKey: ["sales-stats"],   type: "active" }),
+        qc.refetchQueries({ queryKey: ["sales-list"],    type: "active" }),
+        qc.refetchQueries({ queryKey: ["sales-popular"], type: "active" }),
+        qc.refetchQueries({ queryKey: ["overview-kpis"], type: "active" }),
+        qc.refetchQueries({ queryKey: ["overview-trend"],type: "active" }),
+      ]);
       toast.success("Sale recorded");
       onSaved();
     },
@@ -909,8 +912,8 @@ export function SalesTab() {
     }
   }, [searchParams, router]);
 
-  const statsQ   = useQuery({ queryKey: ["sales-stats",   period], queryFn: () => getSalesStats(period),          staleTime: 30_000 });
-  const popularQ = useQuery({ queryKey: ["sales-popular", period], queryFn: () => getServicePopularity(period),    staleTime: 30_000 });
+  const statsQ   = useQuery({ queryKey: ["sales-stats",   period], queryFn: () => getSalesStats(period) });
+  const popularQ = useQuery({ queryKey: ["sales-popular", period], queryFn: () => getServicePopularity(period) });
 
   const stats = statsQ.data;
 
