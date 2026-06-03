@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Plus, Search, X, Check, Loader2, Trash2,
   DollarSign, ShoppingBag, TrendingUp, Star,
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  ChevronLeft, ChevronRight,
   ChevronDown, Pencil, Download,
 } from "lucide-react";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/services/sales";
 import { listServices } from "@/services/services";
 import { cn } from "@/lib/utils";
+import { DashPagination } from "@/components/dashboard/dash-pagination";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,7 +24,7 @@ type Period = "today" | "week" | "month";
 type PriceTier = { label: string; price: string };
 
 const PERIOD_LABELS: Record<Period, string> = { today: "Today", week: "This Week", month: "This Month" };
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 
 function parseTierPrice(raw: string): number {
   const match = raw.match(/[\d]+(?:\.[\d]+)?/);
@@ -776,6 +777,7 @@ const PAY_STYLE: Record<string, string> = {
   unpaid: "bg-amber-500/10  text-amber-400  border-amber-500/20",
 };
 
+
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   cash: "Cash", card: "Card", eftpos: "EFTPOS", bank_transfer: "Bank Transfer",
 };
@@ -982,19 +984,7 @@ function SalesTable({ period }: { period: Period }) {
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-1">
-          <p className="text-[12px] text-muted-foreground">{total} total</p>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setPage(1)} disabled={page === 1} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronsLeft className="w-3.5 h-3.5" /></button>
-            <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronLeft className="w-3.5 h-3.5" /></button>
-            <span className="text-[12px] text-muted-foreground px-2">{page} / {totalPages}</span>
-            <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
-            <button onClick={() => setPage(totalPages)} disabled={page === totalPages} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronsRight className="w-3.5 h-3.5" /></button>
-          </div>
-        </div>
-      )}
+      <DashPagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
     </div>
   );
 }

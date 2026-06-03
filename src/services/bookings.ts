@@ -6,17 +6,23 @@ import type { TablesUpdate } from "@/types/supabase";
 
 const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "chris-auto-shine";
 
-export async function listBookings(statusFilter?: string) {
+export async function listBookings(statusFilter?: string, page = 1, pageSize = 10) {
   const supabase = await createClient();
+  const offset = (page - 1) * pageSize;
+
   let q = supabase
     .from("bookings")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq("app_id", APP_ID)
-    .order("created_at", { ascending: false });
+    .neq("source", "direct")          // direct = sales; keep bookings separate
+    .order("created_at", { ascending: false })
+    .range(offset, offset + pageSize - 1);
+
   if (statusFilter && statusFilter !== "all") q = q.eq("status", statusFilter);
-  const { data, error } = await q;
+
+  const { data, error, count } = await q;
   if (error) throw error;
-  return data;
+  return { data: data ?? [], total: count ?? 0 };
 }
 
 export async function updateBooking(id: string, updates: TablesUpdate<"bookings">) {

@@ -5,24 +5,32 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Mail, Phone, Trash2 } from "lucide-react";
 import { listLeads, updateLeadStatus, deleteLead } from "@/services/leads";
+import { DashPagination } from "@/components/dashboard/dash-pagination";
+
+const PAGE_SIZE = 10;
 
 const STATUSES = ["all", "new", "contacted", "booked", "closed"] as const;
 
 const STATUS_STYLES: Record<string, string> = {
-  new: "bg-amber-500/10 text-amber-500",
+  new:       "bg-amber-500/10 text-amber-500",
   contacted: "bg-blue-500/10 text-blue-500",
-  booked: "bg-emerald-500/10 text-emerald-500",
-  closed: "bg-muted text-muted-foreground",
+  booked:    "bg-emerald-500/10 text-emerald-500",
+  closed:    "bg-muted text-muted-foreground",
 };
 
 export function LeadsTab() {
   const [filter, setFilter] = useState<string>("all");
+  const [page, setPage]     = useState(1);
   const qc = useQueryClient();
 
-  const { data: leads, isLoading } = useQuery({
-    queryKey: ["leads", filter],
-    queryFn: () => listLeads(filter),
+  const { data, isLoading } = useQuery({
+    queryKey: ["leads", filter, page],
+    queryFn:  () => listLeads(filter, page, PAGE_SIZE),
+    placeholderData: prev => prev,
   });
+
+  const leads = data?.data ?? [];
+  const total = data?.total ?? 0;
 
   const updateMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => updateLeadStatus(id, status),
@@ -57,7 +65,7 @@ export function LeadsTab() {
           {STATUSES.map((s) => (
             <button
               key={s}
-              onClick={() => setFilter(s)}
+              onClick={() => { setFilter(s); setPage(1); }}
               className={`px-3 py-1 text-[11px] font-medium rounded-md transition-colors capitalize ${
                 filter === s ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -71,13 +79,13 @@ export function LeadsTab() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center"><Loader2 className="w-5 h-5 animate-spin inline" /></div>
-        ) : (leads ?? []).length === 0 ? (
+        ) : leads.length === 0 ? (
           <div className="p-12 text-center text-[13px] text-muted-foreground">
-            No leads yet. Once your contact form is wired up, they'll appear here.
+            No leads yet. Once your contact form is wired up, they&apos;ll appear here.
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {(leads ?? []).map((l) => {
+            {leads.map((l) => {
               const style = STATUS_STYLES[l.status] ?? STATUS_STYLES.new;
               return (
                 <div key={l.id} className="px-5 py-4">
@@ -117,9 +125,7 @@ export function LeadsTab() {
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete lead from ${l.name}?`)) deleteMutation.mutate(l.id);
-                      }}
+                      onClick={() => { if (confirm(`Delete lead from ${l.name}?`)) deleteMutation.mutate(l.id); }}
                       className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                       title="Delete"
                     >
@@ -132,6 +138,8 @@ export function LeadsTab() {
           </div>
         )}
       </div>
+
+      <DashPagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
     </div>
   );
 }

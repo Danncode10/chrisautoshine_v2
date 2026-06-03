@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Loader2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  Loader2,
   Search, X, Filter, RefreshCw,
 } from "lucide-react";
+import { DashPagination } from "@/components/dashboard/dash-pagination";
 import { listLogs, getLogDistinctValues } from "@/services/logs";
 import type { AuditLog } from "@/services/logs";
 import { cn } from "@/lib/utils";
@@ -353,63 +354,6 @@ function LogRow({ log }: { log: AuditLog }) {
   );
 }
 
-// ─── Pagination ───────────────────────────────────────────────────────────────
-
-function Pagination({ page, total, pageSize, onChange }: {
-  page: number; total: number; pageSize: number; onChange: (p: number) => void;
-}) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const from = (page - 1) * pageSize + 1;
-  const to   = Math.min(page * pageSize, total);
-
-  if (totalPages <= 1) return null;
-
-  return (
-    <div className="flex items-center justify-between gap-4 pt-3 border-t border-border">
-      <p className="text-[12px] text-muted-foreground">
-        {total === 0 ? "No results" : `${from}–${to} of ${total} entries`}
-      </p>
-      <div className="flex items-center gap-1">
-        <button onClick={() => onChange(1)} disabled={page === 1}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-          <ChevronsLeft className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => onChange(page - 1)} disabled={page === 1}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-          <ChevronLeft className="w-3.5 h-3.5" />
-        </button>
-
-        {/* Page numbers */}
-        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-          let p: number;
-          if (totalPages <= 5) p = i + 1;
-          else if (page <= 3) p = i + 1;
-          else if (page >= totalPages - 2) p = totalPages - 4 + i;
-          else p = page - 2 + i;
-          return (
-            <button key={p} onClick={() => onChange(p)}
-              className={cn(
-                "w-7 h-7 rounded-lg text-[12px] transition-colors",
-                page === p ? "bg-primary text-white font-medium" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}>
-              {p}
-            </button>
-          );
-        })}
-
-        <button onClick={() => onChange(page + 1)} disabled={page === totalPages}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => onChange(totalPages)} disabled={page === totalPages}
-          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none transition-colors">
-          <ChevronsRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Tab ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_FILTERS: Filters = { from: "", to: "", action: "all", resourceType: "all", search: "" };
@@ -533,12 +477,7 @@ export function LogsTab() {
 
       {/* Pagination */}
       {!filters.search && (
-        <Pagination
-          page={page}
-          total={total}
-          pageSize={PAGE_SIZE}
-          onChange={setPage}
-        />
+        <DashPagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
       )}
     </div>
   );

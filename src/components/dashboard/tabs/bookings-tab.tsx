@@ -5,33 +5,42 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Mail, Phone, Car, Trash2, Calendar } from "lucide-react";
 import { listBookings, updateBooking, deleteBooking } from "@/services/bookings";
+import { DashPagination } from "@/components/dashboard/dash-pagination";
+
+const PAGE_SIZE = 10;
 
 const STATUSES = ["all", "pending", "confirmed", "completed", "cancelled"] as const;
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-500",
+  pending:   "bg-amber-500/10 text-amber-500",
   confirmed: "bg-blue-500/10 text-blue-500",
   completed: "bg-emerald-500/10 text-emerald-500",
   cancelled: "bg-rose-500/10 text-rose-500",
 };
 
 const PAYMENT_STYLES: Record<string, string> = {
-  unpaid: "bg-rose-500/10 text-rose-500",
+  unpaid:  "bg-rose-500/10 text-rose-500",
   deposit: "bg-amber-500/10 text-amber-500",
-  paid: "bg-emerald-500/10 text-emerald-500",
+  paid:    "bg-emerald-500/10 text-emerald-500",
 };
 
 export function BookingsTab() {
   const [filter, setFilter] = useState<string>("all");
+  const [page, setPage]     = useState(1);
   const qc = useQueryClient();
 
-  const { data: bookings, isLoading } = useQuery({
-    queryKey: ["bookings", filter],
-    queryFn: () => listBookings(filter),
+  const { data, isLoading } = useQuery({
+    queryKey: ["bookings", filter, page],
+    queryFn:  () => listBookings(filter, page, PAGE_SIZE),
+    placeholderData: prev => prev,
   });
 
+  const bookings = data?.data ?? [];
+  const total    = data?.total ?? 0;
+
   const updateMut = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Record<string, unknown> }) => updateBooking(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: Record<string, unknown> }) =>
+      updateBooking(id, updates),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["bookings"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
@@ -63,7 +72,7 @@ export function BookingsTab() {
           {STATUSES.map((s) => (
             <button
               key={s}
-              onClick={() => setFilter(s)}
+              onClick={() => { setFilter(s); setPage(1); }}
               className={`px-3 py-1 text-[11px] font-medium rounded-md transition-colors capitalize ${
                 filter === s ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -77,16 +86,16 @@ export function BookingsTab() {
       <div className="bg-card border border-border rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-12 text-center"><Loader2 className="w-5 h-5 animate-spin inline" /></div>
-        ) : (bookings ?? []).length === 0 ? (
+        ) : bookings.length === 0 ? (
           <div className="p-12 text-center text-[13px] text-muted-foreground">
             No bookings yet. Booking form coming soon — for now, you can add them directly from the website.
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {(bookings ?? []).map((b) => {
+            {bookings.map((b) => {
               const statusStyle = STATUS_STYLES[b.status] ?? STATUS_STYLES.pending;
-              const payStyle = PAYMENT_STYLES[b.payment_status] ?? PAYMENT_STYLES.unpaid;
-              const vehicle = [b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(" ");
+              const payStyle    = PAYMENT_STYLES[b.payment_status] ?? PAYMENT_STYLES.unpaid;
+              const vehicle     = [b.vehicle_year, b.vehicle_make, b.vehicle_model].filter(Boolean).join(" ");
 
               return (
                 <div key={b.id} className="px-5 py-4">
@@ -148,9 +157,7 @@ export function BookingsTab() {
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete booking from ${b.customer_name}?`)) deleteMut.mutate(b.id);
-                      }}
+                      onClick={() => { if (confirm(`Delete booking from ${b.customer_name}?`)) deleteMut.mutate(b.id); }}
                       className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -162,6 +169,8 @@ export function BookingsTab() {
           </div>
         )}
       </div>
+
+      <DashPagination page={page} total={total} pageSize={PAGE_SIZE} onChange={setPage} />
     </div>
   );
 }
