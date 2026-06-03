@@ -1,10 +1,40 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, TrendingUp } from "lucide-react";
+import { Loader2, TrendingUp, DollarSign, ShoppingBag, Users, BarChart2 } from "lucide-react";
 import { getEventCountsByDay, getTopPages, getEventTypeBreakdown } from "@/services/analytics";
+import { getSalesStats } from "@/services/sales";
+import { cn } from "@/lib/utils";
+
+function BizKpiCard({ label, value, sub, icon: Icon, accent }: {
+  label: string; value: string; sub: string; icon: React.ElementType; accent: string;
+}) {
+  return (
+    <div className="bg-card border border-border rounded-2xl px-5 py-5 flex items-center gap-4">
+      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", accent)}>
+        <Icon className="h-5 w-5" strokeWidth={1.5} />
+      </div>
+      <div>
+        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.12em]">{label}</p>
+        <p className="text-xl font-bold text-foreground tabular-nums mt-0.5">{value}</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">{sub}</p>
+      </div>
+    </div>
+  );
+}
 
 export function AnalyticsTab() {
+  const { data: salesMonth } = useQuery({
+    queryKey: ["sales-stats", "month"],
+    queryFn: () => getSalesStats("month"),
+    staleTime: 60_000,
+  });
+  const { data: salesWeek } = useQuery({
+    queryKey: ["sales-stats", "week"],
+    queryFn: () => getSalesStats("week"),
+    staleTime: 60_000,
+  });
+
   const { data: byDay, isLoading: loadingDay } = useQuery({
     queryKey: ["analytics-by-day"],
     queryFn: () => getEventCountsByDay(14),
@@ -31,29 +61,98 @@ export function AnalyticsTab() {
       <div>
         <h2 className="text-2xl font-semibold text-foreground tracking-tight">Analytics</h2>
         <p className="mt-1 text-[14px] text-muted-foreground">
-          Last 14 days · First-party tracking, no Google Analytics required.
+          Business performance and site traffic in one place.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-2xl px-5 py-5">
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">Total Events</p>
-          <p className="text-3xl font-bold text-foreground tabular-nums mt-3">{total14d}</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">across all event types</p>
+      {/* Business Performance */}
+      <div>
+        <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Business Performance</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <BizKpiCard
+            label="Revenue — This Month"
+            value={salesMonth ? `$${salesMonth.revenue.toLocaleString()}` : "—"}
+            sub={`${salesMonth?.count ?? 0} sale${salesMonth?.count !== 1 ? "s" : ""}`}
+            icon={DollarSign}
+            accent="bg-emerald-500/10 text-emerald-400"
+          />
+          <BizKpiCard
+            label="Revenue — This Week"
+            value={salesWeek ? `$${salesWeek.revenue.toLocaleString()}` : "—"}
+            sub={`${salesWeek?.count ?? 0} sale${salesWeek?.count !== 1 ? "s" : ""}`}
+            icon={ShoppingBag}
+            accent="bg-blue-500/10 text-blue-400"
+          />
+          <BizKpiCard
+            label="Avg Sale — This Month"
+            value={salesMonth ? `$${salesMonth.avgSale.toLocaleString()}` : "—"}
+            sub="per completed job"
+            icon={TrendingUp}
+            accent="bg-violet-500/10 text-violet-400"
+          />
+          <BizKpiCard
+            label="Top Service"
+            value={salesMonth?.topService ?? "—"}
+            sub="this month by count"
+            icon={BarChart2}
+            accent="bg-amber-500/10 text-amber-400"
+          />
         </div>
-        <div className="bg-card border border-border rounded-2xl px-5 py-5">
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">Page Views</p>
-          <p className="text-3xl font-bold text-foreground tabular-nums mt-3">
-            {(byType ?? []).find((t) => t.type === "page_view")?.count ?? 0}
+      </div>
+
+      {/* Revenue trend — This Month */}
+      {salesMonth && salesMonth.dailyRevenue.length > 0 && (
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <h3 className="text-[13px] font-semibold text-foreground mb-4">Revenue Trend — This Month</h3>
+          <div className="flex items-end gap-0.5 h-24">
+            {salesMonth.dailyRevenue.map((p, i) => {
+              const max = Math.max(...salesMonth.dailyRevenue.map(x => x.revenue), 1);
+              return (
+                <div key={i} className="flex-1 flex flex-col justify-end group relative">
+                  {p.revenue > 0 && (
+                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none z-10">
+                      <div className="bg-popover border border-border rounded-md px-2 py-1 text-[10px] font-medium text-foreground whitespace-nowrap shadow-md">
+                        ${p.revenue.toLocaleString()} · {p.date.slice(5)}
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className={cn("rounded-t-sm transition-all", p.revenue > 0 ? "bg-emerald-500/70 hover:bg-emerald-500" : "bg-muted/20 h-0.5")}
+                    style={{ height: p.revenue > 0 ? `${Math.max((p.revenue / max) * 100, 4)}%` : undefined }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2 text-right">
+            {salesMonth.dailyRevenue.filter(p => p.revenue > 0).length} active days this month
           </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">14 day total</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl px-5 py-5">
-          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">CTA Clicks</p>
-          <p className="text-3xl font-bold text-foreground tabular-nums mt-3">
-            {(byType ?? []).find((t) => t.type === "cta_click")?.count ?? 0}
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">14 day total</p>
+      )}
+
+      {/* Web Analytics */}
+      <div>
+        <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Web Analytics — Last 14 Days</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-2xl px-5 py-5">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">Total Events</p>
+            <p className="text-3xl font-bold text-foreground tabular-nums mt-3">{total14d}</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">across all event types</p>
+          </div>
+          <div className="bg-card border border-border rounded-2xl px-5 py-5">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">Page Views</p>
+            <p className="text-3xl font-bold text-foreground tabular-nums mt-3">
+              {(byType ?? []).find((t) => t.type === "page_view")?.count ?? 0}
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">14 day total</p>
+          </div>
+          <div className="bg-card border border-border rounded-2xl px-5 py-5">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.15em]">CTA Clicks</p>
+            <p className="text-3xl font-bold text-foreground tabular-nums mt-3">
+              {(byType ?? []).find((t) => t.type === "cta_click")?.count ?? 0}
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">14 day total</p>
+          </div>
         </div>
       </div>
 

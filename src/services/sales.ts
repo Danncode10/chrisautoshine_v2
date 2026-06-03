@@ -24,7 +24,7 @@ export interface SalesStats {
 }
 
 export async function getSalesStats(period: "today" | "week" | "month"): Promise<SalesStats> {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const since = periodStart(period);
 
   const { data } = await supabase
@@ -71,7 +71,7 @@ export interface ServicePopularity {
 }
 
 export async function getServicePopularity(period: "today" | "week" | "month"): Promise<ServicePopularity[]> {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const since = periodStart(period);
 
   const { data } = await supabase
@@ -109,6 +109,7 @@ export interface Sale {
   vehicle_model: string | null;
   price_quoted: number | null;
   payment_status: string;
+  payment_method: string | null;
   confirmed_date: string | null;
   confirmed_time: string | null;
   notes: string | null;
@@ -124,13 +125,13 @@ export interface SaleFilters {
 }
 
 export async function listSales(filters: SaleFilters): Promise<{ data: Sale[]; total: number }> {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { page, pageSize, search, from, to } = filters;
   const offset = (page - 1) * pageSize;
 
   let q = supabase
     .from("bookings")
-    .select("id, customer_name, customer_phone, customer_email, service_name, vehicle_type, vehicle_make, vehicle_model, price_quoted, payment_status, confirmed_date, confirmed_time, notes, created_at", { count: "exact" })
+    .select("id, customer_name, customer_phone, customer_email, service_name, vehicle_type, vehicle_make, vehicle_model, price_quoted, payment_status, payment_method, confirmed_date, confirmed_time, notes, created_at", { count: "exact" })
     .eq("app_id", APP_ID)
     .eq("source", "direct")
     .order("created_at", { ascending: false })
@@ -157,13 +158,14 @@ export interface CreateSaleInput {
   vehicle_model?: string;
   price_quoted: number;
   payment_status: "paid" | "unpaid";
+  payment_method: "cash" | "card" | "eftpos" | "bank_transfer";
   confirmed_date: string;
   confirmed_time: string;
   notes?: string;
 }
 
 export async function createSale(input: CreateSaleInput): Promise<void> {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   // Derive org_id from existing services
   const { data: svc } = await supabase
@@ -189,6 +191,7 @@ export async function createSale(input: CreateSaleInput): Promise<void> {
     price_quoted: input.price_quoted,
     price_paid: input.payment_status === "paid" ? input.price_quoted : null,
     payment_status: input.payment_status,
+    payment_method: input.payment_method,
     status: "completed",
     source: "direct",
     confirmed_date: input.confirmed_date,
@@ -201,7 +204,7 @@ export async function createSale(input: CreateSaleInput): Promise<void> {
 }
 
 export async function deleteSale(id: string): Promise<void> {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { error } = await supabase.from("bookings").delete().eq("id", id).eq("app_id", APP_ID).eq("source", "direct");
   if (error) throw error;
   revalidatePath("/dashboard");

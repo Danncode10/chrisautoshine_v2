@@ -14,13 +14,24 @@ import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 15;
 
+const ACTION_LABELS: Record<string, string> = {
+  "create.service": "New Service",
+  "update.service": "Edit Service",
+  "delete.service": "Delete Service",
+  "create.sale":    "Sale Recorded",
+  "delete.sale":    "Sale Deleted",
+};
+
 function actionVerb(action: string): string {
+  if (ACTION_LABELS[action]) return ACTION_LABELS[action];
   const [verb, ...rest] = action.split(".");
   const resource = rest.join(".").replace(/-/g, " ");
   return `${verb.charAt(0).toUpperCase() + verb.slice(1)} ${resource}`;
 }
 
 function actionColor(action: string): string {
+  if (action === "create.sale")    return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+  if (action === "delete.sale")    return "bg-destructive/10 text-destructive border-destructive/20";
   if (action.startsWith("create")) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
   if (action.startsWith("delete")) return "bg-destructive/10 text-destructive border-destructive/20";
   if (action.startsWith("update")) return "bg-blue-500/10 text-blue-400 border-blue-500/20";
@@ -35,27 +46,138 @@ function formatDate(iso: string) {
   };
 }
 
-function DiffBadge({ diff }: { diff: unknown }) {
+type PriceTier = { label: string; price: string };
+
+function PricingTiersDiff({ oldTiers, newTiers }: { oldTiers: PriceTier[]; newTiers: PriceTier[] }) {
+  const allLabels = [...new Set([...oldTiers.map(t => t.label), ...newTiers.map(t => t.label)])];
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-1.5">
+      {allLabels.map(label => {
+        const o = oldTiers.find(t => t.label === label);
+        const n = newTiers.find(t => t.label === label);
+        const changed = o?.price !== n?.price;
+        const added   = !o && !!n;
+        const removed = !!o && !n;
+        return (
+          <span key={label} className={cn(
+            "inline-flex items-center gap-1 text-[10px] rounded-md px-1.5 py-0.5 border",
+            added   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
+            removed ? "bg-destructive/10 border-destructive/20 text-destructive/80" :
+            changed ? "bg-blue-500/10 border-blue-500/20 text-blue-300" :
+                      "bg-muted/40 border-border text-muted-foreground"
+          )}>
+            <span className="font-medium">{label}:</span>
+            {removed ? (
+              <span className="line-through">{o!.price}</span>
+            ) : added ? (
+              <span>{n!.price}</span>
+            ) : changed ? (
+              <>
+                <span className="line-through text-destructive/70">{o!.price}</span>
+                <span className="text-emerald-400">{n!.price}</span>
+              </>
+            ) : (
+              <span>{n!.price}</span>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function DiffBadge({ diff, newData }: { diff: unknown; newData?: unknown }) {
   if (!diff || typeof diff !== "object") return null;
   const entries = Object.entries(diff as Record<string, { old: unknown; new: unknown }>);
   if (entries.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-1.5 mt-1.5">
-      {entries.map(([field, change]) => (
-        <span key={field} className="inline-flex items-center gap-1 text-[10px] bg-muted/60 border border-border rounded-md px-1.5 py-0.5">
-          <span className="text-muted-foreground font-medium">{field}:</span>
-          {change.old !== undefined && (
-            <span className="text-destructive/80 line-through max-w-[80px] truncate">
-              {String(change.old)}
+      {entries.map(([field, change]) => {
+        if (field === "pricing_tiers") {
+          const o = Array.isArray(change.old) ? (change.old as PriceTier[]) : [];
+          const n = Array.isArray(change.new) ? (change.new as PriceTier[]) : [];
+          return (
+            <div key={field} className="w-full">
+              <span className="text-[10px] text-muted-foreground font-medium">Pricing tiers:</span>
+              <PricingTiersDiff oldTiers={o} newTiers={n} />
+            </div>
+          );
+        }
+        if (field === "features") {
+          const o = Array.isArray(change.old) ? (change.old as string[]).join(", ") : String(change.old ?? "");
+          const n = Array.isArray(change.new) ? (change.new as string[]).join(", ") : String(change.new ?? "");
+          return (
+            <span key={field} className="inline-flex items-center gap-1 text-[10px] bg-muted/60 border border-border rounded-md px-1.5 py-0.5 max-w-full">
+              <span className="text-muted-foreground font-medium">features:</span>
+              <span className="text-destructive/80 line-through max-w-[100px] truncate">{o || "—"}</span>
+              <span className="text-emerald-400 max-w-[100px] truncate">{n || "—"}</span>
             </span>
-          )}
-          <span className="text-emerald-400 max-w-[80px] truncate">
-            {String(change.new ?? "—")}
+          );
+        }
+        return (
+          <span key={field} className="inline-flex items-center gap-1 text-[10px] bg-muted/60 border border-border rounded-md px-1.5 py-0.5">
+            <span className="text-muted-foreground font-medium">{field}:</span>
+            {change.old !== undefined && (
+              <span className="text-destructive/80 line-through max-w-[80px] truncate">{String(change.old)}</span>
+            )}
+            <span className="text-emerald-400 max-w-[80px] truncate">{String(change.new ?? "—")}</span>
           </span>
-        </span>
-      ))}
+        );
+      })}
     </div>
   );
+}
+
+function CreateServiceDetail({ newData }: { newData: unknown }) {
+  if (!newData || typeof newData !== "object") return null;
+  const d = newData as Record<string, unknown>;
+  const tiers = Array.isArray(d.pricing_tiers) ? (d.pricing_tiers as PriceTier[]) : [];
+  if (tiers.length === 0) return null;
+  return (
+    <div className="mt-1.5">
+      <span className="text-[10px] text-muted-foreground font-medium">Initial pricing:</span>
+      <div className="flex flex-wrap gap-1.5 mt-1">
+        {tiers.map(t => (
+          <span key={t.label} className="inline-flex items-center gap-1 text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-md px-1.5 py-0.5">
+            <span className="font-medium">{t.label}:</span> {t.price}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function getLogDescription(log: AuditLog): string | null {
+  if (log.description) return log.description;
+  const nd   = log.new_data as Record<string, unknown> | null;
+  const od   = log.old_data as Record<string, unknown> | null;
+  const name = nd?.name ?? od?.name;
+  const cat  = nd?.category ?? od?.category;
+
+  if (log.action === "create.sale") {
+    const cn  = nd?.customer_name ?? "customer";
+    const sn  = nd?.service_name  ?? "service";
+    const pq  = nd?.price_quoted;
+    return `Recorded sale for "${cn}" — ${sn}${pq ? ` ($${pq})` : ""}`;
+  }
+  if (log.action === "delete.sale") {
+    const cn  = od?.customer_name ?? "customer";
+    const sn  = od?.service_name  ?? "service";
+    const pq  = od?.price_quoted;
+    return `Deleted sale for "${cn}" — ${sn}${pq ? ` ($${pq})` : ""}`;
+  }
+  if (log.action === "create.service") return name ? `Created "${name}" (${cat ?? "service"})` : null;
+  if (log.action === "delete.service") return name ? `Deleted "${name}" (${cat ?? "service"})` : null;
+  if (log.action === "update.service" && log.diff && typeof log.diff === "object") {
+    const d = log.diff as Record<string, { old: unknown; new: unknown }>;
+    if (d.name)          return `Renamed "${d.name.old}" → "${d.name.new}"`;
+    if (d.pricing_tiers) return `Updated pricing tiers for "${name}"`;
+    if (d.is_published)  return (d.is_published.new as boolean) ? `Published "${name}"` : `Unpublished "${name}"`;
+    if (d.features)      return `Updated features for "${name}"`;
+    if (d.description)   return `Updated description for "${name}"`;
+    return `Updated "${name}"`;
+  }
+  return null;
 }
 
 // ─── Filter bar ───────────────────────────────────────────────────────────────
@@ -167,14 +289,17 @@ function FilterBar({
 function LogRow({ log }: { log: AuditLog }) {
   const { date, time } = formatDate(log.created_at);
   const [expanded, setExpanded] = useState(false);
-  const hasDiff = log.diff && typeof log.diff === "object" && Object.keys(log.diff).length > 0;
+  const hasDiff    = log.diff && typeof log.diff === "object" && Object.keys(log.diff).length > 0;
+  const isCreate   = log.action === "create.service";
+  const description = getLogDescription(log);
+  const canExpand  = hasDiff || (isCreate && log.new_data);
 
   return (
     <div
-      onClick={() => hasDiff && setExpanded(v => !v)}
+      onClick={() => canExpand && setExpanded(v => !v)}
       className={cn(
         "flex items-start gap-4 py-3 px-4 rounded-xl transition-colors",
-        hasDiff ? "cursor-pointer hover:bg-muted/40" : "",
+        canExpand ? "cursor-pointer hover:bg-muted/40" : "",
       )}>
 
       {/* Timestamp */}
@@ -195,21 +320,32 @@ function LogRow({ log }: { log: AuditLog }) {
 
       {/* Details */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[12px] text-muted-foreground capitalize">{log.resource_type}</span>
+        {/* Description line */}
+        {description && (
+          <p className="text-[13px] text-foreground font-medium leading-snug">{description}</p>
+        )}
+        <div className="flex items-center gap-2 flex-wrap mt-0.5">
+          <span className="text-[11px] text-muted-foreground capitalize">{log.resource_type}</span>
           {log.resource_id && (
-            <code className="text-[10px] text-muted-foreground/60 bg-muted/60 px-1.5 py-0.5 rounded font-mono truncate max-w-[160px]">
-              {log.resource_id}
+            <code className="text-[10px] text-muted-foreground/50 bg-muted/60 px-1.5 py-0.5 rounded font-mono truncate max-w-[140px]">
+              {log.resource_id.slice(0, 8)}…
             </code>
           )}
           {log.actor_email && (
             <span className="text-[11px] text-muted-foreground">· {log.actor_email}</span>
           )}
         </div>
-        {expanded && hasDiff && <DiffBadge diff={log.diff} />}
-        {hasDiff && !expanded && (
-          <p className="text-[10px] text-muted-foreground/50 mt-0.5">
-            {Object.keys(log.diff as object).length} field{Object.keys(log.diff as object).length !== 1 ? "s" : ""} changed — click to expand
+
+        {/* Expanded detail */}
+        {expanded && hasDiff && <DiffBadge diff={log.diff} newData={log.new_data} />}
+        {expanded && isCreate && !hasDiff && <CreateServiceDetail newData={log.new_data} />}
+
+        {/* Collapse hint */}
+        {!expanded && canExpand && (
+          <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+            {hasDiff
+              ? `${Object.keys(log.diff as object).length} field${Object.keys(log.diff as object).length !== 1 ? "s" : ""} changed · click to expand`
+              : "click to see pricing"}
           </p>
         )}
       </div>

@@ -7,8 +7,8 @@ const APP_ID = process.env.NEXT_PUBLIC_APP_ID ?? "chris-auto-shine";
 
 export type AuditLog = Pick<
   Tables<"audit_logs">,
-  "id" | "action" | "resource_type" | "resource_id" | "actor_email" | "diff" | "created_at" | "ip_address"
->;
+  "id" | "action" | "resource_type" | "resource_id" | "actor_email" | "diff" | "new_data" | "old_data" | "created_at" | "ip_address"
+> & { description?: string | null };
 
 export interface LogFilters {
   page: number;       // 1-based
@@ -31,7 +31,7 @@ export async function listLogs(filters: LogFilters): Promise<LogsResult> {
 
   let query = supabase
     .from("audit_logs")
-    .select("id, action, resource_type, resource_id, actor_email, diff, created_at, ip_address", { count: "exact" })
+    .select("id, action, resource_type, resource_id, actor_email, diff, new_data, old_data, description, created_at, ip_address", { count: "exact" })
     .eq("app_id", APP_ID)
     .order("created_at", { ascending: false })
     .range(offset, offset + pageSize - 1);

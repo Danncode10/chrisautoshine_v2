@@ -8,7 +8,7 @@ import {
   Plus, Search, X, Check, Loader2, Trash2,
   DollarSign, ShoppingBag, TrendingUp, Star,
   ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  ChevronDown, Pencil,
+  ChevronDown, Pencil, Download,
 } from "lucide-react";
 import {
   getSalesStats, getServicePopularity, listSales, createSale, deleteSale,
@@ -475,6 +475,7 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
     time: string;
     notes: string;
     payment_status: "paid" | "unpaid";
+    payment_method: "cash" | "card" | "eftpos" | "bank_transfer";
   }>({
     customer_name: "",
     customer_phone: "",
@@ -484,6 +485,7 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
     time: now.toTimeString().slice(0, 5),
     notes: "",
     payment_status: "paid",
+    payment_method: "cash",
   });
 
   const set = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }));
@@ -544,6 +546,7 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
       vehicle_type:   first.vehicle_type || undefined,
       price_quoted:   parseFloat(form.price_override) || 0,
       payment_status: form.payment_status,
+      payment_method: form.payment_method,
       confirmed_date: form.date,
       confirmed_time: form.time,
       notes:          form.notes.trim() || undefined,
@@ -695,9 +698,9 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
                   </div>
                 </div>
 
-                {/* Payment */}
+                {/* Payment status */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment</label>
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment Status</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(["paid", "unpaid"] as const).map(s => (
                       <button key={s} type="button" onClick={() => set("payment_status", s)}
@@ -710,6 +713,29 @@ function AddSaleModal({ onClose, onSaved }: { onClose: () => void; onSaved: () =
                             : "border-border bg-background text-muted-foreground hover:border-primary/30"
                         )}>
                         {s === "paid" ? "✓ Paid" : "⏳ Unpaid"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Payment method */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment Method</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { value: "cash",          label: "💵 Cash" },
+                      { value: "card",          label: "💳 Card" },
+                      { value: "eftpos",        label: "🏧 EFTPOS" },
+                      { value: "bank_transfer", label: "🏦 Bank Transfer" },
+                    ] as const).map(m => (
+                      <button key={m.value} type="button" onClick={() => set("payment_method", m.value)}
+                        className={cn(
+                          "py-2 rounded-xl border text-sm font-medium transition-colors",
+                          form.payment_method === m.value
+                            ? "border-primary/40 bg-primary/10 text-primary"
+                            : "border-border bg-background text-muted-foreground hover:border-primary/30"
+                        )}>
+                        {m.label}
                       </button>
                     ))}
                   </div>
@@ -750,11 +776,41 @@ const PAY_STYLE: Record<string, string> = {
   unpaid: "bg-amber-500/10  text-amber-400  border-amber-500/20",
 };
 
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  cash: "Cash", card: "Card", eftpos: "EFTPOS", bank_transfer: "Bank Transfer",
+};
+
+function triggerCSVDownload(sales: import("@/services/sales").Sale[]) {
+  const header = ["Date", "Time", "Customer", "Phone", "Email", "Service", "Vehicle", "Price", "Payment Status", "Payment Method", "Notes"];
+  const rows = sales.map(s => [
+    s.confirmed_date ?? s.created_at.slice(0, 10),
+    s.confirmed_time ?? "",
+    s.customer_name,
+    s.customer_phone ?? "",
+    s.customer_email ?? "",
+    s.service_name,
+    [s.vehicle_make, s.vehicle_model].filter(Boolean).join(" ") || s.vehicle_type || "",
+    `$${Number(s.price_quoted) || 0}`,
+    s.payment_status,
+    PAYMENT_METHOD_LABEL[s.payment_method ?? ""] ?? s.payment_method ?? "",
+    s.notes ?? "",
+  ]);
+  const csv  = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `sales-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function SalesTable({ period }: { period: Period }) {
-  const [page, setPage]     = useState(1);
-  const [search, setSearch] = useState("");
-  const [from, setFrom]     = useState("");
-  const [to, setTo]         = useState("");
+  const [page, setPage]       = useState(1);
+  const [search, setSearch]   = useState("");
+  const [from, setFrom]       = useState("");
+  const [to, setTo]           = useState("");
+  const [exporting, setExporting] = useState(false);
   const qc = useQueryClient();
 
   const q = useQuery({
@@ -783,6 +839,40 @@ function SalesTable({ period }: { period: Period }) {
 
   return (
     <div className="space-y-3">
+      {/* Header row */}
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h3 className="text-[13px] font-semibold text-foreground">All Sales</h3>
+          {(from || to) && (
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {from && new Date(from).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })}
+              {from && to ? " → " : ""}
+              {to   && new Date(to  ).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={async () => {
+            setExporting(true);
+            try {
+              const result = await listSales({
+                page: 1, pageSize: 9999,
+                search: search || undefined,
+                from:   from   || undefined,
+                to:     to     || undefined,
+              });
+              triggerCSVDownload(result.data);
+            } finally {
+              setExporting(false);
+            }
+          }}
+          disabled={exporting || !q.data?.total}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:pointer-events-none">
+          {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+          {exporting ? "Exporting…" : `Export CSV${q.data?.total ? ` (${q.data.total})` : ""}`}
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="relative flex-1 min-w-40">
@@ -828,7 +918,9 @@ function SalesTable({ period }: { period: Period }) {
                   <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Service</th>
                   <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Vehicle</th>
                   <th className="text-right px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Price</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Payment</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">Method</th>
+                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Notes</th>
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
@@ -861,6 +953,18 @@ function SalesTable({ period }: { period: Period }) {
                         <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize", PAY_STYLE[sale.payment_status] ?? PAY_STYLE.unpaid)}>
                           {sale.payment_status}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-[11px] text-muted-foreground">
+                          {PAYMENT_METHOD_LABEL[sale.payment_method ?? ""] ?? sale.payment_method ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 max-w-[140px]">
+                        {sale.notes ? (
+                          <p className="text-[11px] text-muted-foreground truncate" title={sale.notes}>{sale.notes}</p>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground/30">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <button
@@ -981,10 +1085,7 @@ export function SalesTab() {
       </div>
 
       {/* Sales table */}
-      <div>
-        <h3 className="text-[14px] font-semibold text-foreground mb-3">All Sales</h3>
-        <SalesTable period={period} />
-      </div>
+      <SalesTable period={period} />
 
       {/* Add modal */}
       {modalOpen && (
