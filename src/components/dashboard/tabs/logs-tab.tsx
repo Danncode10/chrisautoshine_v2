@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Loader2,
-  Search, X, Filter, RefreshCw,
+  Loader2, Search, X, RefreshCw,
+  Plus, Pencil, Trash2, ShoppingCart, Activity,
+  CalendarDays, ChevronDown,
 } from "lucide-react";
 import { DashPagination } from "@/components/dashboard/dash-pagination";
 import { listLogs, getLogDistinctValues } from "@/services/logs";
@@ -21,6 +22,11 @@ const ACTION_LABELS: Record<string, string> = {
   "delete.service": "Delete Service",
   "create.sale":    "Sale Recorded",
   "delete.sale":    "Sale Deleted",
+  "create.lead":    "New Lead",
+  "delete.lead":    "Lead Deleted",
+  "create.booking": "New Booking",
+  "update.booking": "Edit Booking",
+  "delete.booking": "Delete Booking",
 };
 
 function actionVerb(action: string): string {
@@ -30,29 +36,123 @@ function actionVerb(action: string): string {
   return `${verb.charAt(0).toUpperCase() + verb.slice(1)} ${resource}`;
 }
 
-function actionColor(action: string): string {
-  if (action === "create.sale")    return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-  if (action === "delete.sale")    return "bg-destructive/10 text-destructive border-destructive/20";
-  if (action.startsWith("create")) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-  if (action.startsWith("delete")) return "bg-destructive/10 text-destructive border-destructive/20";
-  if (action.startsWith("update")) return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-  return "bg-muted text-muted-foreground border-border";
+type ActionVariant = "create" | "update" | "delete" | "default";
+
+function getVariant(action: string): ActionVariant {
+  if (action.startsWith("create")) return "create";
+  if (action.startsWith("update")) return "update";
+  if (action.startsWith("delete")) return "delete";
+  return "default";
 }
 
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  return {
-    date: d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" }),
-    time: d.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+const VARIANT = {
+  create: {
+    badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    dot:   "bg-emerald-500",
+    ring:  "ring-emerald-500/20",
+    bg:    "bg-emerald-500/10",
+  },
+  update: {
+    badge: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    dot:   "bg-blue-500",
+    ring:  "ring-blue-500/20",
+    bg:    "bg-blue-500/10",
+  },
+  delete: {
+    badge: "bg-destructive/10 text-destructive border-destructive/20",
+    dot:   "bg-destructive",
+    ring:  "ring-destructive/20",
+    bg:    "bg-destructive/10",
+  },
+  default: {
+    badge: "bg-muted text-muted-foreground border-border",
+    dot:   "bg-muted-foreground",
+    ring:  "ring-border",
+    bg:    "bg-muted/40",
+  },
+};
+
+function ActionIcon({ action }: { action: string }) {
+  const v = getVariant(action);
+  const cls = cn(
+    "flex items-center justify-center w-7 h-7 rounded-full ring-1 shrink-0",
+    VARIANT[v].bg, VARIANT[v].ring
+  );
+  const icon = () => {
+    if (action === "create.sale" || action === "delete.sale")
+      return <ShoppingCart className="w-3.5 h-3.5" />;
+    if (v === "create") return <Plus className="w-3.5 h-3.5" />;
+    if (v === "update") return <Pencil className="w-3 h-3" />;
+    if (v === "delete") return <Trash2 className="w-3 h-3" />;
+    return <Activity className="w-3.5 h-3.5" />;
   };
+  return (
+    <div className={cls}>
+      <span className={cn(
+        "flex items-center justify-center",
+        v === "create" ? "text-emerald-400" :
+        v === "update" ? "text-blue-400" :
+        v === "delete" ? "text-destructive" : "text-muted-foreground"
+      )}>
+        {icon()}
+      </span>
+    </div>
+  );
 }
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins  = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days  = Math.floor(diff / 86_400_000);
+  if (mins < 1)  return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return "yesterday";
+  if (days < 7)  return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-AU", { day: "2-digit", month: "short" });
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("en-AU", {
+    hour: "2-digit", minute: "2-digit", hour12: true,
+  });
+}
+
+function groupByDate(logs: AuditLog[]): { label: string; logs: AuditLog[] }[] {
+  const groups: { label: string; logs: AuditLog[] }[] = [];
+  let current: string | null = null;
+  for (const log of logs) {
+    const d = new Date(log.created_at);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const isSameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+    let label: string;
+    if (isSameDay(d, today))     label = "Today";
+    else if (isSameDay(d, yesterday)) label = "Yesterday";
+    else label = d.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+    if (label !== current) {
+      groups.push({ label, logs: [log] });
+      current = label;
+    } else {
+      groups[groups.length - 1].logs.push(log);
+    }
+  }
+  return groups;
+}
+
+// ─── Diff renderers ───────────────────────────────────────────────────────────
 
 type PriceTier = { label: string; price: string };
 
 function PricingTiersDiff({ oldTiers, newTiers }: { oldTiers: PriceTier[]; newTiers: PriceTier[] }) {
   const allLabels = [...new Set([...oldTiers.map(t => t.label), ...newTiers.map(t => t.label)])];
   return (
-    <div className="mt-1.5 flex flex-wrap gap-1.5">
+    <div className="mt-2 flex flex-wrap gap-1.5">
       {allLabels.map(label => {
         const o = oldTiers.find(t => t.label === label);
         const n = newTiers.find(t => t.label === label);
@@ -68,18 +168,14 @@ function PricingTiersDiff({ oldTiers, newTiers }: { oldTiers: PriceTier[]; newTi
                       "bg-muted/40 border-border text-muted-foreground"
           )}>
             <span className="font-medium">{label}:</span>
-            {removed ? (
-              <span className="line-through">{o!.price}</span>
-            ) : added ? (
-              <span>{n!.price}</span>
-            ) : changed ? (
+            {removed ? <span className="line-through">{o!.price}</span>
+            : added   ? <span>{n!.price}</span>
+            : changed ? (
               <>
                 <span className="line-through text-destructive/70">{o!.price}</span>
                 <span className="text-emerald-400">{n!.price}</span>
               </>
-            ) : (
-              <span>{n!.price}</span>
-            )}
+            ) : <span>{n!.price}</span>}
           </span>
         );
       })}
@@ -87,12 +183,12 @@ function PricingTiersDiff({ oldTiers, newTiers }: { oldTiers: PriceTier[]; newTi
   );
 }
 
-function DiffBadge({ diff, newData }: { diff: unknown; newData?: unknown }) {
+function DiffBadge({ diff }: { diff: unknown }) {
   if (!diff || typeof diff !== "object") return null;
   const entries = Object.entries(diff as Record<string, { old: unknown; new: unknown }>);
   if (entries.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-1.5 mt-1.5">
+    <div className="flex flex-wrap gap-1.5 mt-2">
       {entries.map(([field, change]) => {
         if (field === "pricing_tiers") {
           const o = Array.isArray(change.old) ? (change.old as PriceTier[]) : [];
@@ -135,7 +231,7 @@ function CreateServiceDetail({ newData }: { newData: unknown }) {
   const tiers = Array.isArray(d.pricing_tiers) ? (d.pricing_tiers as PriceTier[]) : [];
   if (tiers.length === 0) return null;
   return (
-    <div className="mt-1.5">
+    <div className="mt-2">
       <span className="text-[10px] text-muted-foreground font-medium">Initial pricing:</span>
       <div className="flex flex-wrap gap-1.5 mt-1">
         {tiers.map(t => (
@@ -150,8 +246,8 @@ function CreateServiceDetail({ newData }: { newData: unknown }) {
 
 function getLogDescription(log: AuditLog): string | null {
   if (log.description) return log.description;
-  const nd   = log.new_data as Record<string, unknown> | null;
-  const od   = log.old_data as Record<string, unknown> | null;
+  const nd  = log.new_data as Record<string, unknown> | null;
+  const od  = log.old_data as Record<string, unknown> | null;
   const name = nd?.name ?? od?.name;
   const cat  = nd?.category ?? od?.category;
 
@@ -159,7 +255,7 @@ function getLogDescription(log: AuditLog): string | null {
     const cn  = nd?.customer_name ?? "customer";
     const sn  = nd?.service_name  ?? "service";
     const pq  = nd?.price_quoted;
-    return `Recorded sale for "${cn}" — ${sn}${pq ? ` ($${pq})` : ""}`;
+    return `Sale for "${cn}" — ${sn}${pq ? ` ($${pq})` : ""}`;
   }
   if (log.action === "delete.sale") {
     const cn  = od?.customer_name ?? "customer";
@@ -181,15 +277,139 @@ function getLogDescription(log: AuditLog): string | null {
   return null;
 }
 
-// ─── Filter bar ───────────────────────────────────────────────────────────────
+// ─── Log Row ──────────────────────────────────────────────────────────────────
+
+function LogRow({ log, isLast }: { log: AuditLog; isLast: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDiff   = log.diff && typeof log.diff === "object" && Object.keys(log.diff).length > 0;
+  const isCreate  = log.action === "create.service";
+  const canExpand = hasDiff || (isCreate && log.new_data);
+  const description = getLogDescription(log);
+  const v = getVariant(log.action);
+
+  return (
+    <div className="flex gap-3 px-4 py-3 group">
+      {/* Timeline spine */}
+      <div className="flex flex-col items-center">
+        <ActionIcon action={log.action} />
+        {!isLast && <div className="w-px flex-1 mt-1.5 bg-border/50" />}
+      </div>
+
+      {/* Content */}
+      <div
+        className={cn(
+          "flex-1 min-w-0 pb-3",
+          canExpand ? "cursor-pointer" : ""
+        )}
+        onClick={() => canExpand && setExpanded(v => !v)}
+      >
+        {/* Top row */}
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={cn(
+              "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border",
+              VARIANT[v].badge
+            )}>
+              {actionVerb(log.action)}
+            </span>
+            {log.resource_type && (
+              <span className="text-[11px] text-muted-foreground capitalize">
+                {log.resource_type}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground shrink-0">
+            <span title={new Date(log.created_at).toLocaleString("en-AU")}>
+              {relativeTime(log.created_at)}
+            </span>
+            <span>·</span>
+            <span>{formatTime(log.created_at)}</span>
+          </div>
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p className="mt-1 text-[13px] text-foreground font-medium leading-snug">{description}</p>
+        )}
+
+        {/* Meta */}
+        <div className="flex items-center gap-2 flex-wrap mt-0.5">
+          {log.resource_id && (
+            <code className="text-[10px] text-muted-foreground/50 bg-muted/60 px-1.5 py-0.5 rounded font-mono truncate max-w-[140px]">
+              {log.resource_id.slice(0, 8)}…
+            </code>
+          )}
+          {log.actor_email && (
+            <span className="text-[11px] text-muted-foreground">by {log.actor_email}</span>
+          )}
+        </div>
+
+        {/* Expand hint */}
+        {canExpand && !expanded && (
+          <button className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+            <ChevronDown className="w-3 h-3" />
+            {hasDiff
+              ? `${Object.keys(log.diff as object).length} field${Object.keys(log.diff as object).length !== 1 ? "s" : ""} changed`
+              : "see pricing"}
+          </button>
+        )}
+
+        {/* Expanded detail */}
+        {expanded && hasDiff   && <DiffBadge diff={log.diff} />}
+        {expanded && isCreate && !hasDiff && <CreateServiceDetail newData={log.new_data} />}
+      </div>
+    </div>
+  );
+}
+
+// ─── Filters ──────────────────────────────────────────────────────────────────
+
+type DatePreset = "all" | "today" | "week" | "month" | "custom";
 
 interface Filters {
+  preset: DatePreset;
   from: string;
   to: string;
   action: string;
   resourceType: string;
   search: string;
 }
+
+const DEFAULT_FILTERS: Filters = {
+  preset: "all",
+  from: "", to: "",
+  action: "all", resourceType: "all",
+  search: "",
+};
+
+function toDateString(d: Date): string {
+  return d.toISOString().split("T")[0];
+}
+
+function applyPreset(preset: DatePreset): Partial<Filters> {
+  const today = new Date();
+  if (preset === "all")   return { preset, from: "", to: "" };
+  if (preset === "today") return { preset, from: toDateString(today), to: toDateString(today) };
+  if (preset === "week") {
+    const from = new Date(today);
+    from.setDate(today.getDate() - 6);
+    return { preset, from: toDateString(from), to: toDateString(today) };
+  }
+  if (preset === "month") {
+    const from = new Date(today);
+    from.setDate(today.getDate() - 29);
+    return { preset, from: toDateString(from), to: toDateString(today) };
+  }
+  return { preset }; // custom — keep existing dates
+}
+
+const PRESETS: { id: DatePreset; label: string }[] = [
+  { id: "all",   label: "All time" },
+  { id: "today", label: "Today" },
+  { id: "week",  label: "Last 7 days" },
+  { id: "month", label: "Last 30 days" },
+  { id: "custom", label: "Custom" },
+];
 
 function FilterBar({
   filters, onChange, actions, resourceTypes, onReset, isLoading,
@@ -201,162 +421,127 @@ function FilterBar({
   onReset: () => void;
   isLoading: boolean;
 }) {
-  const hasActive = filters.from || filters.to || filters.action !== "all" || filters.resourceType !== "all" || filters.search;
+  const hasActiveFilter =
+    filters.preset !== "all" ||
+    filters.action !== "all" ||
+    filters.resourceType !== "all" ||
+    filters.search;
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-muted/30 border border-border rounded-2xl">
-      <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      {/* Preset row */}
+      <div className="flex items-center gap-1 px-4 py-3 border-b border-border/50 flex-wrap">
+        <CalendarDays className="w-3.5 h-3.5 text-muted-foreground mr-1 shrink-0" />
+        {PRESETS.map(p => (
+          <button
+            key={p.id}
+            onClick={() => onChange(applyPreset(p.id))}
+            className={cn(
+              "px-3 py-1 rounded-full text-[12px] font-medium transition-colors",
+              filters.preset === p.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}
+          >
+            {p.label}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+          {hasActiveFilter && (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted"
+            >
+              <X className="w-3 h-3" /> Clear
+            </button>
+          )}
+        </div>
+      </div>
 
-        {/* Date from */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-[11px] text-muted-foreground whitespace-nowrap">From</label>
+      {/* Custom date range */}
+      {filters.preset === "custom" && (
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 flex-wrap bg-muted/20">
+          <span className="text-[11px] text-muted-foreground">From</span>
           <input
             type="date"
             value={filters.from}
             onChange={e => onChange({ from: e.target.value })}
-            className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/50 cursor-pointer"
+            className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/60 cursor-pointer"
           />
-        </div>
-
-        {/* Date to */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-[11px] text-muted-foreground whitespace-nowrap">To</label>
+          <span className="text-[11px] text-muted-foreground">To</span>
           <input
             type="date"
             value={filters.to}
             onChange={e => onChange({ to: e.target.value })}
-            className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/50 cursor-pointer"
+            className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/60 cursor-pointer"
           />
         </div>
+      )}
 
-        {/* Action */}
-        <select
-          value={filters.action}
-          onChange={e => onChange({ action: e.target.value })}
-          className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/50 cursor-pointer"
-        >
-          <option value="all">All actions</option>
-          {actions.map(a => (
-            <option key={a} value={a}>{actionVerb(a)}</option>
-          ))}
-        </select>
+      {/* Secondary filters */}
+      <div className="flex items-center gap-2 px-4 py-2.5 flex-wrap">
+        {/* Action select */}
+        <div className="relative">
+          <select
+            value={filters.action}
+            onChange={e => onChange({ action: e.target.value })}
+            className={cn(
+              "appearance-none bg-muted/40 border border-border rounded-lg pl-2.5 pr-7 py-1.5 text-[12px] focus:outline-none focus:border-primary/60 cursor-pointer transition-colors",
+              filters.action !== "all" ? "text-foreground border-primary/40" : "text-muted-foreground"
+            )}
+          >
+            <option value="all">All actions</option>
+            {actions.map(a => (
+              <option key={a} value={a}>{actionVerb(a)}</option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+        </div>
 
-        {/* Resource type */}
-        <select
-          value={filters.resourceType}
-          onChange={e => onChange({ resourceType: e.target.value })}
-          className="bg-background border border-border rounded-lg px-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/50 cursor-pointer"
-        >
-          <option value="all">All types</option>
-          {resourceTypes.map(r => (
-            <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-          ))}
-        </select>
+        {/* Resource type select */}
+        <div className="relative">
+          <select
+            value={filters.resourceType}
+            onChange={e => onChange({ resourceType: e.target.value })}
+            className={cn(
+              "appearance-none bg-muted/40 border border-border rounded-lg pl-2.5 pr-7 py-1.5 text-[12px] focus:outline-none focus:border-primary/60 cursor-pointer transition-colors",
+              filters.resourceType !== "all" ? "text-foreground border-primary/40" : "text-muted-foreground"
+            )}
+          >
+            <option value="all">All types</option>
+            {resourceTypes.map(r => (
+              <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+        </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={filters.search}
             onChange={e => onChange({ search: e.target.value })}
-            placeholder="Search actor or ID…"
-            className="bg-background border border-border rounded-lg pl-6 pr-2 py-1 text-[12px] text-foreground focus:outline-none focus:border-primary/50 w-44"
+            placeholder="Search by actor or ID…"
+            className="bg-muted/40 border border-border rounded-lg pl-7 pr-7 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60 w-52 transition-colors"
           />
           {filters.search && (
-            <button onClick={() => onChange({ search: "" })} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <button
+              onClick={() => onChange({ search: "" })}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
               <X className="w-3 h-3" />
             </button>
           )}
         </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
-          {hasActive && (
-            <button onClick={onReset}
-              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted">
-              <X className="w-3 h-3" /> Clear filters
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Log row ──────────────────────────────────────────────────────────────────
-
-function LogRow({ log }: { log: AuditLog }) {
-  const { date, time } = formatDate(log.created_at);
-  const [expanded, setExpanded] = useState(false);
-  const hasDiff    = log.diff && typeof log.diff === "object" && Object.keys(log.diff).length > 0;
-  const isCreate   = log.action === "create.service";
-  const description = getLogDescription(log);
-  const canExpand  = hasDiff || (isCreate && log.new_data);
-
-  return (
-    <div
-      onClick={() => canExpand && setExpanded(v => !v)}
-      className={cn(
-        "flex items-start gap-4 py-3 px-4 rounded-xl transition-colors",
-        canExpand ? "cursor-pointer hover:bg-muted/40" : "",
-      )}>
-
-      {/* Timestamp */}
-      <div className="shrink-0 text-right min-w-[90px]">
-        <p className="text-[11px] text-foreground font-medium">{date}</p>
-        <p className="text-[10px] text-muted-foreground">{time}</p>
-      </div>
-
-      {/* Action badge */}
-      <div className="shrink-0 pt-0.5">
-        <span className={cn(
-          "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border",
-          actionColor(log.action)
-        )}>
-          {actionVerb(log.action)}
-        </span>
-      </div>
-
-      {/* Details */}
-      <div className="flex-1 min-w-0">
-        {/* Description line */}
-        {description && (
-          <p className="text-[13px] text-foreground font-medium leading-snug">{description}</p>
-        )}
-        <div className="flex items-center gap-2 flex-wrap mt-0.5">
-          <span className="text-[11px] text-muted-foreground capitalize">{log.resource_type}</span>
-          {log.resource_id && (
-            <code className="text-[10px] text-muted-foreground/50 bg-muted/60 px-1.5 py-0.5 rounded font-mono truncate max-w-[140px]">
-              {log.resource_id.slice(0, 8)}…
-            </code>
-          )}
-          {log.actor_email && (
-            <span className="text-[11px] text-muted-foreground">· {log.actor_email}</span>
-          )}
-        </div>
-
-        {/* Expanded detail */}
-        {expanded && hasDiff && <DiffBadge diff={log.diff} newData={log.new_data} />}
-        {expanded && isCreate && !hasDiff && <CreateServiceDetail newData={log.new_data} />}
-
-        {/* Collapse hint */}
-        {!expanded && canExpand && (
-          <p className="text-[10px] text-muted-foreground/40 mt-0.5">
-            {hasDiff
-              ? `${Object.keys(log.diff as object).length} field${Object.keys(log.diff as object).length !== 1 ? "s" : ""} changed · click to expand`
-              : "click to see pricing"}
-          </p>
-        )}
       </div>
     </div>
   );
 }
 
 // ─── Main Tab ─────────────────────────────────────────────────────────────────
-
-const DEFAULT_FILTERS: Filters = { from: "", to: "", action: "all", resourceType: "all", search: "" };
 
 export function LogsTab() {
   const [page, setPage]       = useState(1);
@@ -372,17 +557,14 @@ export function LogsTab() {
     setPage(1);
   }, []);
 
-  // Build the to-date as end-of-day
-  const toEndOfDay = filters.to ? `${filters.to}T23:59:59.999Z` : undefined;
-
   const logsQuery = useQuery({
     queryKey: ["audit-logs", page, filters],
     queryFn: () => listLogs({
       page,
       pageSize: PAGE_SIZE,
-      from: filters.from ? new Date(filters.from).toISOString() : undefined,
-      to: toEndOfDay,
-      action: filters.action !== "all" ? filters.action : undefined,
+      from: filters.from ? `${filters.from}T00:00:00.000Z` : undefined,
+      to:   filters.to   ? `${filters.to}T23:59:59.999Z`   : undefined,
+      action:       filters.action       !== "all" ? filters.action       : undefined,
       resourceType: filters.resourceType !== "all" ? filters.resourceType : undefined,
     }),
     placeholderData: prev => prev,
@@ -390,16 +572,15 @@ export function LogsTab() {
 
   const metaQuery = useQuery({
     queryKey: ["audit-logs-meta"],
-    queryFn: getLogDistinctValues,
+    queryFn:  getLogDistinctValues,
     staleTime: 5 * 60 * 1000,
   });
 
-  const logs    = logsQuery.data?.data ?? [];
-  const total   = logsQuery.data?.total ?? 0;
-  const actions = metaQuery.data?.actions ?? [];
-  const resTypes = metaQuery.data?.resourceTypes ?? [];
+  const logs      = logsQuery.data?.data ?? [];
+  const total     = logsQuery.data?.total ?? 0;
+  const actions   = metaQuery.data?.actions ?? [];
+  const resTypes  = metaQuery.data?.resourceTypes ?? [];
 
-  // Client-side search filter (on actor_email + resource_id)
   const visible = filters.search
     ? logs.filter(l =>
         l.actor_email?.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -407,21 +588,27 @@ export function LogsTab() {
       )
     : logs;
 
+  const grouped = useMemo(() => groupByDate(visible), [visible]);
+
+  const hasFilters = filters.preset !== "all" || filters.action !== "all" ||
+                     filters.resourceType !== "all" || filters.search;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-foreground tracking-tight">Activity Logs</h2>
           <p className="mt-1 text-[14px] text-muted-foreground">
-            Full audit trail of all changes. Click any row to expand diff.
+            Full audit trail of all changes. Click any entry to expand.
           </p>
         </div>
         <button
           onClick={() => logsQuery.refetch()}
           disabled={logsQuery.isFetching}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13px] text-muted-foreground border border-border hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50">
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[13px] text-muted-foreground border border-border hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+        >
           <RefreshCw className={cn("w-3.5 h-3.5", logsQuery.isFetching && "animate-spin")} />
           Refresh
         </button>
@@ -438,38 +625,79 @@ export function LogsTab() {
       />
 
       {/* Stats strip */}
-      <div className="flex items-center gap-6 text-[12px] text-muted-foreground">
-        <span><span className="font-semibold text-foreground">{total}</span> total entries</span>
-        {filters.from || filters.to ? (
-          <span>
-            Filtered: <span className="font-semibold text-foreground">
-              {filters.from && new Date(filters.from).toLocaleDateString("en-AU", { day: "2-digit", month: "short" })}
-              {filters.from && filters.to ? " – " : ""}
-              {filters.to && new Date(filters.to).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })}
+      <div className="flex items-center gap-3 text-[12px] text-muted-foreground px-0.5">
+        <span>
+          <span className="font-semibold text-foreground">{total}</span> total entr{total === 1 ? "y" : "ies"}
+        </span>
+        {filters.preset !== "all" && (
+          <>
+            <span className="text-border">·</span>
+            <span>
+              {filters.preset === "custom" && filters.from && filters.to
+                ? `${new Date(filters.from).toLocaleDateString("en-AU", { day: "2-digit", month: "short" })} – ${new Date(filters.to).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })}`
+                : PRESETS.find(p => p.id === filters.preset)?.label}
             </span>
-          </span>
-        ) : null}
+          </>
+        )}
       </div>
 
       {/* Log list */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
         {logsQuery.isLoading ? (
-          <div className="flex items-center justify-center py-16">
+          <div className="flex items-center justify-center py-20">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : logsQuery.isError ? (
-          <div className="py-12 text-center text-[13px] text-destructive">
-            Failed to load logs. Check your connection and try again.
+          <div className="py-14 text-center">
+            <p className="text-[14px] text-destructive font-medium">Failed to load logs</p>
+            <p className="text-[12px] text-muted-foreground mt-1">Check your connection and try refreshing.</p>
           </div>
         ) : visible.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-[14px] text-muted-foreground">No log entries found.</p>
-            <p className="text-[12px] text-muted-foreground/60 mt-1">Try adjusting your filters.</p>
+          <div className="py-20 text-center flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-muted-foreground/50" />
+            </div>
+            <div>
+              <p className="text-[14px] text-foreground font-medium">
+                {hasFilters ? "No results match your filters" : "No activity yet"}
+              </p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                {hasFilters ? "Try a wider date range or clear some filters." : "Actions like sales and edits will appear here."}
+              </p>
+            </div>
+            {hasFilters && (
+              <button
+                onClick={resetFilters}
+                className="text-[12px] text-primary hover:underline"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         ) : (
-          <div className="divide-y divide-border/50">
-            {visible.map((log, i) => (
-              <LogRow key={log.id} log={log} />
+          <div className="pt-2 pb-1">
+            {grouped.map((group, gi) => (
+              <div key={group.label}>
+                {/* Date group header */}
+                <div className="flex items-center gap-3 px-4 py-2">
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    {group.label}
+                  </span>
+                  <div className="flex-1 h-px bg-border/40" />
+                  <span className="text-[10px] text-muted-foreground/50">
+                    {group.logs.length} event{group.logs.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                {/* Rows */}
+                {group.logs.map((log, li) => (
+                  <LogRow
+                    key={log.id}
+                    log={log}
+                    isLast={gi === grouped.length - 1 && li === group.logs.length - 1}
+                  />
+                ))}
+              </div>
             ))}
           </div>
         )}
