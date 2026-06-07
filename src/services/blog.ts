@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { Tables } from "@/types/supabase";
 
@@ -29,7 +29,9 @@ export async function listBlogPosts(opts: {
   publishedOnly?: boolean;
 }): Promise<BlogListResult> {
   const { page = 1, pageSize = 20, publishedOnly = false } = opts;
-  const supabase = await createClient();
+  // Public reads (publishedOnly) use admin client to avoid cookie/auth issues.
+  // Dashboard reads use the session client so RLS still applies for write ops.
+  const supabase = publishedOnly ? createAdminClient() : await createClient();
   const offset = (page - 1) * pageSize;
 
   let query = supabase
@@ -59,8 +61,11 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   return data ?? null;
 }
 
+// Public reads use the admin client (no cookies, bypasses RLS).
+// Safe because we always filter by app_id + is_published.
+
 export async function getPublishedBlogPost(slug: string): Promise<BlogPost | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
     .select("*")
@@ -74,7 +79,7 @@ export async function getPublishedBlogPost(slug: string): Promise<BlogPost | nul
 }
 
 export async function getLatestPublishedPosts(limit = 3): Promise<BlogPost[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
     .select("*")
@@ -87,11 +92,12 @@ export async function getLatestPublishedPosts(limit = 3): Promise<BlogPost[]> {
   return (data ?? []) as BlogPost[];
 }
 
+// Safe to call from generateStaticParams at build time (no cookies).
 export async function getAllPublishedSlugs(): Promise<string[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
-    .select("slug, updated_at")
+    .select("slug")
     .eq("app_id", APP_ID)
     .eq("is_published", true);
 
