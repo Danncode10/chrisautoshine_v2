@@ -8,8 +8,8 @@ import { businessConfig } from "@/lib/business-config";
 
 const navLinks = [
   { href: "/#services", label: "Services" },
-  { href: "/#gallery", label: "Gallery" },
   { href: "/#packages", label: "Packages" },
+  { href: "/blog", label: "Blog" },
   { href: "/#contact", label: "Contact" },
 ];
 
