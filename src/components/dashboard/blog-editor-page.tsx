@@ -15,6 +15,7 @@ import {
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
   Heading1, Heading2, Heading3, ImageIcon, PlayCircle,
   EyeOff, Check, X, Upload, Table2, ChevronDown,
+  Undo2, Redo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { uploadBlogImage, deleteBlogImage } from "@/lib/blog-image-upload";
@@ -342,6 +343,9 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
         onChange={handleInlineImageFile}
       />
       <div className="max-w-3xl mx-auto flex items-center flex-wrap gap-0.5 px-4 sm:px-6 py-2">
+        <ToolBtn onClick={() => editor.chain().focus().undo().run()} title="Undo (⌘Z)" active={false}><Undo2 className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().redo().run()} title="Redo (⌘⇧Z)" active={false}><Redo2 className="w-4 h-4" /></ToolBtn>
+        <Sep />
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1"><Heading1 className="w-4 h-4" /></ToolBtn>
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2"><Heading2 className="w-4 h-4" /></ToolBtn>
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Heading 3"><Heading3 className="w-4 h-4" /></ToolBtn>
