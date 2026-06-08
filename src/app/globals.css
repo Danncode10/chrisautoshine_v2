@@ -259,3 +259,44 @@ input[type="password"]::-webkit-strong-password-auto-fill-button {
 .prose th { background: var(--color-muted); border: 1px solid var(--color-border); padding: 0.6rem 0.875rem; text-align: left; font-weight: 600; color: var(--color-foreground); }
 .prose td { border: 1px solid var(--color-border); padding: 0.6rem 0.875rem; color: var(--color-foreground); vertical-align: top; }
 .prose tr:nth-child(even) td { background: var(--color-card); }
+
+/* ─── TipTap Editor Tables ────────────────────────────────────────────────── */
+/* Visible borders in the dark editor canvas.                                  */
+/* Uses muted-foreground (#8a8a8a) — solid token, Safari-safe.                 */
+.ProseMirror table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--color-muted-foreground);
+  padding: 0.5rem 0.875rem;
+  vertical-align: top;
+  min-width: 80px;
+}
+.ProseMirror th {
+  background: var(--color-secondary);
+  font-weight: 600;
+  color: var(--color-foreground);
+  text-align: left;
+}
+.ProseMirror td {
+  color: var(--color-foreground);
+}
+.ProseMirror .selectedCell:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  opacity: 0.15;
+  pointer-events: none;
+}
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.ProseMirror table p {
+  margin: 0;
+}

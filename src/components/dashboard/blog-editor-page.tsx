@@ -749,10 +749,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                     [&_.ProseMirror_pre]:bg-card [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-border [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
                     [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
                     [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
-                    [&_.ProseMirror_table]:w-full [&_.ProseMirror_table]:border-collapse [&_.ProseMirror_table]:mb-4 [&_.ProseMirror_table]:text-[14px]
-                    [&_.ProseMirror_th]:bg-muted [&_.ProseMirror_th]:border [&_.ProseMirror_th]:border-border [&_.ProseMirror_th]:px-3 [&_.ProseMirror_th]:py-2 [&_.ProseMirror_th]:text-left [&_.ProseMirror_th]:font-semibold [&_.ProseMirror_th]:text-foreground
-                    [&_.ProseMirror_td]:border [&_.ProseMirror_td]:border-border [&_.ProseMirror_td]:px-3 [&_.ProseMirror_td]:py-2 [&_.ProseMirror_td]:text-foreground [&_.ProseMirror_td]:align-top
-                    [&_.ProseMirror_.selectedCell]:bg-primary/10
+                    /* Table styles handled via globals.css .ProseMirror table rules */
                     [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
                   ">
                     <EditorContent editor={editor} />
