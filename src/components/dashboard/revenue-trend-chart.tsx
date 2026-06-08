@@ -73,9 +73,6 @@ export function RevenueTrendChart({
   const linePath = points
     .map((p, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(p.revenue).toFixed(1)}`)
     .join(" ");
-  const areaPath = n > 0
-    ? `${linePath} L ${xAt(n - 1).toFixed(1)} ${(padT + innerH).toFixed(1)} L ${xAt(0).toFixed(1)} ${(padT + innerH).toFixed(1)} Z`
-    : "";
 
   const ySteps = 4;
   const gridVals = Array.from({ length: ySteps + 1 }, (_, i) => (niceMax / ySteps) * i);
@@ -95,14 +92,6 @@ export function RevenueTrendChart({
   return (
     <div ref={wrapRef} className="relative" style={{ height: H }}>
       <svg width={w} height={H} className="overflow-visible">
-        <defs>
-          <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#10b981" stopOpacity="0.38" />
-            <stop offset="55%"  stopColor="#10b981" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
         {/* Y grid + labels */}
         {gridVals.map((v, i) => {
           const y = yAt(v);
@@ -124,12 +113,11 @@ export function RevenueTrendChart({
           );
         })}
 
-        {/* Area + line */}
-        {areaPath && <path d={areaPath} fill="url(#revGrad)" />}
+        {/* Line */}
         <path
           d={linePath} fill="none"
           className="stroke-emerald-500"
-          strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round"
+          strokeWidth={2} strokeLinejoin="round" strokeLinecap="round"
         />
 
         {/* Dots on days with revenue */}
