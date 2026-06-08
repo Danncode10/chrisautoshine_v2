@@ -27,6 +27,47 @@ function extractBlogImageStoragePaths(coverImageUrl: string | null, content: str
 
 export type BlogPost = Tables<"blog_posts">;
 
+/**
+ * Garbage-collects orphaned blog images: anything sitting in this app's
+ * storage folder that no post (draft or published) references anymore.
+ *
+ * This exists because uploads happen the moment you pick a file (for instant
+ * preview), but a post is only persisted on Save/Publish — and a refresh,
+ * closed tab, or crash mid-edit skips React's unmount cleanup entirely. A
+ * sweep that compares "what's referenced" vs "what's in storage" is the only
+ * thing that's correct regardless of how an edit session ends.
+ */
+export async function cleanupOrphanedBlogImages(): Promise<{ deleted: number }> {
+  const supabase = await createClient();
+  const { data: posts, error } = await supabase
+    .from("blog_posts")
+    .select("cover_image_url, content")
+    .eq("app_id", APP_ID);
+  if (error) throw error;
+
+  const referenced = new Set<string>();
+  for (const p of posts ?? []) {
+    for (const path of extractBlogImageStoragePaths(p.cover_image_url, p.content)) {
+      referenced.add(path);
+    }
+  }
+
+  const admin = createAdminClient();
+  const { data: files, error: listError } = await admin.storage
+    .from(BLOG_IMAGES_BUCKET)
+    .list(APP_ID, { limit: 1000 });
+  if (listError) throw listError;
+
+  const orphanPaths = (files ?? [])
+    .map(f => `${APP_ID}/${f.name}`)
+    .filter(path => !referenced.has(path));
+
+  if (orphanPaths.length) {
+    await admin.storage.from(BLOG_IMAGES_BUCKET).remove(orphanPaths);
+  }
+  return { deleted: orphanPaths.length };
+}
+
 export type BlogPostInput = {
   title: string;
   slug: string;

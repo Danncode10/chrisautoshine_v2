@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { DOMParser as PMDOMParser } from "@tiptap/pm/model";
@@ -21,8 +21,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  uploadBlogImage, deleteBlogImage, extractBlogImagePath,
-  extractImageSrcs, getBlogImageUsageKb, MAX_POST_IMAGES_KB,
+  compressImageToDataUrl, uploadDataUrl, dataUrlSizeKb, isDataUrl,
+  extractImageSrcs, MAX_POST_IMAGES_KB,
 } from "@/lib/blog-image-upload";
 import {
   createBlogPost, updateBlogPost, publishBlogPost, unpublishBlogPost,
@@ -50,20 +50,32 @@ function looksLikeMarkdown(text: string): boolean {
 
 interface ImageBudget {
   remainingKb: number;
-  recompute: () => void;
+}
+
+/** Extracts every image URL (cover + inline) currently referenced by a post's form state. */
+function collectImageUrls(coverUrl: string, contentHtml: string): string[] {
+  return [coverUrl, ...extractImageSrcs(contentHtml)].filter(Boolean);
+}
+
+/** Sums the in-memory (data-URL) image weight of a post — used for the budget bar. */
+function localImageUsageKb(coverUrl: string, contentHtml: string): number {
+  let kb = 0;
+  for (const u of collectImageUrls(coverUrl, contentHtml)) {
+    if (isDataUrl(u)) kb += dataUrlSizeKb(u);
+  }
+  return kb;
 }
 
 // ─── Cover Upload ─────────────────────────────────────────────────────────────
 
 interface CoverUploadProps {
   url: string;
-  storagePath: string;
   onChange: (url: string, storagePath: string) => void;
   budget: ImageBudget;
   compact?: boolean; // true = sidebar chip, false = full inline zone
 }
 
-function CoverUpload({ url, storagePath, onChange, budget, compact = false }: CoverUploadProps) {
+function CoverUpload({ url, onChange, budget, compact = false }: CoverUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress]   = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -73,24 +85,29 @@ function CoverUpload({ url, storagePath, onChange, budget, compact = false }: Co
     if (file.size > 20 * 1024 * 1024) { toast.error("File too large — max 20 MB before compression"); return; }
 
     setUploading(true);
-    setProgress(0);
+    setProgress(40);
     try {
-      // Delete old image from storage if replacing — fall back to parsing the
-      // path out of the URL for posts loaded before we tracked storagePath.
-      const oldPath = storagePath || extractBlogImagePath(url);
-      if (oldPath) await deleteBlogImage(oldPath).catch(() => null);
-
-      const result = await uploadBlogImage(file, pct => setProgress(pct), budget.remainingKb);
-      onChange(result.url, result.path);
-      budget.recompute();
-      toast.success(`Cover uploaded — ${result.sizeKb} KB after compression`);
+      // Deferred upload: compress in the browser and hold the image as a data
+      // URL. It's only written to Supabase Storage when the post is published.
+      const dataUrl = await compressImageToDataUrl(file);
+      const sizeKb = dataUrlSizeKb(dataUrl);
+      if (sizeKb > budget.remainingKb) {
+        toast.error(
+          `This image is ${sizeKb} KB, but this post only has ${budget.remainingKb} KB left of its ` +
+          `${MAX_POST_IMAGES_KB / 1024} MB image budget. Remove an image or pick a smaller one.`
+        );
+        return;
+      }
+      setProgress(100);
+      onChange(dataUrl, "");
+      toast.success(`Cover added — ${sizeKb} KB · uploads when you publish`);
     } catch (e: unknown) {
-      toast.error((e as Error).message ?? "Upload failed");
+      toast.error((e as Error).message ?? "Couldn't process image");
     } finally {
       setUploading(false);
       setProgress(0);
     }
-  }, [storagePath, url, onChange, budget]);
+  }, [onChange, budget]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -104,11 +121,9 @@ function CoverUpload({ url, storagePath, onChange, budget, compact = false }: Co
     if (f) handleFile(f);
   };
 
-  const handleRemove = async () => {
-    const path = storagePath || extractBlogImagePath(url);
-    if (path) await deleteBlogImage(path).catch(() => null);
+  const handleRemove = () => {
+    // Nothing is in storage until publish, so removing is just clearing state.
     onChange("", "");
-    budget.recompute();
   };
 
   // ── Compact (sidebar) ──────────────────────────────────────────────────────
@@ -457,12 +472,20 @@ function Toolbar({ editor, budget }: { editor: ReturnType<typeof useEditor>; bud
     if (!file) return;
     setImgUploading(true);
     try {
-      const result = await uploadBlogImage(file, undefined, budget.remainingKb);
-      editor.chain().focus().setImage({ src: result.url }).run();
-      budget.recompute();
-      toast.success(`Image inserted — ${result.sizeKb} KB`);
+      // Deferred: compress to a data URL now, upload to storage only on publish.
+      const dataUrl = await compressImageToDataUrl(file);
+      const sizeKb = dataUrlSizeKb(dataUrl);
+      if (sizeKb > budget.remainingKb) {
+        toast.error(
+          `This image is ${sizeKb} KB, but this post only has ${budget.remainingKb} KB left of its ` +
+          `${MAX_POST_IMAGES_KB / 1024} MB image budget. Remove an image or pick a smaller one.`
+        );
+        return;
+      }
+      editor.chain().focus().setImage({ src: dataUrl }).run();
+      toast.success(`Image added — ${sizeKb} KB · uploads when you publish`);
     } catch (err: unknown) {
-      toast.error((err as Error).message ?? "Upload failed");
+      toast.error((err as Error).message ?? "Couldn't process image");
     } finally {
       setImgUploading(false);
     }
@@ -572,7 +595,6 @@ function SettingsPanel({
         <CoverUpload
           compact
           url={form.cover_image_url}
-          storagePath={form.cover_storage_path}
           onChange={(url, path) => onChange({ cover_image_url: url, cover_storage_path: path })}
           budget={budget}
         />
@@ -593,7 +615,7 @@ function SettingsPanel({
           />
         </div>
         <p className="text-[10px] text-muted-foreground mt-1.5">
-          Cover + inline images for this post. Shared free-tier bucket — keep posts lean.
+          Cover + inline images for this post, after auto-compression (~1200px JPEG). Uploaded to storage only when you publish — drafts stay local.
         </p>
       </div>
 
@@ -701,34 +723,27 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
   }, []);
 
   // ── Per-post image storage budget ──────────────────────────────────────────
-  // Mirror form in a ref so async callbacks (uploads, paste, doc-diff) always
-  // see the latest cover/content without re-subscribing on every keystroke.
+  // Mirror form in a ref so async callbacks (uploads, paste, doc-diff, unmount)
+  // always see the latest cover/content without re-subscribing on every keystroke.
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
 
-  const [usedImagesKb, setUsedImagesKb] = useState(0);
-  const recomputeUsage = useCallback(() => {
-    const { cover_image_url, content } = formRef.current;
-    getBlogImageUsageKb([cover_image_url, ...extractImageSrcs(content)])
-      .then(setUsedImagesKb)
-      .catch(() => {});
-  }, []);
+  // Image budget is computed entirely in-memory from the data URLs currently
+  // held in the form — no storage reads, because nothing is uploaded until
+  // publish. (Already-published remote images don't count against the budget.)
+  const usedImagesKb = useMemo(
+    () => localImageUsageKb(form.cover_image_url, form.content),
+    [form.cover_image_url, form.content],
+  );
 
   const imageBudget: ImageBudget = {
     remainingKb: Math.max(0, MAX_POST_IMAGES_KB - usedImagesKb),
-    recompute: recomputeUsage,
   };
-
-  // Seed the real usage figure for existing posts (new posts start at 0).
-  useEffect(() => {
-    if (isEdit) recomputeUsage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
-      ImageExtension.configure({ inline: false, allowBase64: false }),
+      ImageExtension.configure({ inline: false, allowBase64: true }),
       Youtube.configure({ controls: true, nocookie: true }),
       Placeholder.configure({
         placeholder: ({ node }: { node: { type: { name: string } } }) =>
@@ -765,35 +780,6 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
     },
   });
 
-  // Clean up storage when an inline image is removed from the document
-  // (hover-delete, undo across an insert, selection-delete, etc.) — without
-  // this, every "added then removed" image would sit in storage forever.
-  const prevInlineImagesRef = useRef<Set<string> | null>(null);
-  useEffect(() => {
-    if (!editor) return;
-
-    const snapshot = () => new Set(
-      extractImageSrcs(editor.getHTML()).filter(u => extractBlogImagePath(u))
-    );
-    prevInlineImagesRef.current = snapshot();
-
-    const onUpdate = () => {
-      const current = snapshot();
-      const prev = prevInlineImagesRef.current;
-      if (prev) {
-        for (const url of prev) {
-          if (current.has(url) || url === formRef.current.cover_image_url) continue;
-          const path = extractBlogImagePath(url);
-          if (path) deleteBlogImage(path).then(recomputeUsage).catch(() => {});
-        }
-      }
-      prevInlineImagesRef.current = current;
-    };
-
-    editor.on("update", onUpdate);
-    return () => { editor.off("update", onUpdate); };
-  }, [editor, recomputeUsage]);
-
   const wordCount = form.content
     .replace(/<[^>]+>/g, " ")
     .split(/\s+/)
@@ -801,7 +787,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
 
   // ── Build payload ──────────────────────────────────────────────────────────
 
-  const buildPayload = (): BlogPostInput => ({
+  const buildPayload = (overrides: Partial<BlogPostInput> = {}): BlogPostInput => ({
     title: form.title || "Untitled",
     slug: form.slug || slugify(form.title || "untitled"),
     excerpt: form.excerpt || undefined,
@@ -809,21 +795,43 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
     cover_image_url: form.cover_image_url || undefined,
     seo_title: form.seo_title || undefined,
     seo_description: form.seo_description || undefined,
+    ...overrides,
   });
+
+  // Uploads every in-editor data URL (cover + inline) to Supabase Storage and
+  // returns the rewritten cover/content pointing at the public CDN URLs. This
+  // is the ONLY place blog images are written to storage — called on publish.
+  const materializeImages = async (): Promise<{ cover: string; content: string }> => {
+    let cover = formRef.current.cover_image_url;
+    let content = formRef.current.content;
+
+    if (cover && isDataUrl(cover)) {
+      const { url } = await uploadDataUrl(cover);
+      cover = url;
+    }
+    const dataSrcs = Array.from(new Set(extractImageSrcs(content).filter(isDataUrl)));
+    for (const src of dataSrcs) {
+      const { url } = await uploadDataUrl(src);
+      content = content.split(src).join(url);
+    }
+    return { cover, content };
+  };
 
   // ── Save draft ─────────────────────────────────────────────────────────────
 
   const saveMutation = useMutation({
     mutationFn: async () => {
       const payload = buildPayload();
+      let result: BlogPost;
       if (postId) {
-        return updateBlogPost(postId, payload);
+        result = await updateBlogPost(postId, payload);
       } else {
         const created = await createBlogPost(payload, orgId);
         setPostId(created.id);
         window.history.replaceState({}, "", `/dashboard/blog/${created.id}`);
-        return created;
+        result = created;
       }
+      return result;
     },
     onMutate: () => setSaveStatus("saving"),
     onSuccess: () => {
@@ -841,24 +849,37 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
 
   const publishMutation = useMutation({
     mutationFn: async () => {
+      // Unpublish path never uploads — just flip the flag back to draft.
+      if (isPublished && postId) {
+        await unpublishBlogPost(postId);
+        setIsPublished(false);
+        toast.success("Post unpublished");
+        return;
+      }
+
+      // Publish path: NOW upload every data-URL image to storage, rewrite the
+      // content to point at the public URLs, then persist + publish.
+      const { cover, content } = await materializeImages();
+      // Reflect the real URLs back into the editor so a second publish doesn't
+      // re-upload the same images.
+      if (cover !== formRef.current.cover_image_url || content !== formRef.current.content) {
+        updateForm({ cover_image_url: cover, content });
+        editor?.commands.setContent(content);
+      }
+
+      const payload = buildPayload({ content, cover_image_url: cover || undefined });
       let id = postId;
       if (!id) {
-        const created = await createBlogPost(buildPayload(), orgId);
+        const created = await createBlogPost(payload, orgId);
         id = created.id;
         setPostId(created.id);
         window.history.replaceState({}, "", `/dashboard/blog/${created.id}`);
       } else {
-        await updateBlogPost(id, buildPayload());
+        await updateBlogPost(id, payload);
       }
-      if (isPublished) {
-        await unpublishBlogPost(id);
-        setIsPublished(false);
-        toast.success("Post unpublished");
-      } else {
-        await publishBlogPost(id);
-        setIsPublished(true);
-        toast.success("Post published — now live at /blog/" + (form.slug || "untitled"));
-      }
+      await publishBlogPost(id);
+      setIsPublished(true);
+      toast.success("Post published — now live at /blog/" + (form.slug || "untitled"));
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -963,7 +984,6 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                 {/* Cover zone */}
                 <CoverUpload
                   url={form.cover_image_url}
-                  storagePath={form.cover_storage_path}
                   onChange={(url, path) => updateForm({ cover_image_url: url, cover_storage_path: path })}
                   budget={imageBudget}
                 />

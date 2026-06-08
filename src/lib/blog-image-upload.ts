@@ -104,6 +104,54 @@ async function compressImage(file: File): Promise<Blob> {
   });
 }
 
+// ── Data-URL helpers (deferred-upload flow) ─────────────────────────────────
+// Images are held as compressed data URLs in the editor and only written to
+// Supabase Storage when the user clicks Publish — nothing touches the shared
+// bucket while drafting or saving a draft.
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/** Compresses a picked file and returns a self-contained data URL (no upload). */
+export async function compressImageToDataUrl(file: File): Promise<string> {
+  const blob = await compressImage(file);
+  return blobToDataUrl(blob);
+}
+
+export function isDataUrl(src: string): boolean {
+  return src.startsWith("data:");
+}
+
+/** Approximate decoded byte size (in KB) of a base64 data URL. */
+export function dataUrlSizeKb(dataUrl: string): number {
+  const comma = dataUrl.indexOf(",");
+  const b64 = comma === -1 ? dataUrl : dataUrl.slice(comma + 1);
+  const padding = b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0;
+  return Math.round((b64.length * 3 / 4 - padding) / 1024);
+}
+
+/** Uploads an already-compressed data URL to storage and returns its public URL. */
+export async function uploadDataUrl(dataUrl: string): Promise<UploadResult> {
+  const blob = await (await fetch(dataUrl)).blob();
+  const rand = Math.random().toString(36).slice(2, 8);
+  const path = `${APP_ID}/${Date.now()}-${rand}.jpg`;
+
+  const supabase = createClient();
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, blob, { contentType: "image/jpeg", upsert: false });
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl, path, sizeKb: Math.round(blob.size / 1024) };
+}
+
 // ── Upload ────────────────────────────────────────────────────────────────────
 
 export async function uploadBlogImage(
