@@ -194,66 +194,68 @@ const DELETABLE_SELECTOR = 'img, table, blockquote, pre, h1, h2, h3, iframe';
 function HoverDeleteButton({ editor }: { editor: ReturnType<typeof useEditor> }) {
   const [target, setTarget] = useState<Element | null>(null);
   const [rect,   setRect  ] = useState<DOMRect   | null>(null);
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const btnWrapRef = useRef<HTMLDivElement>(null);
+  const targetRef  = useRef<Element | null>(null);
 
-  const updateRect = useCallback((el: Element) => {
-    setRect(el.getBoundingClientRect());
-  }, []);
-
-  const show = useCallback((el: Element) => {
-    clearTimeout(hideTimer.current);
+  const apply = useCallback((el: Element | null) => {
+    targetRef.current = el;
     setTarget(el);
-    updateRect(el);
-  }, [updateRect]);
-
-  const hide = useCallback(() => {
-    hideTimer.current = setTimeout(() => { setTarget(null); setRect(null); }, 180);
+    setRect(el ? el.getBoundingClientRect() : null);
   }, []);
 
-  // Listen on mousemove within the ProseMirror editor div
+  // Timer-free hover tracking: a block stays "active" while the cursor is over
+  // either the block itself OR the floating delete button (they visually overlap,
+  // so there is never a dead gap to cross).
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
+      const node = e.target as Element;
+
+      // Over the delete button → keep current target, do nothing.
+      if (btnWrapRef.current?.contains(node)) return;
+
       const pm = document.querySelector('.ProseMirror');
       if (!pm) return;
-      const el = (e.target as Element).closest(DELETABLE_SELECTOR);
-      if (!el || !pm.contains(el)) { hide(); return; }
-      show(el);
+
+      const el = node.closest(DELETABLE_SELECTOR);
+      if (el && pm.contains(el)) {
+        if (el !== targetRef.current) apply(el);   // only re-render when block changes
+      } else if (targetRef.current) {
+        apply(null);                                // left a block → hide immediately
+      }
     };
     document.addEventListener('mousemove', onMove);
     return () => document.removeEventListener('mousemove', onMove);
-  }, [show, hide]);
+  }, [apply]);
 
-  // Keep rect in sync with scroll / resize
+  // Keep rect in sync with scroll / resize while a target is active
   useEffect(() => {
     if (!target) return;
-    const sync = () => updateRect(target);
+    const sync = () => setRect(target.getBoundingClientRect());
     window.addEventListener('scroll', sync, true);
     window.addEventListener('resize', sync);
     return () => { window.removeEventListener('scroll', sync, true); window.removeEventListener('resize', sync); };
-  }, [target, updateRect]);
+  }, [target]);
 
-  const handleDelete = () => {
-    if (!target || !editor) return;
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const el = targetRef.current;
+    if (!el || !editor) return;
     const view = editor.view;
     try {
-      const tag = target.tagName.toLowerCase();
-
+      const tag = el.tagName.toLowerCase();
       if (tag === 'table') {
-        // Cursor must be inside the table for deleteTable to work
-        const cell = target.querySelector('td, th');
+        const cell = el.querySelector('td, th');
         if (cell) {
           const pos = view.posAtDOM(cell, 0);
           editor.chain().focus().setTextSelection(pos).deleteTable().run();
         }
       } else if (tag === 'img') {
-        // Images are atom nodes: posAtDOM returns the node position directly
-        const pos = view.posAtDOM(target, 0);
+        const pos = view.posAtDOM(el, 0);
         const node = view.state.doc.nodeAt(pos);
         if (node) editor.chain().focus().deleteRange({ from: pos, to: pos + node.nodeSize }).run();
       } else {
-        // Block nodes (heading, blockquote, pre, iframe):
-        // posAtDOM(el, 0) = inside the node; node starts at pos - 1
-        const innerPos = view.posAtDOM(target, 0);
+        const innerPos = view.posAtDOM(el, 0);
         const blockPos = Math.max(0, innerPos - 1);
         const node = view.state.doc.nodeAt(blockPos);
         if (node && node.nodeSize > 0) {
@@ -263,8 +265,7 @@ function HoverDeleteButton({ editor }: { editor: ReturnType<typeof useEditor> })
     } catch (err) {
       console.warn('Block delete failed:', err);
     }
-    setTarget(null);
-    setRect(null);
+    apply(null);
   };
 
   if (!rect || !target) return null;
@@ -274,18 +275,26 @@ function HoverDeleteButton({ editor }: { editor: ReturnType<typeof useEditor> })
     if (/^h[1-6]$/.test(t)) return 'heading';
     if (t === 'pre') return 'code block';
     if (t === 'img') return 'image';
-    return t; // table, blockquote, iframe
+    if (t === 'iframe') return 'video';
+    return t; // table, blockquote
   })();
 
+  // Anchor inside the block's top-right corner so there's no gap to cross.
   return (
     <div
-      style={{ position: 'fixed', top: rect.top + 6, right: Math.max(8, window.innerWidth - rect.right + 6), zIndex: 100 }}
-      onMouseEnter={() => clearTimeout(hideTimer.current)}
-      onMouseLeave={hide}
+      ref={btnWrapRef}
+      style={{
+        position: 'fixed',
+        top: rect.top + 8,
+        left: rect.right - 8,
+        transform: 'translateX(-100%)',
+        zIndex: 200,
+      }}
     >
       <button
-        onClick={handleDelete}
-        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive text-primary-foreground text-[11px] font-semibold shadow-lg"
+        type="button"
+        onMouseDown={handleDelete}
+        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-destructive text-primary-foreground text-[11px] font-semibold shadow-lg hover:brightness-110 cursor-pointer"
       >
         <Trash2 className="w-3 h-3" />
         Delete {label}
