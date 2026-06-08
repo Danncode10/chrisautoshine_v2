@@ -9,7 +9,8 @@ import { businessConfig } from "@/lib/business-config";
 const navLinks = [
   { href: "/#services", label: "Services" },
   { href: "/#packages", label: "Packages" },
-  { href: "/blog", label: "Blog" },
+  // Blog link only shown when the blog feature is enabled in business.json
+  ...(businessConfig.features.blog ? [{ href: "/blog", label: "Blog" }] : []),
   { href: "/#contact", label: "Contact" },
 ];
 
