@@ -260,6 +260,12 @@ input[type="password"]::-webkit-strong-password-auto-fill-button {
 .prose td { border: 1px solid var(--color-border); padding: 0.6rem 0.875rem; color: var(--color-foreground); vertical-align: top; }
 .prose tr:nth-child(even) td { background: var(--color-card); }
 
+/* ─── TipTap Editor Cursor ───────────────────────────────────────────────── */
+.ProseMirror {
+  caret-color: var(--color-foreground) !important;
+  outline: none !important;
+}
+
 /* ─── TipTap Editor Tables ────────────────────────────────────────────────── */
 /* !important needed — Tailwind Preflight resets border:0 on th/td.            */
 /* table-layout:fixed prevents empty cells from collapsing to zero width.      */
