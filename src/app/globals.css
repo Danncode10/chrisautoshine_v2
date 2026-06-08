@@ -261,42 +261,55 @@ input[type="password"]::-webkit-strong-password-auto-fill-button {
 .prose tr:nth-child(even) td { background: var(--color-card); }
 
 /* ─── TipTap Editor Tables ────────────────────────────────────────────────── */
-/* Visible borders in the dark editor canvas.                                  */
-/* Uses muted-foreground (#8a8a8a) — solid token, Safari-safe.                 */
-.ProseMirror table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
+/* !important needed — Tailwind Preflight resets border:0 on th/td.            */
+/* table-layout:fixed prevents empty cells from collapsing to zero width.      */
+/* border color: foreground (#fff) — visible on both Chrome and Safari.        */
+
+.ProseMirror .tableWrapper {
+  overflow-x: auto !important;
+  margin: 1rem 0 !important;
 }
+
+.ProseMirror table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  table-layout: fixed !important;
+  margin: 0 !important;
+  font-size: 0.875rem !important;
+}
+
 .ProseMirror th,
 .ProseMirror td {
-  border: 1px solid var(--color-muted-foreground);
-  padding: 0.5rem 0.875rem;
-  vertical-align: top;
-  min-width: 80px;
+  border: 1px solid var(--color-foreground) !important;
+  padding: 0.625rem 0.875rem !important;
+  min-width: 120px !important;
+  vertical-align: top !important;
+  position: relative !important;
+  box-sizing: border-box !important;
 }
+
 .ProseMirror th {
-  background: var(--color-secondary);
-  font-weight: 600;
-  color: var(--color-foreground);
-  text-align: left;
+  background: var(--color-secondary) !important;
+  font-weight: 600 !important;
+  color: var(--color-foreground) !important;
+  text-align: left !important;
 }
+
 .ProseMirror td {
-  color: var(--color-foreground);
+  background: var(--color-card) !important;
+  color: var(--color-foreground) !important;
 }
-.ProseMirror .selectedCell:after {
+
+.ProseMirror table p {
+  margin: 0 !important;
+}
+
+/* Selected cell highlight */
+.ProseMirror .selectedCell::after {
   content: "";
   position: absolute;
   inset: 0;
   background: var(--color-primary);
-  opacity: 0.15;
+  opacity: 0.12;
   pointer-events: none;
-}
-.ProseMirror .tableWrapper {
-  overflow-x: auto;
-  margin: 1rem 0;
-}
-.ProseMirror table p {
-  margin: 0;
 }
