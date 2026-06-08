@@ -219,9 +219,23 @@ function Sep() {
 function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
   if (!editor) return null;
 
-  const addImage = () => {
-    const url = window.prompt("Paste image URL:");
-    if (url) editor.chain().focus().setImage({ src: url }).run();
+  const imgInputRef = useRef<HTMLInputElement>(null);
+  const [imgUploading, setImgUploading] = useState(false);
+
+  const handleInlineImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImgUploading(true);
+    try {
+      const result = await uploadBlogImage(file);
+      editor.chain().focus().setImage({ src: result.url }).run();
+      toast.success(`Image inserted — ${result.sizeKb} KB`);
+    } catch (err: unknown) {
+      toast.error((err as Error).message ?? "Upload failed");
+    } finally {
+      setImgUploading(false);
+    }
   };
 
   const addYoutube = () => {
@@ -231,6 +245,14 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
 
   return (
     <div className="sticky top-[57px] z-10 border-b border-border bg-background/95 backdrop-blur-sm">
+      {/* Hidden file input for inline image upload */}
+      <input
+        ref={imgInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleInlineImageFile}
+      />
       <div className="max-w-3xl mx-auto flex items-center flex-wrap gap-0.5 px-4 sm:px-6 py-2">
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1"><Heading1 className="w-4 h-4" /></ToolBtn>
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2"><Heading2 className="w-4 h-4" /></ToolBtn>
@@ -245,7 +267,17 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
         <ToolBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} title="Blockquote"><Quote className="w-4 h-4" /></ToolBtn>
         <ToolBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} title="Code Block"><AlignLeft className="w-4 h-4" /></ToolBtn>
         <Sep />
-        <ToolBtn onClick={addImage} title="Insert Image"><ImageIcon className="w-4 h-4" /></ToolBtn>
+        {/* Image — triggers file upload, compresses, inserts into editor */}
+        <ToolBtn
+          onClick={() => imgInputRef.current?.click()}
+          title="Insert Image (upload & compress)"
+          active={imgUploading}
+        >
+          {imgUploading
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <ImageIcon className="w-4 h-4" />
+          }
+        </ToolBtn>
         <ToolBtn onClick={addYoutube} title="Embed YouTube"><PlayCircle className="w-4 h-4" /></ToolBtn>
       </div>
     </div>
