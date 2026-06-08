@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -192,39 +192,48 @@ function TableMenu({ editor }: { editor: ReturnType<typeof useEditor> }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
-  const handleBlur = (e: React.FocusEvent) => {
-    if (!ref.current?.contains(e.relatedTarget as Node)) setOpen(false);
-  };
+  // Close on outside click — proper listener so Safari behaves
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
 
   if (!editor) return null;
   const inTable = editor.isActive("table");
 
-  const run = (fn: () => void) => { fn(); setOpen(false); editor.commands.focus(); };
+  // Plain onClick (not onMouseDown+preventDefault) — works reliably in Safari
+  const runAction = (fn: () => void) => {
+    fn();
+    setOpen(false);
+  };
 
   const actions = inTable ? [
-    { label: "Add row above",    fn: () => run(() => editor.chain().focus().addRowBefore().run()) },
-    { label: "Add row below",    fn: () => run(() => editor.chain().focus().addRowAfter().run()) },
-    { label: "Delete row",       fn: () => run(() => editor.chain().focus().deleteRow().run()), danger: true },
+    { label: "Add row above",    fn: () => runAction(() => editor.chain().focus().addRowBefore().run()) },
+    { label: "Add row below",    fn: () => runAction(() => editor.chain().focus().addRowAfter().run()) },
+    { label: "Delete row",       fn: () => runAction(() => editor.chain().focus().deleteRow().run()), danger: true },
     null, // separator
-    { label: "Add column left",  fn: () => run(() => editor.chain().focus().addColumnBefore().run()) },
-    { label: "Add column right", fn: () => run(() => editor.chain().focus().addColumnAfter().run()) },
-    { label: "Delete column",    fn: () => run(() => editor.chain().focus().deleteColumn().run()), danger: true },
+    { label: "Add column left",  fn: () => runAction(() => editor.chain().focus().addColumnBefore().run()) },
+    { label: "Add column right", fn: () => runAction(() => editor.chain().focus().addColumnAfter().run()) },
+    { label: "Delete column",    fn: () => runAction(() => editor.chain().focus().deleteColumn().run()), danger: true },
     null,
-    { label: "Toggle header row",fn: () => run(() => editor.chain().focus().toggleHeaderRow().run()) },
-    { label: "Delete table",     fn: () => run(() => editor.chain().focus().deleteTable().run()), danger: true },
+    { label: "Toggle header row",fn: () => runAction(() => editor.chain().focus().toggleHeaderRow().run()) },
+    { label: "Delete table",     fn: () => runAction(() => editor.chain().focus().deleteTable().run()), danger: true },
   ] : [
-    { label: "Insert 2 × 2",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()) },
-    { label: "Insert 3 × 3",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()) },
-    { label: "Insert 4 × 4",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 4, cols: 4, withHeaderRow: true }).run()) },
-    { label: "Insert 3 × 5",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 3, cols: 5, withHeaderRow: true }).run()) },
+    { label: "Insert 2 × 2",    fn: () => runAction(() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()) },
+    { label: "Insert 3 × 3",    fn: () => runAction(() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()) },
+    { label: "Insert 4 × 4",    fn: () => runAction(() => editor.chain().focus().insertTable({ rows: 4, cols: 4, withHeaderRow: true }).run()) },
+    { label: "Insert 3 × 5",    fn: () => runAction(() => editor.chain().focus().insertTable({ rows: 3, cols: 5, withHeaderRow: true }).run()) },
   ];
 
   return (
-    <div ref={ref} className="relative" onBlur={handleBlur}>
+    <div ref={ref} className="relative">
       <button
         type="button"
-        onMouseDown={e => { e.preventDefault(); setOpen(v => !v); }}
+        onClick={() => setOpen(v => !v)}
         title="Table"
         className={cn(
           "flex items-center gap-0.5 p-1.5 rounded-md text-[13px] transition-colors",
@@ -239,19 +248,16 @@ function TableMenu({ editor }: { editor: ReturnType<typeof useEditor> }) {
 
       {open && (
         <div className="absolute top-full left-0 mt-1 z-50 min-w-[170px] bg-card border border-border rounded-xl shadow-lg overflow-hidden py-1">
-          {!inTable && (
-            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Insert table</p>
-          )}
-          {inTable && (
-            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Table options</p>
-          )}
+          <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            {inTable ? "Table options" : "Insert table"}
+          </p>
           {actions.map((a, i) =>
             a === null ? (
               <div key={i} className="my-1 border-t border-border" />
             ) : (
               <button
                 key={a.label}
-                onMouseDown={e => { e.preventDefault(); a.fn(); }}
+                onClick={a.fn}
                 className={cn(
                   "w-full text-left px-3 py-2 text-[13px] transition-colors hover:bg-muted",
                   (a as { danger?: boolean }).danger ? "text-destructive" : "text-foreground"
