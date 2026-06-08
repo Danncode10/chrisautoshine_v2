@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -13,7 +13,7 @@ import {
   ArrowLeft, Settings2, Globe, FileText, Loader2,
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
   Heading1, Heading2, Heading3, ImageIcon, PlayCircle,
-  Eye, EyeOff, Check, X,
+  EyeOff, Check, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -50,8 +50,8 @@ function ToolBtn({
       className={cn(
         "p-1.5 rounded-md text-[13px] transition-colors",
         active
-          ? "bg-white/15 text-white"
-          : "text-white/50 hover:text-white hover:bg-white/10"
+          ? "bg-muted text-foreground"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
       )}
     >
       {children}
@@ -60,7 +60,7 @@ function ToolBtn({
 }
 
 function Sep() {
-  return <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0" />;
+  return <div className="w-px h-4 bg-border mx-0.5 shrink-0" />;
 }
 
 function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
@@ -77,7 +77,7 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
   };
 
   return (
-    <div className="sticky top-[57px] z-10 border-b border-white/[0.07] bg-[#0d0d0d]/95 backdrop-blur-sm">
+    <div className="sticky top-[57px] z-10 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="max-w-3xl mx-auto flex items-center flex-wrap gap-0.5 px-4 sm:px-6 py-2">
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1"><Heading1 className="w-4 h-4" /></ToolBtn>
         <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2"><Heading2 className="w-4 h-4" /></ToolBtn>
@@ -109,35 +109,33 @@ function SettingsPanel({
   isPublished: boolean;
   wordCount: number;
 }) {
-  const inputCls = "w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors resize-none";
+  const inputCls = "w-full bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-colors resize-none";
 
   return (
-    <div className="flex flex-col gap-0 divide-y divide-white/[0.07]">
+    <div className="flex flex-col gap-0 divide-y divide-border">
 
       {/* Status */}
       <div className="p-4">
-        <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-3">Status</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Status</p>
         <div className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium border",
-          isPublished
-            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-            : "bg-white/5 border-white/10 text-white/60"
+          "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-medium border border-border",
+          isPublished ? "bg-muted text-emerald-400" : "bg-muted text-muted-foreground"
         )}>
           {isPublished ? <Globe className="w-3.5 h-3.5 shrink-0" /> : <FileText className="w-3.5 h-3.5 shrink-0" />}
           {isPublished ? "Published" : "Draft"}
         </div>
-        <p className="text-[11px] text-white/30 mt-2">{wordCount} words</p>
+        <p className="text-[11px] text-muted-foreground mt-2">{wordCount} words</p>
       </div>
 
       {/* Slug */}
       <div className="p-4">
-        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-2">URL Slug</label>
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-          <span className="text-[11px] text-white/30 shrink-0">/blog/</span>
+        <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">URL Slug</label>
+        <div className="flex items-center gap-1.5 bg-muted border border-border rounded-lg px-3 py-2">
+          <span className="text-[11px] text-muted-foreground shrink-0">/blog/</span>
           <input
             value={form.slug}
             onChange={e => onChange({ slug: slugify(e.target.value), slugManual: true })}
-            className="flex-1 bg-transparent text-[12px] text-white font-mono focus:outline-none min-w-0"
+            className="flex-1 bg-transparent text-[12px] text-foreground font-mono focus:outline-none min-w-0"
             placeholder="your-slug"
           />
         </div>
@@ -145,7 +143,7 @@ function SettingsPanel({
 
       {/* Cover image */}
       <div className="p-4">
-        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-2">Cover Image</label>
+        <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Cover Image</label>
         <input
           value={form.cover_image_url}
           onChange={e => onChange({ cover_image_url: e.target.value })}
@@ -153,11 +151,11 @@ function SettingsPanel({
           className={inputCls}
         />
         {form.cover_image_url && (
-          <div className="mt-2 rounded-lg overflow-hidden aspect-video bg-white/5 relative group">
+          <div className="mt-2 rounded-lg overflow-hidden aspect-video bg-muted relative group">
             <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
             <button
               onClick={() => onChange({ cover_image_url: "" })}
-              className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1.5 right-1.5 p-1 rounded-md bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <X className="w-3 h-3" />
             </button>
@@ -167,7 +165,7 @@ function SettingsPanel({
 
       {/* Excerpt */}
       <div className="p-4">
-        <label className="block text-[10px] font-semibold text-white/40 uppercase tracking-widest mb-2">Excerpt</label>
+        <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Excerpt</label>
         <textarea
           value={form.excerpt}
           onChange={e => onChange({ excerpt: e.target.value })}
@@ -179,9 +177,9 @@ function SettingsPanel({
 
       {/* SEO */}
       <div className="p-4 space-y-3">
-        <p className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">SEO</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">SEO</p>
         <div>
-          <label className="block text-[11px] text-white/40 mb-1.5">SEO Title</label>
+          <label className="block text-[11px] text-muted-foreground mb-1.5">SEO Title</label>
           <input
             value={form.seo_title}
             onChange={e => onChange({ seo_title: e.target.value })}
@@ -190,13 +188,13 @@ function SettingsPanel({
             className={inputCls}
           />
           <div className="flex justify-end mt-1">
-            <span className={cn("text-[10px]", form.seo_title.length > 55 ? "text-amber-400" : "text-white/25")}>
+            <span className={cn("text-[10px]", form.seo_title.length > 55 ? "text-amber-400" : "text-muted-foreground")}>
               {form.seo_title.length}/60
             </span>
           </div>
         </div>
         <div>
-          <label className="block text-[11px] text-white/40 mb-1.5">Meta Description</label>
+          <label className="block text-[11px] text-muted-foreground mb-1.5">Meta Description</label>
           <textarea
             value={form.seo_description}
             onChange={e => onChange({ seo_description: e.target.value })}
@@ -206,7 +204,7 @@ function SettingsPanel({
             className={inputCls}
           />
           <div className="flex justify-end mt-1">
-            <span className={cn("text-[10px]", form.seo_description.length > 150 ? "text-emerald-400" : form.seo_description.length > 0 ? "text-amber-400" : "text-white/25")}>
+            <span className={cn("text-[10px]", form.seo_description.length > 150 ? "text-emerald-400" : form.seo_description.length > 0 ? "text-amber-400" : "text-muted-foreground")}>
               {form.seo_description.length}/160
             </span>
           </div>
@@ -311,7 +309,6 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       } else {
         const created = await createBlogPost(payload, orgId);
         setPostId(created.id);
-        // Update URL without full navigation
         window.history.replaceState({}, "", `/dashboard/blog/${created.id}`);
         return created;
       }
@@ -357,22 +354,22 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
   const isBusy = saveMutation.isPending || publishMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-[#111111] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
 
       {/* ── Top bar ───────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 h-[57px] flex items-center justify-between gap-4 px-4 border-b border-white/[0.07] bg-[#111111]/95 backdrop-blur-sm shrink-0">
+      <header className="sticky top-0 z-20 h-[57px] flex items-center justify-between gap-4 px-4 border-b border-border bg-background/95 backdrop-blur-sm shrink-0">
 
         {/* Left */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboard?tab=blog")}
-            className="flex items-center gap-1.5 text-[13px] text-white/50 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Blog</span>
           </button>
-          <div className="w-px h-4 bg-white/10" />
-          <span className="text-[13px] text-white/40 truncate max-w-[180px] sm:max-w-xs">
+          <div className="w-px h-4 bg-border" />
+          <span className="text-[13px] text-muted-foreground truncate max-w-[180px] sm:max-w-xs">
             {form.title || "Untitled post"}
           </span>
         </div>
@@ -382,7 +379,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
           {/* Save status */}
           <span className={cn(
             "text-[11px] transition-all duration-300 hidden sm:flex items-center gap-1",
-            saveStatus === "saving" ? "text-white/40" :
+            saveStatus === "saving" ? "text-muted-foreground" :
             saveStatus === "saved"  ? "text-emerald-400" : "text-transparent"
           )}>
             {saveStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin" />}
@@ -394,7 +391,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={isBusy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] text-white/70 border border-white/10 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] text-muted-foreground border border-border hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
           >
             {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">Save Draft</span>
@@ -405,10 +402,10 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
             onClick={() => publishMutation.mutate()}
             disabled={isBusy || !form.title}
             className={cn(
-              "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-colors disabled:opacity-50",
+              "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[13px] font-medium transition-colors disabled:opacity-50 border",
               isPublished
-                ? "bg-white/10 text-white/70 hover:bg-white/15 border border-white/10"
-                : "bg-primary text-white hover:bg-primary/90"
+                ? "bg-muted text-muted-foreground hover:text-foreground border-border"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 border-transparent"
             )}
           >
             {publishMutation.isPending
@@ -427,8 +424,8 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
             className={cn(
               "p-2 rounded-lg transition-colors border",
               sidebarOpen
-                ? "bg-white/10 text-white border-white/20"
-                : "text-white/50 border-white/10 hover:text-white hover:bg-white/5"
+                ? "bg-muted text-foreground border-border"
+                : "text-muted-foreground border-border hover:text-foreground hover:bg-muted"
             )}
           >
             <Settings2 className="w-4 h-4" />
@@ -437,7 +434,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       </header>
 
       {/* ── Body ──────────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 min-h-0 bg-[#0d0d0d]">
+      <div className="flex flex-1 min-h-0 bg-background">
 
         {/* Editor column */}
         <div className="flex-1 min-w-0 flex flex-col">
@@ -449,25 +446,25 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
             <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10">
 
               {/* Document sheet */}
-              <div className="rounded-2xl border border-white/[0.07] bg-[#181818] shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden">
+              <div className="rounded-2xl border border-border bg-muted shadow-[0_8px_40px_rgba(0,0,0,0.5)] overflow-hidden">
 
                 {/* Cover zone */}
                 {form.cover_image_url ? (
                   <div className="relative group aspect-[2.4/1] overflow-hidden">
                     <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-muted via-transparent to-transparent" />
                     <button
                       onClick={() => {
                         const url = window.prompt("Cover image URL:", form.cover_image_url);
                         if (url !== null) updateForm({ cover_image_url: url });
                       }}
-                      className="absolute top-3 right-12 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur text-white text-[11px] opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-3 right-12 px-2.5 py-1.5 rounded-lg bg-background/70 backdrop-blur text-foreground text-[11px] opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       Replace
                     </button>
                     <button
                       onClick={() => updateForm({ cover_image_url: "" })}
-                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/60 backdrop-blur text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-background/70 backdrop-blur text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                       title="Remove cover"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -479,7 +476,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                       const url = window.prompt("Cover image URL:");
                       if (url) updateForm({ cover_image_url: url });
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-4 border-b border-white/[0.07] text-white/30 hover:text-white/60 hover:bg-white/[0.02] transition-colors text-[12px]"
+                    className="w-full flex items-center justify-center gap-2 py-4 border-b border-border text-muted-foreground hover:text-foreground transition-colors text-[12px]"
                   >
                     <ImageIcon className="w-4 h-4" />
                     Add cover image
@@ -494,32 +491,32 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                     value={form.title}
                     onChange={e => updateForm({ title: e.target.value })}
                     placeholder="Post title"
-                    className="w-full bg-transparent text-3xl sm:text-[2.5rem] font-bold text-white placeholder:text-white/15 focus:outline-none mb-3 leading-[1.15] tracking-tight"
+                    className="w-full bg-transparent text-3xl sm:text-[2.5rem] font-bold text-foreground placeholder:text-muted-foreground focus:outline-none mb-3 leading-[1.15] tracking-tight"
                   />
 
                   {/* Slug preview */}
-                  <div className="flex items-center gap-2 mb-8 pb-6 border-b border-white/[0.06]">
-                    <span className="text-[11px] text-white/25 font-mono">
-                      /blog/<span className="text-white/45">{form.slug || slugify(form.title) || "your-slug"}</span>
+                  <div className="flex items-center gap-2 mb-8 pb-6 border-b border-border">
+                    <span className="text-[11px] text-muted-foreground font-mono">
+                      /blog/<span className="text-foreground">{form.slug || slugify(form.title) || "your-slug"}</span>
                     </span>
                   </div>
 
                   {/* TipTap */}
-                  <div className="prose prose-invert max-w-none text-[16px] text-white/80
+                  <div className="prose prose-invert max-w-none text-[16px] text-foreground
                     [&_.ProseMirror]:min-h-[40vh]
-                    [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:text-white [&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4
-                    [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:text-white [&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-3
-                    [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:text-white [&_.ProseMirror_h3]:mt-5 [&_.ProseMirror_h3]:mb-2
-                    [&_.ProseMirror_p]:text-white/75 [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p]:leading-[1.8]
-                    [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ul]:text-white/75
-                    [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_ol]:text-white/75
+                    [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:text-foreground [&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4
+                    [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:text-foreground [&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-3
+                    [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:text-foreground [&_.ProseMirror_h3]:mt-5 [&_.ProseMirror_h3]:mb-2
+                    [&_.ProseMirror_p]:text-foreground [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p]:leading-[1.8]
+                    [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ul]:text-foreground
+                    [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_ol]:text-foreground
                     [&_.ProseMirror_li]:mb-1.5
-                    [&_.ProseMirror_blockquote]:border-l-[3px] [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:text-white/50 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:mb-4
-                    [&_.ProseMirror_code]:bg-white/10 [&_.ProseMirror_code]:text-white/80 [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-[0.875em] [&_.ProseMirror_code]:font-mono
-                    [&_.ProseMirror_pre]:bg-white/5 [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-white/10 [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
+                    [&_.ProseMirror_blockquote]:border-l-[3px] [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:text-muted-foreground [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:mb-4
+                    [&_.ProseMirror_code]:bg-card [&_.ProseMirror_code]:text-foreground [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-[0.875em] [&_.ProseMirror_code]:font-mono
+                    [&_.ProseMirror_pre]:bg-card [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-border [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
                     [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
                     [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
-                    [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-white/20 [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
+                    [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
                   ">
                     <EditorContent editor={editor} />
                   </div>
@@ -527,7 +524,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
               </div>
 
               {/* Footer meta */}
-              <p className="text-center text-[11px] text-white/20 mt-4">
+              <p className="text-center text-[11px] text-muted-foreground mt-4">
                 {wordCount} words · ~{Math.max(1, Math.ceil(wordCount / 200))} min read
               </p>
             </div>
@@ -536,7 +533,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
 
         {/* ── Settings sidebar ────────────────────────────────────────────── */}
         <aside className={cn(
-          "shrink-0 border-l border-white/[0.07] bg-[#161616] overflow-y-auto transition-all duration-200",
+          "shrink-0 border-l border-border bg-card overflow-y-auto transition-all duration-200",
           sidebarOpen ? "w-72" : "w-0 overflow-hidden border-l-0"
         )}>
           {sidebarOpen && (
