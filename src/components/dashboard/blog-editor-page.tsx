@@ -7,7 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
 import Placeholder from "@tiptap/extension-placeholder";
-import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
+import { TableKit } from "@tiptap/extension-table";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -530,10 +530,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       ImageExtension.configure({ inline: false, allowBase64: false }),
       Youtube.configure({ controls: true, nocookie: true }),
       Placeholder.configure({ placeholder: "Start writing your blog post…" }),
-      Table.configure({ resizable: false }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      TableKit.configure({ table: { resizable: false } }),
     ],
     content: form.content,
     onUpdate: ({ editor }) => {
