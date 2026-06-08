@@ -15,7 +15,7 @@ import {
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
   Heading1, Heading2, Heading3, ImageIcon, PlayCircle,
   EyeOff, Check, X, Upload, Table2, ChevronDown,
-  Undo2, Redo2,
+  Undo2, Redo2, Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { uploadBlogImage, deleteBlogImage } from "@/lib/blog-image-upload";
@@ -184,6 +184,113 @@ function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploa
         </div>
       )}
     </>
+  );
+}
+
+// ─── Hover delete overlay ─────────────────────────────────────────────────────
+
+const DELETABLE_SELECTOR = 'img, table, blockquote, pre, h1, h2, h3, iframe';
+
+function HoverDeleteButton({ editor }: { editor: ReturnType<typeof useEditor> }) {
+  const [target, setTarget] = useState<Element | null>(null);
+  const [rect,   setRect  ] = useState<DOMRect   | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const updateRect = useCallback((el: Element) => {
+    setRect(el.getBoundingClientRect());
+  }, []);
+
+  const show = useCallback((el: Element) => {
+    clearTimeout(hideTimer.current);
+    setTarget(el);
+    updateRect(el);
+  }, [updateRect]);
+
+  const hide = useCallback(() => {
+    hideTimer.current = setTimeout(() => { setTarget(null); setRect(null); }, 180);
+  }, []);
+
+  // Listen on mousemove within the ProseMirror editor div
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const pm = document.querySelector('.ProseMirror');
+      if (!pm) return;
+      const el = (e.target as Element).closest(DELETABLE_SELECTOR);
+      if (!el || !pm.contains(el)) { hide(); return; }
+      show(el);
+    };
+    document.addEventListener('mousemove', onMove);
+    return () => document.removeEventListener('mousemove', onMove);
+  }, [show, hide]);
+
+  // Keep rect in sync with scroll / resize
+  useEffect(() => {
+    if (!target) return;
+    const sync = () => updateRect(target);
+    window.addEventListener('scroll', sync, true);
+    window.addEventListener('resize', sync);
+    return () => { window.removeEventListener('scroll', sync, true); window.removeEventListener('resize', sync); };
+  }, [target, updateRect]);
+
+  const handleDelete = () => {
+    if (!target || !editor) return;
+    const view = editor.view;
+    try {
+      const tag = target.tagName.toLowerCase();
+
+      if (tag === 'table') {
+        // Cursor must be inside the table for deleteTable to work
+        const cell = target.querySelector('td, th');
+        if (cell) {
+          const pos = view.posAtDOM(cell, 0);
+          editor.chain().focus().setTextSelection(pos).deleteTable().run();
+        }
+      } else if (tag === 'img') {
+        // Images are atom nodes: posAtDOM returns the node position directly
+        const pos = view.posAtDOM(target, 0);
+        const node = view.state.doc.nodeAt(pos);
+        if (node) editor.chain().focus().deleteRange({ from: pos, to: pos + node.nodeSize }).run();
+      } else {
+        // Block nodes (heading, blockquote, pre, iframe):
+        // posAtDOM(el, 0) = inside the node; node starts at pos - 1
+        const innerPos = view.posAtDOM(target, 0);
+        const blockPos = Math.max(0, innerPos - 1);
+        const node = view.state.doc.nodeAt(blockPos);
+        if (node && node.nodeSize > 0) {
+          editor.chain().focus().deleteRange({ from: blockPos, to: blockPos + node.nodeSize }).run();
+        }
+      }
+    } catch (err) {
+      console.warn('Block delete failed:', err);
+    }
+    setTarget(null);
+    setRect(null);
+  };
+
+  if (!rect || !target) return null;
+
+  const label = (() => {
+    const t = target.tagName.toLowerCase();
+    if (/^h[1-6]$/.test(t)) return 'heading';
+    if (t === 'pre') return 'code block';
+    if (t === 'img') return 'image';
+    return t; // table, blockquote, iframe
+  })();
+
+  return (
+    <div
+      style={{ position: 'fixed', top: rect.top + 6, right: Math.max(8, window.innerWidth - rect.right + 6), zIndex: 100 }}
+      onMouseEnter={() => clearTimeout(hideTimer.current)}
+      onMouseLeave={hide}
+    >
+      <button
+        onClick={handleDelete}
+        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-destructive text-primary-foreground text-[11px] font-semibold shadow-lg"
+      >
+        <Trash2 className="w-3 h-3" />
+        Delete {label}
+      </button>
+    </div>
   );
 }
 
@@ -743,6 +850,9 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                       /blog/<span className="text-foreground">{form.slug || slugify(form.title) || "your-slug"}</span>
                     </span>
                   </div>
+
+                  {/* Hover-delete overlay — rendered once, works globally in editor */}
+                  {editor && <HoverDeleteButton editor={editor} />}
 
                   {/* TipTap */}
                   <div className="prose prose-invert max-w-none text-[16px] text-foreground
