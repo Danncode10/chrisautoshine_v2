@@ -17,6 +17,7 @@ import {
 import { listServices } from "@/services/services";
 import { cn } from "@/lib/utils";
 import { DashPagination } from "@/components/dashboard/dash-pagination";
+import { RevenueTrendChart } from "@/components/dashboard/revenue-trend-chart";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,54 +49,6 @@ function StatCard({ label, value, icon: Icon, accent }: {
       <div>
         <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.12em]">{label}</p>
         <p className="text-xl font-bold text-foreground tabular-nums mt-0.5">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-// ─── Revenue bar chart ────────────────────────────────────────────────────────
-
-function RevenueChart({ points, period }: {
-  points: { date: string; revenue: number; count: number }[];
-  period: Period;
-}) {
-  const max = Math.max(...points.map(p => p.revenue), 1);
-  const labelStep = period === "month" ? 7 : 1;
-
-  const fmt = (iso: string) => {
-    const d = new Date(iso);
-    if (period === "today") return d.toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" });
-    if (period === "week")  return d.toLocaleDateString("en-AU", { weekday: "short" });
-    return d.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
-  };
-
-  return (
-    <div>
-      <div className="flex items-end gap-1 h-28">
-        {points.map((p, i) => (
-          <div key={i} className="flex-1 flex flex-col justify-end group relative">
-            {p.revenue > 0 && (
-              <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
-                <div className="bg-popover border border-border rounded-md px-2 py-1 text-[10px] font-medium text-foreground whitespace-nowrap shadow-md">
-                  ${p.revenue.toLocaleString()} · {p.count} sale{p.count !== 1 ? "s" : ""}
-                </div>
-              </div>
-            )}
-            <div
-              className={cn("rounded-t-sm transition-all", p.revenue > 0 ? "bg-emerald-500/70 hover:bg-emerald-500" : "bg-border/40 h-1")}
-              style={{ height: p.revenue > 0 ? `${Math.max((p.revenue / max) * 100, 4)}%` : undefined }}
-            />
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-1 mt-1">
-        {points.map((p, i) => (
-          <div key={i} className="flex-1 text-center">
-            {i % labelStep === 0 && (
-              <span className="text-[9px] text-muted-foreground/50">{fmt(p.date)}</span>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -1055,11 +1008,11 @@ export function SalesTab() {
         <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5">
           <h3 className="text-[13px] font-semibold text-foreground mb-4">Revenue — {PERIOD_LABELS[period]}</h3>
           {statsQ.isLoading ? (
-            <div className="h-28 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+            <div className="h-[220px] flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
           ) : stats && stats.dailyRevenue.some(d => d.revenue > 0) ? (
-            <RevenueChart points={stats.dailyRevenue} period={period} />
+            <RevenueTrendChart points={stats.dailyRevenue} period={period} />
           ) : (
-            <div className="h-28 flex items-center justify-center text-[13px] text-muted-foreground">No data for this period</div>
+            <div className="h-[220px] flex items-center justify-center text-[13px] text-muted-foreground">No data for this period</div>
           )}
         </div>
 
