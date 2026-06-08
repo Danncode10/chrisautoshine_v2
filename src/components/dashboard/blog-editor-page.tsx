@@ -646,7 +646,10 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       StarterKit,
       ImageExtension.configure({ inline: false, allowBase64: false }),
       Youtube.configure({ controls: true, nocookie: true }),
-      Placeholder.configure({ placeholder: "Start writing your blog post…" }),
+      Placeholder.configure({
+        placeholder: ({ node }: { node: { type: { name: string } } }) =>
+          node.type.name === 'heading' ? 'Type a heading…' : 'Start writing your blog post…',
+      }),
       TableKit.configure({ table: { resizable: false } }),
     ],
     content: form.content,
@@ -854,24 +857,8 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                   {/* Hover-delete overlay — rendered once, works globally in editor */}
                   {editor && <HoverDeleteButton editor={editor} />}
 
-                  {/* TipTap */}
-                  <div className="prose prose-invert max-w-none text-[16px] text-foreground
-                    [&_.ProseMirror]:min-h-[40vh]
-                    [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:text-foreground [&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4
-                    [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:text-foreground [&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-3
-                    [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:text-foreground [&_.ProseMirror_h3]:mt-5 [&_.ProseMirror_h3]:mb-2
-                    [&_.ProseMirror_p]:text-foreground [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p]:leading-[1.8]
-                    [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ul]:text-foreground
-                    [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_ol]:text-foreground
-                    [&_.ProseMirror_li]:mb-1.5
-                    [&_.ProseMirror_blockquote]:border-l-[3px] [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:text-muted-foreground [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:mb-4
-                    [&_.ProseMirror_code]:bg-card [&_.ProseMirror_code]:text-foreground [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-[0.875em] [&_.ProseMirror_code]:font-mono
-                    [&_.ProseMirror_pre]:bg-card [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-border [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
-                    [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
-                    [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
-                    /* Table styles handled via globals.css .ProseMirror table rules */
-                    [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
-                  ">
+                  {/* TipTap — all prose styles live in globals.css .ProseMirror rules */}
+                  <div className="blog-editor-prose">
                     <EditorContent editor={editor} />
                   </div>
                 </div>
