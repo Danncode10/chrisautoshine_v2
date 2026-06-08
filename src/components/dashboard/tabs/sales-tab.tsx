@@ -82,7 +82,7 @@ function RevenueChart({ points, period }: {
               </div>
             )}
             <div
-              className={cn("rounded-t-sm transition-all", p.revenue > 0 ? "bg-emerald-500/70 hover:bg-emerald-500" : "bg-muted/30 h-0.5")}
+              className={cn("rounded-t-sm transition-all", p.revenue > 0 ? "bg-emerald-500/70 hover:bg-emerald-500" : "bg-border/40 h-1")}
               style={{ height: p.revenue > 0 ? `${Math.max((p.revenue / max) * 100, 4)}%` : undefined }}
             />
           </div>
