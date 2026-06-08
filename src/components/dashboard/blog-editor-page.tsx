@@ -7,13 +7,14 @@ import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft, Settings2, Globe, FileText, Loader2,
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
   Heading1, Heading2, Heading3, ImageIcon, PlayCircle,
-  EyeOff, Check, X, Upload,
+  EyeOff, Check, X, Upload, Table2, ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { uploadBlogImage, deleteBlogImage } from "@/lib/blog-image-upload";
@@ -185,6 +186,87 @@ function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploa
   );
 }
 
+// ─── Table dropdown ───────────────────────────────────────────────────────────
+
+function TableMenu({ editor }: { editor: ReturnType<typeof useEditor> }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!ref.current?.contains(e.relatedTarget as Node)) setOpen(false);
+  };
+
+  if (!editor) return null;
+  const inTable = editor.isActive("table");
+
+  const run = (fn: () => void) => { fn(); setOpen(false); editor.commands.focus(); };
+
+  const actions = inTable ? [
+    { label: "Add row above",    fn: () => run(() => editor.chain().focus().addRowBefore().run()) },
+    { label: "Add row below",    fn: () => run(() => editor.chain().focus().addRowAfter().run()) },
+    { label: "Delete row",       fn: () => run(() => editor.chain().focus().deleteRow().run()), danger: true },
+    null, // separator
+    { label: "Add column left",  fn: () => run(() => editor.chain().focus().addColumnBefore().run()) },
+    { label: "Add column right", fn: () => run(() => editor.chain().focus().addColumnAfter().run()) },
+    { label: "Delete column",    fn: () => run(() => editor.chain().focus().deleteColumn().run()), danger: true },
+    null,
+    { label: "Toggle header row",fn: () => run(() => editor.chain().focus().toggleHeaderRow().run()) },
+    { label: "Delete table",     fn: () => run(() => editor.chain().focus().deleteTable().run()), danger: true },
+  ] : [
+    { label: "Insert 2 × 2",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 2, cols: 2, withHeaderRow: true }).run()) },
+    { label: "Insert 3 × 3",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()) },
+    { label: "Insert 4 × 4",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 4, cols: 4, withHeaderRow: true }).run()) },
+    { label: "Insert 3 × 5",    fn: () => run(() => editor.chain().focus().insertTable({ rows: 3, cols: 5, withHeaderRow: true }).run()) },
+  ];
+
+  return (
+    <div ref={ref} className="relative" onBlur={handleBlur}>
+      <button
+        type="button"
+        onMouseDown={e => { e.preventDefault(); setOpen(v => !v); }}
+        title="Table"
+        className={cn(
+          "flex items-center gap-0.5 p-1.5 rounded-md text-[13px] transition-colors",
+          inTable || open
+            ? "bg-muted text-foreground"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+        )}
+      >
+        <Table2 className="w-4 h-4" />
+        <ChevronDown className="w-3 h-3" />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[170px] bg-card border border-border rounded-xl shadow-lg overflow-hidden py-1">
+          {!inTable && (
+            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Insert table</p>
+          )}
+          {inTable && (
+            <p className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Table options</p>
+          )}
+          {actions.map((a, i) =>
+            a === null ? (
+              <div key={i} className="my-1 border-t border-border" />
+            ) : (
+              <button
+                key={a.label}
+                onMouseDown={e => { e.preventDefault(); a.fn(); }}
+                className={cn(
+                  "w-full text-left px-3 py-2 text-[13px] transition-colors hover:bg-muted",
+                  (a as { danger?: boolean }).danger ? "text-destructive" : "text-foreground"
+                )}
+              >
+                {a.label}
+              </button>
+            )
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 
 function ToolBtn({
@@ -279,6 +361,8 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
           }
         </ToolBtn>
         <ToolBtn onClick={addYoutube} title="Embed YouTube"><PlayCircle className="w-4 h-4" /></ToolBtn>
+        <Sep />
+        <TableMenu editor={editor} />
       </div>
     </div>
   );
@@ -446,6 +530,10 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       ImageExtension.configure({ inline: false, allowBase64: false }),
       Youtube.configure({ controls: true, nocookie: true }),
       Placeholder.configure({ placeholder: "Start writing your blog post…" }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: form.content,
     onUpdate: ({ editor }) => {
@@ -664,6 +752,10 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                     [&_.ProseMirror_pre]:bg-card [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-border [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
                     [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
                     [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
+                    [&_.ProseMirror_table]:w-full [&_.ProseMirror_table]:border-collapse [&_.ProseMirror_table]:mb-4 [&_.ProseMirror_table]:text-[14px]
+                    [&_.ProseMirror_th]:bg-muted [&_.ProseMirror_th]:border [&_.ProseMirror_th]:border-border [&_.ProseMirror_th]:px-3 [&_.ProseMirror_th]:py-2 [&_.ProseMirror_th]:text-left [&_.ProseMirror_th]:font-semibold [&_.ProseMirror_th]:text-foreground
+                    [&_.ProseMirror_td]:border [&_.ProseMirror_td]:border-border [&_.ProseMirror_td]:px-3 [&_.ProseMirror_td]:py-2 [&_.ProseMirror_td]:text-foreground [&_.ProseMirror_td]:align-top
+                    [&_.ProseMirror_.selectedCell]:bg-primary/10
                     [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
                   ">
                     <EditorContent editor={editor} />
