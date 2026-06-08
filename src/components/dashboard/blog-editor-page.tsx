@@ -13,9 +13,10 @@ import {
   ArrowLeft, Settings2, Globe, FileText, Loader2,
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
   Heading1, Heading2, Heading3, ImageIcon, PlayCircle,
-  EyeOff, Check, X,
+  EyeOff, Check, X, Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadBlogImage, deleteBlogImage } from "@/lib/blog-image-upload";
 import {
   createBlogPost, updateBlogPost, publishBlogPost, unpublishBlogPost,
 } from "@/services/blog";
@@ -30,6 +31,158 @@ function slugify(str: string) {
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
+}
+
+// ─── Cover Upload ─────────────────────────────────────────────────────────────
+
+interface CoverUploadProps {
+  url: string;
+  storagePath: string;
+  onChange: (url: string, storagePath: string) => void;
+  compact?: boolean; // true = sidebar chip, false = full inline zone
+}
+
+function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploadProps) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress]   = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 20 * 1024 * 1024) { toast.error("File too large — max 20 MB before compression"); return; }
+
+    setUploading(true);
+    setProgress(0);
+    try {
+      // Delete old image from storage if replacing
+      if (storagePath) await deleteBlogImage(storagePath).catch(() => null);
+
+      const result = await uploadBlogImage(file, pct => setProgress(pct));
+      onChange(result.url, result.path);
+      toast.success(`Cover uploaded — ${result.sizeKb} KB after compression`);
+    } catch (e: unknown) {
+      toast.error((e as Error).message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+      setProgress(0);
+    }
+  }, [storagePath, onChange]);
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handleFile(f);
+    e.target.value = ""; // allow re-selecting same file
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleFile(f);
+  };
+
+  const handleRemove = async () => {
+    if (storagePath) await deleteBlogImage(storagePath).catch(() => null);
+    onChange("", "");
+  };
+
+  // ── Compact (sidebar) ──────────────────────────────────────────────────────
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onInputChange} />
+        {url ? (
+          <div className="relative group rounded-lg overflow-hidden aspect-video bg-muted">
+            <img src={url} alt="cover" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/60 backdrop-blur-sm">
+              <button onClick={() => inputRef.current?.click()} className="px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground text-[11px] hover:bg-muted transition-colors">Replace</button>
+              <button onClick={handleRemove} className="p-1.5 rounded-lg bg-card border border-border text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="w-full flex flex-col items-center justify-center gap-2 py-5 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:text-foreground hover:border-ring transition-colors disabled:opacity-60"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-[11px]">Uploading… {progress}%</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5" />
+                <span className="text-[11px]">Click to upload</span>
+                <span className="text-[10px] text-muted-foreground">JPG, PNG, WebP · compressed automatically</span>
+              </>
+            )}
+          </button>
+        )}
+        {uploading && (
+          <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-primary transition-all duration-200 rounded-full" style={{ width: `${progress}%` }} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Inline / full (document sheet top) ────────────────────────────────────
+  return (
+    <>
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onInputChange} />
+      {url ? (
+        <div
+          className="relative group aspect-[2.4/1] overflow-hidden cursor-pointer"
+          onDrop={onDrop}
+          onDragOver={e => e.preventDefault()}
+          onClick={() => inputRef.current?.click()}
+        >
+          <img src={url} alt="cover" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-muted via-transparent to-transparent" />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-foreground text-[12px]">
+              <Upload className="w-3.5 h-3.5" /> Replace cover
+            </div>
+            <button
+              onClick={e => { e.stopPropagation(); handleRemove(); }}
+              className="p-1.5 rounded-lg bg-card border border-border text-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          {/* Upload progress bar */}
+          {uploading && (
+            <div className="absolute bottom-0 inset-x-0 h-1 bg-muted">
+              <div className="h-full bg-primary transition-all duration-200" style={{ width: `${progress}%` }} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          className="flex items-center justify-center gap-2 py-5 border-b border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer select-none"
+          onClick={() => inputRef.current?.click()}
+          onDrop={onDrop}
+          onDragOver={e => e.preventDefault()}
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-[12px]">Uploading… {progress}%</span>
+              <div className="absolute bottom-0 inset-x-0 h-0.5 bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
+            </>
+          ) : (
+            <>
+              <ImageIcon className="w-4 h-4" />
+              <span className="text-[12px]">Add cover image</span>
+              <span className="text-[11px] text-muted-foreground">— drag & drop or click · auto-compressed</span>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
 }
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
@@ -144,23 +297,12 @@ function SettingsPanel({
       {/* Cover image */}
       <div className="p-4">
         <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Cover Image</label>
-        <input
-          value={form.cover_image_url}
-          onChange={e => onChange({ cover_image_url: e.target.value })}
-          placeholder="https://example.com/image.jpg"
-          className={inputCls}
+        <CoverUpload
+          compact
+          url={form.cover_image_url}
+          storagePath={form.cover_storage_path}
+          onChange={(url, path) => onChange({ cover_image_url: url, cover_storage_path: path })}
         />
-        {form.cover_image_url && (
-          <div className="mt-2 rounded-lg overflow-hidden aspect-video bg-muted relative group">
-            <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
-            <button
-              onClick={() => onChange({ cover_image_url: "" })}
-              className="absolute top-1.5 right-1.5 p-1 rounded-md bg-background/80 text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Excerpt */}
@@ -222,6 +364,7 @@ interface FormState {
   slugManual: boolean;
   excerpt: string;
   cover_image_url: string;
+  cover_storage_path: string; // storage path for deletion on replace/remove
   content: string;
   seo_title: string;
   seo_description: string;
@@ -249,6 +392,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
     slugManual: isEdit,
     excerpt: post?.excerpt ?? "",
     cover_image_url: post?.cover_image_url ?? "",
+    cover_storage_path: "",  // existing posts: path unknown; deletion handled on replace
     content: post?.content ?? "",
     seo_title: post?.seo_title ?? "",
     seo_description: post?.seo_description ?? "",
@@ -449,39 +593,11 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
               <div className="rounded-2xl border border-border bg-muted shadow-[0_8px_40px_rgba(0,0,0,0.5)] overflow-hidden">
 
                 {/* Cover zone */}
-                {form.cover_image_url ? (
-                  <div className="relative group aspect-[2.4/1] overflow-hidden">
-                    <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-muted via-transparent to-transparent" />
-                    <button
-                      onClick={() => {
-                        const url = window.prompt("Cover image URL:", form.cover_image_url);
-                        if (url !== null) updateForm({ cover_image_url: url });
-                      }}
-                      className="absolute top-3 right-12 px-2.5 py-1.5 rounded-lg bg-background/70 backdrop-blur text-foreground text-[11px] opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      Replace
-                    </button>
-                    <button
-                      onClick={() => updateForm({ cover_image_url: "" })}
-                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-background/70 backdrop-blur text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Remove cover"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      const url = window.prompt("Cover image URL:");
-                      if (url) updateForm({ cover_image_url: url });
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-4 border-b border-border text-muted-foreground hover:text-foreground transition-colors text-[12px]"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    Add cover image
-                  </button>
-                )}
+                <CoverUpload
+                  url={form.cover_image_url}
+                  storagePath={form.cover_storage_path}
+                  onChange={(url, path) => updateForm({ cover_image_url: url, cover_storage_path: path })}
+                />
 
                 {/* Inner padding */}
                 <div className="px-6 sm:px-10 py-8 sm:py-10">
