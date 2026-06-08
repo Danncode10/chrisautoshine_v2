@@ -13,10 +13,54 @@ const BUCKET  = "blog-images";
 const MAX_PX  = 1200;   // longest edge target
 const QUALITY = 0.82;   // JPEG quality (0–1)
 
+// This bucket is shared across every Dannflow business on a free Supabase
+// storage tier (1 GB total) — keeping each post's images small protects
+// everyone's quota, not just this app's.
+export const MAX_POST_IMAGES_KB = 2 * 1024; // 2 MB of images per blog post
+
 export interface UploadResult {
   url: string;       // public CDN URL
   path: string;      // storage path for deletion
   sizeKb: number;    // final size after compression
+}
+
+// ── Storage path helpers ──────────────────────────────────────────────────────
+
+const PUBLIC_URL_MARKER = `/storage/v1/object/public/${BUCKET}/`;
+
+/** Recovers the storage path (e.g. "chris-auto-shine/123-abc.jpg") from a public URL. */
+export function extractBlogImagePath(url: string): string | null {
+  const idx = url.indexOf(PUBLIC_URL_MARKER);
+  if (idx === -1) return null;
+  return url.slice(idx + PUBLIC_URL_MARKER.length);
+}
+
+/** Pulls every <img src="..."> out of the editor's HTML content. */
+export function extractImageSrcs(html: string): string[] {
+  return Array.from(html.matchAll(/<img[^>]+src="([^"]+)"/g), m => m[1]);
+}
+
+/**
+ * Sums the storage size (in KB) of the given image URLs, used to show how
+ * much of a post's image budget is currently spent. Ignores URLs that aren't
+ * in this bucket (e.g. external images).
+ */
+export async function getBlogImageUsageKb(urls: (string | null | undefined)[]): Promise<number> {
+  const paths = Array.from(new Set(
+    urls.filter((u): u is string => !!u).map(extractBlogImagePath).filter((p): p is string => !!p)
+  ));
+  if (!paths.length) return 0;
+
+  const supabase = createClient();
+  const { data } = await supabase.storage.from(BUCKET).list(APP_ID, { limit: 1000 });
+  if (!data) return 0;
+
+  const sizeByName = new Map(data.map(f => [f.name, f.metadata?.size ?? 0]));
+  let bytes = 0;
+  for (const path of paths) {
+    bytes += sizeByName.get(path.split("/").pop()!) ?? 0;
+  }
+  return Math.round(bytes / 1024);
 }
 
 // ── Compress via Canvas ───────────────────────────────────────────────────────
@@ -65,11 +109,23 @@ async function compressImage(file: File): Promise<Blob> {
 export async function uploadBlogImage(
   file: File,
   onProgress?: (pct: number) => void,
+  remainingKb?: number,
 ): Promise<UploadResult> {
   onProgress?.(5);
 
   // 1. Compress
   const blob = await compressImage(file);
+  const sizeKb = Math.round(blob.size / 1024);
+
+  // Budget check happens *after* compression (so the figure is accurate) but
+  // *before* the network upload (so we don't waste storage writes on images
+  // that would blow the post's quota).
+  if (remainingKb !== undefined && sizeKb > remainingKb) {
+    throw new Error(
+      `This image is ${sizeKb} KB, but this post only has ${remainingKb} KB left of its ` +
+      `${MAX_POST_IMAGES_KB / 1024} MB image budget. Remove an image or pick a smaller one.`
+    );
+  }
   onProgress?.(40);
 
   // 2. Unique path: app-id/timestamp-randomhex.jpg
@@ -95,7 +151,7 @@ export async function uploadBlogImage(
   return {
     url: data.publicUrl,
     path,
-    sizeKb: Math.round(blob.size / 1024),
+    sizeKb,
   };
 }
 

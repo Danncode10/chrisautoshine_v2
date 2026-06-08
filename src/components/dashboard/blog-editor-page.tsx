@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { DOMParser as PMDOMParser } from "@tiptap/pm/model";
 import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
@@ -10,6 +11,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { TableKit } from "@tiptap/extension-table";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { marked } from "marked";
 import {
   ArrowLeft, Settings2, Globe, FileText, Loader2,
   Bold, Italic, Code, List, ListOrdered, Quote, AlignLeft,
@@ -18,7 +20,10 @@ import {
   Undo2, Redo2, Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { uploadBlogImage, deleteBlogImage } from "@/lib/blog-image-upload";
+import {
+  uploadBlogImage, deleteBlogImage, extractBlogImagePath,
+  extractImageSrcs, getBlogImageUsageKb, MAX_POST_IMAGES_KB,
+} from "@/lib/blog-image-upload";
 import {
   createBlogPost, updateBlogPost, publishBlogPost, unpublishBlogPost,
 } from "@/services/blog";
@@ -35,16 +40,30 @@ function slugify(str: string) {
     .replace(/-+/g, "-");
 }
 
+// Heuristic check for "this plain-text paste is probably markdown" — used to
+// decide whether to auto-format pasted text into rich content (Notion-style).
+const MARKDOWN_PATTERN = /(^|\n) {0,3}(#{1,6})\s|\*\*[^*\n]+\*\*|__[^_\n]+__|(^|\n) {0,3}[-*+]\s|(^|\n) {0,3}\d+\.\s|(^|\n) {0,3}>\s|```|\[[^\]]+\]\([^)]+\)/;
+
+function looksLikeMarkdown(text: string): boolean {
+  return MARKDOWN_PATTERN.test(text);
+}
+
+interface ImageBudget {
+  remainingKb: number;
+  recompute: () => void;
+}
+
 // ─── Cover Upload ─────────────────────────────────────────────────────────────
 
 interface CoverUploadProps {
   url: string;
   storagePath: string;
   onChange: (url: string, storagePath: string) => void;
+  budget: ImageBudget;
   compact?: boolean; // true = sidebar chip, false = full inline zone
 }
 
-function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploadProps) {
+function CoverUpload({ url, storagePath, onChange, budget, compact = false }: CoverUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress]   = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,11 +75,14 @@ function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploa
     setUploading(true);
     setProgress(0);
     try {
-      // Delete old image from storage if replacing
-      if (storagePath) await deleteBlogImage(storagePath).catch(() => null);
+      // Delete old image from storage if replacing — fall back to parsing the
+      // path out of the URL for posts loaded before we tracked storagePath.
+      const oldPath = storagePath || extractBlogImagePath(url);
+      if (oldPath) await deleteBlogImage(oldPath).catch(() => null);
 
-      const result = await uploadBlogImage(file, pct => setProgress(pct));
+      const result = await uploadBlogImage(file, pct => setProgress(pct), budget.remainingKb);
       onChange(result.url, result.path);
+      budget.recompute();
       toast.success(`Cover uploaded — ${result.sizeKb} KB after compression`);
     } catch (e: unknown) {
       toast.error((e as Error).message ?? "Upload failed");
@@ -68,7 +90,7 @@ function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploa
       setUploading(false);
       setProgress(0);
     }
-  }, [storagePath, onChange]);
+  }, [storagePath, url, onChange, budget]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -83,8 +105,10 @@ function CoverUpload({ url, storagePath, onChange, compact = false }: CoverUploa
   };
 
   const handleRemove = async () => {
-    if (storagePath) await deleteBlogImage(storagePath).catch(() => null);
+    const path = storagePath || extractBlogImagePath(url);
+    if (path) await deleteBlogImage(path).catch(() => null);
     onChange("", "");
+    budget.recompute();
   };
 
   // ── Compact (sidebar) ──────────────────────────────────────────────────────
@@ -421,7 +445,7 @@ function Sep() {
   return <div className="w-px h-4 bg-border mx-0.5 shrink-0" />;
 }
 
-function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
+function Toolbar({ editor, budget }: { editor: ReturnType<typeof useEditor>; budget: ImageBudget }) {
   if (!editor) return null;
 
   const imgInputRef = useRef<HTMLInputElement>(null);
@@ -433,8 +457,9 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
     if (!file) return;
     setImgUploading(true);
     try {
-      const result = await uploadBlogImage(file);
+      const result = await uploadBlogImage(file, undefined, budget.remainingKb);
       editor.chain().focus().setImage({ src: result.url }).run();
+      budget.recompute();
       toast.success(`Image inserted — ${result.sizeKb} KB`);
     } catch (err: unknown) {
       toast.error((err as Error).message ?? "Upload failed");
@@ -497,14 +522,19 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
 // ─── Settings Panel ───────────────────────────────────────────────────────────
 
 function SettingsPanel({
-  form, onChange, isPublished, wordCount,
+  form, onChange, isPublished, wordCount, budget,
 }: {
   form: FormState;
   onChange: (f: Partial<FormState>) => void;
   isPublished: boolean;
   wordCount: number;
+  budget: ImageBudget;
 }) {
   const inputCls = "w-full bg-muted border border-border rounded-lg px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-colors resize-none";
+
+  const usedKb = MAX_POST_IMAGES_KB - budget.remainingKb;
+  const usedPct = Math.min(100, Math.round((usedKb / MAX_POST_IMAGES_KB) * 100));
+  const nearLimit = usedPct >= 85;
 
   return (
     <div className="flex flex-col gap-0 divide-y divide-border">
@@ -544,7 +574,27 @@ function SettingsPanel({
           url={form.cover_image_url}
           storagePath={form.cover_storage_path}
           onChange={(url, path) => onChange({ cover_image_url: url, cover_storage_path: path })}
+          budget={budget}
         />
+      </div>
+
+      {/* Image budget */}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Image Storage</label>
+          <span className={cn("text-[11px]", nearLimit ? "text-amber-400" : "text-muted-foreground")}>
+            {(usedKb / 1024).toFixed(2)} / {(MAX_POST_IMAGES_KB / 1024).toFixed(0)} MB
+          </span>
+        </div>
+        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+          <div
+            className={cn("h-full rounded-full transition-all duration-300", nearLimit ? "bg-amber-400" : "bg-primary")}
+            style={{ width: `${usedPct}%` }}
+          />
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-1.5">
+          Cover + inline images for this post. Shared free-tier bucket — keep posts lean.
+        </p>
       </div>
 
       {/* Excerpt */}
@@ -650,6 +700,31 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
     });
   }, []);
 
+  // ── Per-post image storage budget ──────────────────────────────────────────
+  // Mirror form in a ref so async callbacks (uploads, paste, doc-diff) always
+  // see the latest cover/content without re-subscribing on every keystroke.
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
+
+  const [usedImagesKb, setUsedImagesKb] = useState(0);
+  const recomputeUsage = useCallback(() => {
+    const { cover_image_url, content } = formRef.current;
+    getBlogImageUsageKb([cover_image_url, ...extractImageSrcs(content)])
+      .then(setUsedImagesKb)
+      .catch(() => {});
+  }, []);
+
+  const imageBudget: ImageBudget = {
+    remainingKb: Math.max(0, MAX_POST_IMAGES_KB - usedImagesKb),
+    recompute: recomputeUsage,
+  };
+
+  // Seed the real usage figure for existing posts (new posts start at 0).
+  useEffect(() => {
+    if (isEdit) recomputeUsage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -669,8 +744,55 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       attributes: {
         class: "outline-none min-h-[60vh] leading-relaxed",
       },
+      // Notion-style markdown paste: plain-text pastes that look like markdown
+      // (headings, bold, lists, links…) are parsed to HTML and inserted as
+      // rich content instead of landing as raw "## Heading" text.
+      handlePaste: (view, event) => {
+        const clipboard = event.clipboardData;
+        if (!clipboard) return false;
+
+        const text = clipboard.getData("text/plain");
+        const html = clipboard.getData("text/html");
+        if (!text || html || !looksLikeMarkdown(text)) return false;
+
+        event.preventDefault();
+        const parsedHtml = marked.parse(text, { async: false }) as string;
+        const dom = new window.DOMParser().parseFromString(parsedHtml, "text/html");
+        const slice = PMDOMParser.fromSchema(view.state.schema).parseSlice(dom.body);
+        view.dispatch(view.state.tr.replaceSelection(slice).scrollIntoView());
+        return true;
+      },
     },
   });
+
+  // Clean up storage when an inline image is removed from the document
+  // (hover-delete, undo across an insert, selection-delete, etc.) — without
+  // this, every "added then removed" image would sit in storage forever.
+  const prevInlineImagesRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!editor) return;
+
+    const snapshot = () => new Set(
+      extractImageSrcs(editor.getHTML()).filter(u => extractBlogImagePath(u))
+    );
+    prevInlineImagesRef.current = snapshot();
+
+    const onUpdate = () => {
+      const current = snapshot();
+      const prev = prevInlineImagesRef.current;
+      if (prev) {
+        for (const url of prev) {
+          if (current.has(url) || url === formRef.current.cover_image_url) continue;
+          const path = extractBlogImagePath(url);
+          if (path) deleteBlogImage(path).then(recomputeUsage).catch(() => {});
+        }
+      }
+      prevInlineImagesRef.current = current;
+    };
+
+    editor.on("update", onUpdate);
+    return () => { editor.off("update", onUpdate); };
+  }, [editor, recomputeUsage]);
 
   const wordCount = form.content
     .replace(/<[^>]+>/g, " ")
@@ -829,7 +951,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
         {/* Editor column */}
         <div className="flex-1 min-w-0 flex flex-col">
 
-          <Toolbar editor={editor} />
+          <Toolbar editor={editor} budget={imageBudget} />
 
           {/* Writing area */}
           <div className="flex-1 overflow-y-auto">
@@ -843,6 +965,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
                   url={form.cover_image_url}
                   storagePath={form.cover_storage_path}
                   onChange={(url, path) => updateForm({ cover_image_url: url, cover_storage_path: path })}
+                  budget={imageBudget}
                 />
 
                 {/* Inner padding */}
@@ -892,6 +1015,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
               onChange={updateForm}
               isPublished={isPublished}
               wordCount={wordCount}
+              budget={imageBudget}
             />
           )}
         </aside>
