@@ -77,22 +77,24 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
   };
 
   return (
-    <div className="sticky top-[57px] z-10 flex items-center flex-wrap gap-0.5 px-4 py-2 border-b border-white/[0.07] bg-[#1a1a1a]/95 backdrop-blur-sm">
-      <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1"><Heading1 className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2"><Heading2 className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Heading 3"><Heading3 className="w-4 h-4" /></ToolBtn>
-      <Sep />
-      <ToolBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold"><Bold className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italic"><Italic className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive("code")} title="Inline Code"><Code className="w-4 h-4" /></ToolBtn>
-      <Sep />
-      <ToolBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet List"><List className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Ordered List"><ListOrdered className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} title="Blockquote"><Quote className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} title="Code Block"><AlignLeft className="w-4 h-4" /></ToolBtn>
-      <Sep />
-      <ToolBtn onClick={addImage} title="Insert Image"><ImageIcon className="w-4 h-4" /></ToolBtn>
-      <ToolBtn onClick={addYoutube} title="Embed YouTube"><PlayCircle className="w-4 h-4" /></ToolBtn>
+    <div className="sticky top-[57px] z-10 border-b border-white/[0.07] bg-[#0d0d0d]/95 backdrop-blur-sm">
+      <div className="max-w-3xl mx-auto flex items-center flex-wrap gap-0.5 px-4 sm:px-6 py-2">
+        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} title="Heading 1"><Heading1 className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2"><Heading2 className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} title="Heading 3"><Heading3 className="w-4 h-4" /></ToolBtn>
+        <Sep />
+        <ToolBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold"><Bold className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italic"><Italic className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive("code")} title="Inline Code"><Code className="w-4 h-4" /></ToolBtn>
+        <Sep />
+        <ToolBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet List"><List className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} title="Ordered List"><ListOrdered className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} title="Blockquote"><Quote className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} title="Code Block"><AlignLeft className="w-4 h-4" /></ToolBtn>
+        <Sep />
+        <ToolBtn onClick={addImage} title="Insert Image"><ImageIcon className="w-4 h-4" /></ToolBtn>
+        <ToolBtn onClick={addYoutube} title="Embed YouTube"><PlayCircle className="w-4 h-4" /></ToolBtn>
+      </div>
     </div>
   );
 }
@@ -435,7 +437,7 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
       </header>
 
       {/* ── Body ──────────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 bg-[#0d0d0d]">
 
         {/* Editor column */}
         <div className="flex-1 min-w-0 flex flex-col">
@@ -444,46 +446,90 @@ export function BlogEditorPage({ post, orgId }: BlogEditorPageProps) {
 
           {/* Writing area */}
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-3xl mx-auto px-6 sm:px-12 py-10">
+            <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10">
 
-              {/* Title */}
-              <input
-                value={form.title}
-                onChange={e => updateForm({ title: e.target.value })}
-                placeholder="Post title"
-                className="w-full bg-transparent text-3xl sm:text-4xl font-bold text-white placeholder:text-white/20 focus:outline-none mb-2 leading-tight"
-              />
+              {/* Document sheet */}
+              <div className="rounded-2xl border border-white/[0.07] bg-[#181818] shadow-[0_8px_40px_rgba(0,0,0,0.4)] overflow-hidden">
 
-              {/* Slug preview */}
-              <p className="text-[12px] text-white/25 mb-8 font-mono">
-                /blog/<span className="text-white/40">{form.slug || slugify(form.title) || "your-slug"}</span>
-              </p>
+                {/* Cover zone */}
+                {form.cover_image_url ? (
+                  <div className="relative group aspect-[2.4/1] overflow-hidden">
+                    <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
+                    <button
+                      onClick={() => {
+                        const url = window.prompt("Cover image URL:", form.cover_image_url);
+                        if (url !== null) updateForm({ cover_image_url: url });
+                      }}
+                      className="absolute top-3 right-12 px-2.5 py-1.5 rounded-lg bg-black/60 backdrop-blur text-white text-[11px] opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      Replace
+                    </button>
+                    <button
+                      onClick={() => updateForm({ cover_image_url: "" })}
+                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/60 backdrop-blur text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove cover"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const url = window.prompt("Cover image URL:");
+                      if (url) updateForm({ cover_image_url: url });
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-4 border-b border-white/[0.07] text-white/30 hover:text-white/60 hover:bg-white/[0.02] transition-colors text-[12px]"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    Add cover image
+                  </button>
+                )}
 
-              {/* Cover preview in editor (if set) */}
-              {form.cover_image_url && (
-                <div className="rounded-xl overflow-hidden mb-8 aspect-video">
-                  <img src={form.cover_image_url} alt="cover" className="w-full h-full object-cover" />
+                {/* Inner padding */}
+                <div className="px-6 sm:px-10 py-8 sm:py-10">
+
+                  {/* Title */}
+                  <input
+                    value={form.title}
+                    onChange={e => updateForm({ title: e.target.value })}
+                    placeholder="Post title"
+                    className="w-full bg-transparent text-3xl sm:text-[2.5rem] font-bold text-white placeholder:text-white/15 focus:outline-none mb-3 leading-[1.15] tracking-tight"
+                  />
+
+                  {/* Slug preview */}
+                  <div className="flex items-center gap-2 mb-8 pb-6 border-b border-white/[0.06]">
+                    <span className="text-[11px] text-white/25 font-mono">
+                      /blog/<span className="text-white/45">{form.slug || slugify(form.title) || "your-slug"}</span>
+                    </span>
+                  </div>
+
+                  {/* TipTap */}
+                  <div className="prose prose-invert max-w-none text-[16px] text-white/80
+                    [&_.ProseMirror]:min-h-[40vh]
+                    [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:text-white [&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4
+                    [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:text-white [&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-3
+                    [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:text-white [&_.ProseMirror_h3]:mt-5 [&_.ProseMirror_h3]:mb-2
+                    [&_.ProseMirror_p]:text-white/75 [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p]:leading-[1.8]
+                    [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ul]:text-white/75
+                    [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_ol]:text-white/75
+                    [&_.ProseMirror_li]:mb-1.5
+                    [&_.ProseMirror_blockquote]:border-l-[3px] [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:text-white/50 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:mb-4
+                    [&_.ProseMirror_code]:bg-white/10 [&_.ProseMirror_code]:text-white/80 [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-[0.875em] [&_.ProseMirror_code]:font-mono
+                    [&_.ProseMirror_pre]:bg-white/5 [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-white/10 [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
+                    [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
+                    [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
+                    [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-white/20 [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
+                  ">
+                    <EditorContent editor={editor} />
+                  </div>
                 </div>
-              )}
-
-              {/* TipTap */}
-              <div className="prose prose-invert max-w-none text-[16px] text-white/80
-                [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:text-white [&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4
-                [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:text-white [&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-3
-                [&_.ProseMirror_h3]:text-xl [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:text-white [&_.ProseMirror_h3]:mt-5 [&_.ProseMirror_h3]:mb-2
-                [&_.ProseMirror_p]:text-white/75 [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_p]:leading-[1.8]
-                [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:mb-4 [&_.ProseMirror_ul]:text-white/75
-                [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:mb-4 [&_.ProseMirror_ol]:text-white/75
-                [&_.ProseMirror_li]:mb-1.5
-                [&_.ProseMirror_blockquote]:border-l-[3px] [&_.ProseMirror_blockquote]:border-primary [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:text-white/50 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_blockquote]:mb-4
-                [&_.ProseMirror_code]:bg-white/10 [&_.ProseMirror_code]:text-white/80 [&_.ProseMirror_code]:px-1.5 [&_.ProseMirror_code]:py-0.5 [&_.ProseMirror_code]:rounded [&_.ProseMirror_code]:text-[0.875em] [&_.ProseMirror_code]:font-mono
-                [&_.ProseMirror_pre]:bg-white/5 [&_.ProseMirror_pre]:border [&_.ProseMirror_pre]:border-white/10 [&_.ProseMirror_pre]:rounded-xl [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:mb-4 [&_.ProseMirror_pre]:overflow-x-auto
-                [&_.ProseMirror_img]:rounded-xl [&_.ProseMirror_img]:max-w-full [&_.ProseMirror_img]:mb-4
-                [&_.ProseMirror_iframe]:rounded-xl [&_.ProseMirror_iframe]:w-full [&_.ProseMirror_iframe]:mb-4
-                [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-white/20 [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
-              ">
-                <EditorContent editor={editor} />
               </div>
+
+              {/* Footer meta */}
+              <p className="text-center text-[11px] text-white/20 mt-4">
+                {wordCount} words · ~{Math.max(1, Math.ceil(wordCount / 200))} min read
+              </p>
             </div>
           </div>
         </div>
