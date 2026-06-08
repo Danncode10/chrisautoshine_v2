@@ -1056,7 +1056,7 @@ export function SalesTab() {
           <h3 className="text-[13px] font-semibold text-foreground mb-4">Revenue — {PERIOD_LABELS[period]}</h3>
           {statsQ.isLoading ? (
             <div className="h-28 flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
-          ) : stats?.dailyRevenue.length ? (
+          ) : stats && stats.dailyRevenue.some(d => d.revenue > 0) ? (
             <RevenueChart points={stats.dailyRevenue} period={period} />
           ) : (
             <div className="h-28 flex items-center justify-center text-[13px] text-muted-foreground">No data for this period</div>

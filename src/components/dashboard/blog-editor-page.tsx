@@ -42,10 +42,17 @@ function slugify(str: string) {
 
 // Heuristic check for "this plain-text paste is probably markdown" — used to
 // decide whether to auto-format pasted text into rich content (Notion-style).
-const MARKDOWN_PATTERN = /(^|\n) {0,3}(#{1,6})\s|\*\*[^*\n]+\*\*|__[^_\n]+__|(^|\n) {0,3}[-*+]\s|(^|\n) {0,3}\d+\.\s|(^|\n) {0,3}>\s|```|\[[^\]]+\]\([^)]+\)/;
+const MARKDOWN_PATTERN = /(^|\n)#{1,6}\s|(\*\*|__)[^\*_]+(\*\*|__)|^[-*+]\s|^\d+\.\s|^>\s|```|\[[^\]]+\]\([^)]+\)/m;
 
 function looksLikeMarkdown(text: string): boolean {
-  return MARKDOWN_PATTERN.test(text);
+  const result = MARKDOWN_PATTERN.test(text);
+  if (!result) {
+    console.debug('[Markdown Paste] Text does not match markdown pattern:', {
+      text: text.slice(0, 100),
+      pattern: MARKDOWN_PATTERN.source,
+    });
+  }
+  return result;
 }
 
 interface ImageBudget {
