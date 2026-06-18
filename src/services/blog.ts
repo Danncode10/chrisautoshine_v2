@@ -28,6 +28,19 @@ function extractBlogImageStoragePaths(coverImageUrl: string | null, content: str
 export type BlogPost = Tables<"blog_posts">;
 
 /**
+ * Public reads run at build time (sitemap, /blog, /blog/[slug], homepage
+ * preview) where Supabase env vars may be absent. Without this guard the admin
+ * client constructor throws "supabaseUrl is required" and the entire build
+ * fails. When unconfigured we degrade to "no posts" — pages still build and are
+ * generated on demand once env is present at runtime (revalidate = 60).
+ */
+function publicReadsConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
+
+/**
  * Garbage-collects orphaned blog images: anything sitting in this app's
  * storage folder that no post (draft or published) references anymore.
  *
@@ -89,6 +102,7 @@ export async function listBlogPosts(opts: {
   publishedOnly?: boolean;
 }): Promise<BlogListResult> {
   const { page = 1, pageSize = 20, publishedOnly = false } = opts;
+  if (publishedOnly && !publicReadsConfigured()) return { data: [], total: 0 };
   // Public reads (publishedOnly) use admin client to avoid cookie/auth issues.
   // Dashboard reads use the session client so RLS still applies for write ops.
   const supabase = publishedOnly ? createAdminClient() : await createClient();
@@ -125,6 +139,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 // Safe because we always filter by app_id + is_published.
 
 export async function getPublishedBlogPost(slug: string): Promise<BlogPost | null> {
+  if (!publicReadsConfigured()) return null;
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
@@ -139,6 +154,7 @@ export async function getPublishedBlogPost(slug: string): Promise<BlogPost | nul
 }
 
 export async function getLatestPublishedPosts(limit = 3): Promise<BlogPost[]> {
+  if (!publicReadsConfigured()) return [];
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
@@ -154,6 +170,7 @@ export async function getLatestPublishedPosts(limit = 3): Promise<BlogPost[]> {
 
 // Safe to call from generateStaticParams at build time (no cookies).
 export async function getAllPublishedSlugs(): Promise<string[]> {
+  if (!publicReadsConfigured()) return [];
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("blog_posts")
