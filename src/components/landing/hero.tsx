@@ -110,6 +110,13 @@ export function Hero() {
   const [introComplete, setIntroComplete] = useState(false);
 
   useEffect(() => {
+    // Skip intro when landing directly on a hash anchor (e.g. /#services)
+    if (window.location.hash) {
+      setIntroComplete(true);
+      setLine1Done(true);
+      setParticlesActive(true);
+      return;
+    }
     document.body.classList.add("intro-active");
     const t = setTimeout(() => setParticlesActive(true), 200);
     return () => clearTimeout(t);
