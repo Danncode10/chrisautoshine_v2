@@ -5,6 +5,7 @@ import { Loader2, TrendingUp, DollarSign, ShoppingBag, Users, BarChart2 } from "
 import { getEventCountsByDay, getTopPages, getEventTypeBreakdown } from "@/services/analytics";
 import { getSalesStats } from "@/services/sales";
 import { cn } from "@/lib/utils";
+import { RevenueTrendChart } from "@/components/dashboard/revenue-trend-chart";
 
 function BizKpiCard({ label, value, sub, icon: Icon, accent }: {
   label: string; value: string; sub: string; icon: React.ElementType; accent: string;
@@ -101,32 +102,21 @@ export function AnalyticsTab() {
       </div>
 
       {/* Revenue trend — This Month */}
-      {salesMonth && salesMonth.dailyRevenue.length > 0 && (
+      {salesMonth && (
         <div className="bg-card border border-border rounded-2xl p-5">
           <h3 className="text-[13px] font-semibold text-foreground mb-4">Revenue Trend — This Month</h3>
-          <div className="flex items-end gap-0.5 h-24">
-            {salesMonth.dailyRevenue.map((p, i) => {
-              const max = Math.max(...salesMonth.dailyRevenue.map(x => x.revenue), 1);
-              return (
-                <div key={i} className="flex-1 flex flex-col justify-end group relative">
-                  {p.revenue > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none z-10">
-                      <div className="bg-popover border border-border rounded-md px-2 py-1 text-[10px] font-medium text-foreground whitespace-nowrap shadow-md">
-                        ${p.revenue.toLocaleString()} · {p.date.slice(5)}
-                      </div>
-                    </div>
-                  )}
-                  <div
-                    className={cn("rounded-t-sm transition-all", p.revenue > 0 ? "bg-emerald-500/70 hover:bg-emerald-500" : "bg-muted/20 h-0.5")}
-                    style={{ height: p.revenue > 0 ? `${Math.max((p.revenue / max) * 100, 4)}%` : undefined }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2 text-right">
-            {salesMonth.dailyRevenue.filter(p => p.revenue > 0).length} active days this month
-          </p>
+          {salesMonth.dailyRevenue.some(d => d.revenue > 0) ? (
+            <>
+              <RevenueTrendChart points={salesMonth.dailyRevenue} period="month" />
+              <p className="text-[10px] text-muted-foreground mt-2 text-right">
+                {salesMonth.dailyRevenue.filter(p => p.revenue > 0).length} active days this month
+              </p>
+            </>
+          ) : (
+            <div className="h-[220px] flex items-center justify-center text-[13px] text-muted-foreground">
+              No revenue data for this month
+            </div>
+          )}
         </div>
       )}
 

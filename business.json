@@ -75,8 +75,8 @@
   },
 
   "features": {
-    "blog": false,
-    "gallery": true,
+    "blog": true,
+    "gallery": false,
     "testimonials": false,
     "pricing": true,
     "contactForm": true,
