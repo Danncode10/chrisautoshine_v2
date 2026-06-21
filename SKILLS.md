@@ -36,6 +36,19 @@ All brand colors are in `src/app/globals.css` under `@theme`. Currently:
 - Primary: `#DC2626` (red)
 - Background: `#000000` (OLED black)
 
+### UI must work in Safari AND Chrome
+
+When building or editing any UI, target **both browsers equally**. The common
+pitfall: Tailwind v4 compiles alpha modifiers (`bg-white/5`, `border-white/[0.07]`,
+`divide-white/10`, `text-white/40`) into `color-mix()`, which **Safari renders
+inconsistently** — borders and panels can blow out to near-full white (a harsh
+outlined box that looks fine in Chrome).
+
+**Always use solid semantic tokens for surfaces, borders, dividers, and base text:**
+`bg-background` · `bg-card` · `bg-muted` · `border-border` · `divide-border` ·
+`text-foreground` · `text-muted-foreground` · `bg-primary`. These are flat colors
+and render pixel-identically in Safari and Chrome. Run `/ui` to auto-enforce this.
+
 ### EmailJS Setup
 
 1. Create account at emailjs.com

@@ -67,19 +67,21 @@
   },
 
   "supabase": {
-    "organizationSlug": null,
-    "projectRef": null,
+    "organizationSlug": "chris-auto-shine",
+    "organizationId": "506a6266-a437-4751-9853-086a5272c861",
+    "projectRef": "okctavmxprxjtvnwvvas",
+    "projectName": "Businesses",
     "_note": "This project uses the shared Dannflow Supabase project. See docs/SUPABASE_PLAN.md for setup instructions."
   },
 
   "features": {
-    "blog": false,
-    "gallery": true,
+    "blog": true,
+    "gallery": false,
     "testimonials": false,
     "pricing": true,
     "contactForm": true,
     "teamPage": false,
-    "analytics": false
+    "analytics": true
   },
 
   "client": {

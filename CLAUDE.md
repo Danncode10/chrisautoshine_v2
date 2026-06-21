@@ -75,6 +75,12 @@ Supabase vars are optional until the shared project is configured (see `docs/SUP
 ## Conventions
 
 - **Colors:** Always use `var(--color-primary)` / Tailwind `bg-primary` etc. Never hardcode `#DC2626` in components.
+- **Cross-browser (Safari + Chrome):** Every UI must render identically in **both** Safari and Chrome — Safari is a first-class target, not an afterthought.
+  - **Avoid Tailwind alpha modifiers for structural surfaces, borders, and dividers** (`bg-white/5`, `border-white/[0.07]`, `divide-white/10`, `text-white/40`). In Tailwind v4 these compile to `color-mix(in oklab, … , transparent)`, which Safari renders inconsistently — borders/backgrounds can blow out to near-full opacity (e.g. a harsh white outlined box).
+  - **Use solid semantic tokens instead:** `bg-background`, `bg-card`, `bg-muted`, `border-border`, `text-foreground`, `text-muted-foreground`, `bg-primary`. These are flat colors defined in `globals.css @theme` and render pixel-identically across browsers.
+  - Don't hardcode raw hex (`bg-[#181818]`) either — map to the nearest token (`bg-muted`, `bg-card`, etc.).
+  - Brand/accent hover tints like `hover:bg-primary/90` on a single solid button are fine (worst case Safari shows full primary). The rule targets **borders, dividers, panels, and base text** where the blow-out is visible.
+  - When you finish a UI change, sanity-check it mentally for Safari: any `…/[0-9]` opacity on a border/bg/divider is a red flag.
 - **Animations:** All scroll-triggered via `whileInView` + `viewport={{ once: true }}`. Respect `prefers-reduced-motion`.
 - **Icons:** lucide-react for UI icons. `react-icons/fa` only for social brand icons (Facebook/TikTok).
 - **No auth:** This is a landing page. Do not add Supabase auth until explicitly requested.
