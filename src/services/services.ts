@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { TablesUpdate, TablesInsert, Tables } from "@/types/supabase";
 
@@ -12,12 +12,31 @@ function revalidateAll() {
   revalidatePath("/dashboard");
 }
 
-export async function listServices() {
+async function getCurrentOrganizationId() {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", user.id)
+    .single();
+
+  if (error) throw error;
+  if (!profile?.organization_id) throw new Error("Organization not found");
+
+  return profile.organization_id;
+}
+
+export async function listServices() {
+  const organizationId = await getCurrentOrganizationId();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("services")
     .select("*")
     .eq("app_id", APP_ID)
+    .eq("organization_id", organizationId)
     .order("display_order", { ascending: true });
   if (error) throw error;
   return data;
@@ -40,11 +59,13 @@ export async function listPublishedServices(): Promise<Tables<"services">[]> {
 }
 
 export async function updateService(id: string, updates: TablesUpdate<"services">) {
-  const supabase = await createClient();
+  const organizationId = await getCurrentOrganizationId();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("services")
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("app_id", APP_ID)
+    .eq("organization_id", organizationId)
     .eq("id", id)
     .select()
     .single();
@@ -54,10 +75,11 @@ export async function updateService(id: string, updates: TablesUpdate<"services"
 }
 
 export async function createService(input: TablesInsert<"services">) {
-  const supabase = await createClient();
+  const organizationId = await getCurrentOrganizationId();
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("services")
-    .insert({ ...input, app_id: APP_ID })
+    .insert({ ...input, app_id: APP_ID, organization_id: organizationId })
     .select()
     .single();
   if (error) throw error;
@@ -66,11 +88,13 @@ export async function createService(input: TablesInsert<"services">) {
 }
 
 export async function deleteService(id: string) {
-  const supabase = await createClient();
+  const organizationId = await getCurrentOrganizationId();
+  const supabase = createAdminClient();
   const { error } = await supabase
     .from("services")
     .delete()
     .eq("app_id", APP_ID)
+    .eq("organization_id", organizationId)
     .eq("id", id);
   if (error) throw error;
   revalidateAll();
