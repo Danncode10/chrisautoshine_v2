@@ -10,14 +10,8 @@ import { Packages } from "@/components/landing/packages";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { ContactBlock } from "@/components/landing/contact-block";
 import { BlogPreview } from "@/components/landing/blog-preview";
-import { listPublishedServices } from "@/services/services";
 
-// Fetch fresh on every request (revalidatePath in dashboard mutations re-renders this)
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const services = await listPublishedServices();
-
+export default function Home() {
   return (
     <>
       <Toaster position="bottom-right" theme="dark" richColors />
@@ -27,7 +21,7 @@ export default async function Home() {
       <Services />
       <Gallery />
       <HowItWorks />
-      <Packages services={services} />
+      <Packages />
       <CtaBanner />
       <BlogPreview />
       <ContactBlock />

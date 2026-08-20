@@ -1,0 +1,74 @@
+{
+  "packages": {
+    "exterior": [
+      {
+        "id": "exterior-auto-1",
+        "name": "Auto 1",
+        "features": ["Snow Foam Wash + Exterior Windows", "Door Frames + Tire & Rim Shine", "Regular Exterior Cleaning"],
+        "prices": [{ "label": "Hatchback", "price": "$55" }, { "label": "Sedan/UTE", "price": "$65" }, { "label": "7 Seater", "price": "$75" }]
+      },
+      {
+        "id": "exterior-deluxe",
+        "name": "Deluxe",
+        "features": ["Foam Wash + Hand Wax", "Interior Quick Vacuum & Dust Wipe", "Tire & Rim Shine"],
+        "prices": [{ "label": "Hatchback", "price": "$160" }, { "label": "Sedan/UTE", "price": "$180" }, { "label": "7 Seater", "price": "$200" }]
+      },
+      {
+        "id": "exterior-super",
+        "name": "Super",
+        "features": ["Foam Wash + Single Stage Polish", "Spray Wax + Tire & Rim Shine", "Quick Interior Clean"],
+        "prices": [{ "label": "Hatchback", "price": "$245" }, { "label": "Sedan/UTE", "price": "$295" }, { "label": "7 Seater", "price": "$345" }]
+      }
+    ],
+    "interior": [
+      {
+        "id": "interior-plus",
+        "name": "Plus",
+        "features": ["Interior Vacuum + Dust Wipe", "Snow Foam Wash + Exterior Wipe", "Spray Wax + Rim Shine"],
+        "prices": [{ "label": "Hatchback", "price": "$105" }, { "label": "Sedan/UTE", "price": "$125" }, { "label": "7 Seater", "price": "$145" }]
+      },
+      {
+        "id": "interior-deluxe",
+        "name": "Deluxe",
+        "features": ["Vacuum + Interior Panels Wipe", "Foam Wash + Spray Wax", "Tire & Rim Shine + 4 Door Shampoo"],
+        "prices": [{ "label": "Hatchback", "price": "$160" }, { "label": "Sedan/UTE", "price": "$180" }, { "label": "7 Seater", "price": "$200" }]
+      },
+      {
+        "id": "interior-super",
+        "name": "Super",
+        "features": ["Interior Shampoo + Steam Clean", "Leather Conditioner", "Foam Wash + Spray Wax"],
+        "prices": [{ "label": "Hatchback", "price": "$295" }, { "label": "Sedan/UTE", "price": "$345" }, { "label": "7 Seater", "price": "$395" }]
+      }
+    ],
+    "exclusive": [
+      {
+        "id": "exclusive-auto-elite",
+        "name": "Auto Elite",
+        "badge": "Popular",
+        "featured": true,
+        "features": ["Full Interior — Shampoo, Steam Clean, Air Blow, Vacuum, Leather Conditioner", "Exterior Wash — Tires & Rims + Spray Wax + Foam Wash", "Single Stage Polish — Removes light swirls for extra shine"],
+        "prices": [{ "label": "Hatchback", "price": "$495" }, { "label": "Sedan/UTE", "price": "$595" }, { "label": "7 Seater", "price": "$695" }]
+      },
+      {
+        "id": "exclusive-auto-super-elite",
+        "name": "Auto Super Elite",
+        "features": ["Complete Interior — Shampoo, Steam Clean, Vacuum, Leather Conditioner", "Deep Exterior — Tar Removal, Clay Bar & Engine Clean", "2–3 Stage Polish + Spray Wax — Professional finish & protection"],
+        "prices": [{ "label": "Hatchback", "price": "$999" }, { "label": "Sedan/UTE", "price": "$1,250" }, { "label": "7 Seater", "price": "$1,500" }]
+      }
+    ]
+  },
+  "paintCorrection": [
+    { "id": "paint-single-stage", "label": "Single Stage Polish", "price": "$395" },
+    { "id": "paint-two-stage", "label": "Two Stage Polish", "price": "$595" },
+    { "id": "paint-three-stage", "label": "Three Stage Polish", "price": "$750" }
+  ],
+  "addOns": [
+    { "id": "addon-tar-removal", "label": "Premium Tar & Contamination Removal", "price": "$50–100" },
+    { "id": "addon-pet-hair", "label": "Pet Hair & Odor Elimination", "price": "$50–100" },
+    { "id": "addon-odour", "label": "Advanced Odour Neutralization", "price": "$50" },
+    { "id": "addon-panel-restoration", "label": "Precision Panel Restoration", "price": "$100" },
+    { "id": "addon-headlight", "label": "Headlight Clarity Enhancement", "price": "$45" },
+    { "id": "addon-red-dirt", "label": "Australian Red Dirt Deep Clean", "price": "$100–150" },
+    { "id": "addon-ceramic", "label": "Professional Ceramic Coating", "price": "From $850" }
+  ]
+}

@@ -5,48 +5,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { Typewriter } from "@/components/landing/typewriter";
 import { cn } from "@/lib/utils";
-import type { Tables } from "@/types/supabase";
+import pricingData from "@/data/pricing.json";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 type PriceTier = { label: string; price: string };
-type Service = Tables<"services">;
 
 type PackageView = {
   id: string;
   name: string;
   features: string[];
   prices: PriceTier[];
-  featured: boolean;
-  badge: string | null;
+  featured?: boolean;
+  badge?: string;
 };
 
 type SimpleRow = { id: string; label: string; price: string };
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function asStringArray(raw: unknown): string[] {
-  return Array.isArray(raw) ? (raw as string[]) : [];
-}
-function asTiers(raw: unknown): PriceTier[] {
-  return Array.isArray(raw) ? (raw as PriceTier[]) : [];
-}
-
-function toPackage(s: Service): PackageView {
-  return {
-    id: s.id,
-    name: s.name,
-    features: asStringArray(s.features),
-    prices: asTiers(s.pricing_tiers),
-    featured: !!s.is_featured,
-    badge: s.badge,
-  };
-}
-
-function toSimpleRow(s: Service): SimpleRow {
-  const tiers = asTiers(s.pricing_tiers);
-  return { id: s.id, label: s.name, price: tiers[0]?.price ?? "" };
-}
 
 // ─── Card ───────────────────────────────────────────────────────────────────
 
@@ -121,17 +95,12 @@ type TabKey = (typeof TAB_CONFIG)[number]["key"];
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
-export function Packages({ services }: { services: Service[] }) {
+export function Packages() {
   const [tab, setTab] = useState<TabKey>("exterior");
 
-  const byCategory = (cat: string) =>
-    services
-      .filter((s) => s.category === cat)
-      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-
-  const activePackages = byCategory(tab).map(toPackage);
-  const paintCorrection = byCategory("paint-correction").map(toSimpleRow);
-  const addOns = byCategory("addons").map(toSimpleRow);
+  const activePackages: PackageView[] = pricingData.packages[tab];
+  const paintCorrection: SimpleRow[] = pricingData.paintCorrection;
+  const addOns: SimpleRow[] = pricingData.addOns;
 
   return (
     <section id="packages" className="py-28 bg-background">
