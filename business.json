@@ -58,24 +58,8 @@
     "twitterHandle": null
   },
 
-  "deployment": {
-    "domain": null,
-    "vercelProject": null,
-    "appId": "chris-auto-shine",
-    "_appId_note": "Must match NEXT_PUBLIC_APP_ID in .env.local",
-    "_domain_note": "e.g. 'chrisautoshinedetailing.com.au'"
-  },
-
-  "supabase": {
-    "organizationSlug": "chris-auto-shine",
-    "organizationId": "506a6266-a437-4751-9853-086a5272c861",
-    "projectRef": "okctavmxprxjtvnwvvas",
-    "projectName": "Businesses",
-    "_note": "This project uses the shared Dannflow Supabase project. See docs/SUPABASE_PLAN.md for setup instructions."
-  },
-
   "features": {
-    "blog": true,
+    "blog": false,
     "gallery": false,
     "testimonials": false,
     "pricing": true,

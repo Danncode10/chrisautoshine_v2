@@ -61,17 +61,6 @@ export const businessConfig = {
     twitterHandle: businessData.seo.twitterHandle || null,
   },
 
-  deployment: {
-    domain: businessData.deployment.domain || null,
-    vercelProject: businessData.deployment.vercelProject || null,
-    appId: businessData.deployment.appId || "chris-auto-shine",
-  },
-
-  supabase: {
-    organizationSlug: businessData.supabase.organizationSlug || null,
-    projectRef: businessData.supabase.projectRef || null,
-  },
-
   features: {
     blog: businessData.features.blog || false,
     gallery: businessData.features.gallery || true,

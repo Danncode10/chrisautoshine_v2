@@ -9,7 +9,6 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { Packages } from "@/components/landing/packages";
 import { CtaBanner } from "@/components/landing/cta-banner";
 import { ContactBlock } from "@/components/landing/contact-block";
-import { BlogPreview } from "@/components/landing/blog-preview";
 
 export default function Home() {
   return (
@@ -23,7 +22,6 @@ export default function Home() {
       <HowItWorks />
       <Packages />
       <CtaBanner />
-      <BlogPreview />
       <ContactBlock />
       <Footer />
     </>
